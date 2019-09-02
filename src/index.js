@@ -22,5 +22,9 @@ import './index.css';
 // ReactDOM.render(<SignalPage/>, document.getElementById('root'));
 
 //使用react router开发博客页面
-import AppRouter from './AppRouter'
-ReactDOM.render(<AppRouter/>, document.getElementById('root'));
+// import AppRouter from './AppRouter'
+// ReactDOM.render(<AppRouter/>, document.getElementById('root'));
+
+//react hooks
+import App from './App'
+ReactDOM.render(<App/>, document.getElementById("root"));

@@ -1,26 +1,52 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect, createContext, useContext } from 'react'; 
+import {BrowserRouter as Router,  Route, Link} from 'react-router-dom';
+
+const CountContext = createContext();
+function Count() {
+  let count = useContext(CountContext)
+  return (
+    <h2>{count}</h2>
+  )
+}
+
+function Index() {
+  useEffect(()=>{
+    console.log(`进入Index页面`)
+    return ()=>{
+      console.log(`离开Index页面`)
+    }
+  }, [])
+  return (<h1>这是首页</h1>)
+}
+function List() {
+  return (<h1>这是列表</h1>)
+}
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+  const [count, setCount] = useState(0);
+  useEffect(()=>{
+    console.log(`useEffect=>You clicked ${count} times`)
+  })
+  return(
+    <div>
+      <p>点击了{count}次</p>
+      <button onClick={()=>{setCount(count+1)}}>点击</button>
+
+      <CountContext.Provider value={count}>
+        <Count />
+      </CountContext.Provider>
+
+      <Router>
+        <ul>
+          <li><Link to="/">首页</Link></li>
+          <li><Link to="/list/">列表</Link></li>
+        </ul>
+        <Route path="/" exact component={Index}></Route>
+        <Route path="/list/" component={List}></Route>
+      </Router>
     </div>
-  );
+  )
+
 }
 
 export default App;
