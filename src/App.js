@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext, useContext } from 'react'; 
+import React, { useState, useEffect, createContext, useContext, useCallback } from 'react'; 
 import {BrowserRouter as Router,  Route, Link} from 'react-router-dom';
 
 const CountContext = createContext();
@@ -23,6 +23,8 @@ function List() {
 }
 
 function App() {
+  const size = useWinSize()
+
   const [count, setCount] = useState(0);
   useEffect(()=>{
     console.log(`useEffect=>You clicked ${count} times`)
@@ -44,9 +46,34 @@ function App() {
         <Route path="/" exact component={Index}></Route>
         <Route path="/list/" component={List}></Route>
       </Router>
+
+      页面Size: {size.width}*{size.height}
     </div>
   )
 
+}
+
+function useWinSize() {
+  const [size, setSize] = useState ({
+    width: document.documentElement.clientWidth,
+    height: document.documentElement.clientHeight,
+  })
+
+  const onResize = useCallback(()=>{
+    setSize({
+      width: document.documentElement.clientWidth,
+      height: document.documentElement.clientHeight,
+    })
+  }, [])
+
+  useEffect(()=>{
+    window.addEventListener('resize', onResize)
+    return ()=>{
+      window.removeEventListener('resize', onResize)
+    }
+  })
+
+  return size
 }
 
 export default App;

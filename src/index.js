@@ -28,3 +28,5 @@ import './index.css';
 //react hooks
 import App from './App'
 ReactDOM.render(<App/>, document.getElementById("root"));
+// import Demo from './hookdemo/Demo'
+// ReactDOM.render(<Demo/>, document.getElementById("root"));
