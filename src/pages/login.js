@@ -21,7 +21,7 @@ class Login extends Component {
             <Input placeholder="验证码"/>
           </Form.Item>
           <Form.Item>
-            <Link to="/home/index/"><Button type="primary">登录</Button></Link>
+            <Link to="/"><Button type="primary">登录</Button></Link>
           </Form.Item>
         </Form>
       </div>

@@ -12,7 +12,7 @@ const menu = (
     <Menu.Item key="setting">个人设置</Menu.Item>
     <Menu.Item key="editPassword">修改密码</Menu.Item>
     <Menu.Divider />
-    <Menu.Item key="logout"><NavLink to="/">退出</NavLink></Menu.Item>
+    <Menu.Item key="logout"><NavLink to="/login">退出</NavLink></Menu.Item>
   </Menu>
 );
 class Index extends Component {
