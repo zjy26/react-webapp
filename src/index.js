@@ -26,7 +26,17 @@ import './index.css';
 // ReactDOM.render(<AppRouter/>, document.getElementById('root'));
 
 //react hooks
-import App from './App'
-ReactDOM.render(<App/>, document.getElementById("root"));
+// import App from './App'
+// ReactDOM.render(<App/>, document.getElementById("root"));
 // import Demo from './hookdemo/Demo'
 // ReactDOM.render(<Demo/>, document.getElementById("root"));
+import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
+import Login from './pages/login'
+import Index from './pages/home/index'
+ReactDOM.render(
+  <Router>
+    <Route path="/" exact component = {Login}></Route>
+    <Route path="/home/index/" component = {Index}></Route>
+    <Redirect to='/' />
+  </Router>
+  , document.getElementById("root"));
