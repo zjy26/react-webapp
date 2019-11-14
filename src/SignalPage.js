@@ -1,72 +1,21 @@
-import React, { Component, PureComponent } from 'react';
-import ReactModal from 'react-modal'
-const customStyles = {
-    content: {
-      width: '300px',
-      height: '300px',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -55%)'
-    },
-    btn: {
-      marginTop: 30,
-      background: 'transparent',  
-      padding: '10px 15px'
-    }
-};
+import React from 'react';
+import { BrowserRouter as Router, Route, Link} from "react-router-dom"
+import Index from './pages/Index'
+import List from './pages/List'
+import Home from './pages/Home'
 
-  ReactModal.setAppElement('#root')
+function SignalPage() { 
+    return ( 
+    <Router>
+        <ul>
+            <li><Link to="/">首页</Link></li>
+            <li><Link to="/list/111">列表</Link></li>
+        </ul>
+        <Route path = "/" exact component={Index}></Route>
+        <Route path = "/list/:id" component={List}></Route>
+        <Route path = "/home/" component={Home}></Route>
+    </Router>);
+}
+ 
+export default SignalPage;
 
-  export default class ReactModalComp extends Component{
-    constructor(arg){
-        super(arg)
-
-        this.state = {
-            modalOpenState: false,
-        }
-
-        this.openModal = this.openModal.bind(this)
-        this.closeModal = this.closeModal.bind(this)
-    }
-
-    openModal(){
-        this.setState({
-            modalOpenState: true,
-        })
-    }
-
-    closeModal(){
-        this.setState({
-            modalOpenState: false,
-        })
-    }
-
-    comfirm(){
-        console.log('确认')
-    }
-
-    render(){
-        const { modalOpenState } = this.state;
-        return(
-            <div className="reactModal">
-                <button onClick={this.openModal} style={customStyles.btn}>打开</button>
-                <ReactModal
-                    isOpen = {modalOpenState}
-                    style={customStyles}
-                    contentLabel="Example Modal"
-                    onAfterOpen={this.afterOpenModalEv}
-                >
-                    <form>
-                        <input />
-                        <p>tab navigation</p>
-                        <p>stays</p>
-                        <p>inside</p>
-                        <p>the modal</p>
-                    </form>
-                    <button onClick={this.comfirm}>确认</button>
-                    <button onClick={this.closeModal}>取消</button>
-                </ReactModal>
-            </div>
-        )
-    }
-} 
