@@ -1,0 +1,11 @@
+.cardPanel {
+  background: '#ECECEC';
+  padding: '30px';
+}
+.ant-card {
+  height: 230px;
+}
+.addApplication {
+  text-align: center;
+  padding-top: 50px;
+}
