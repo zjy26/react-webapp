@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Layout, Menu, Icon, Dropdown, Button, Form, Input, Col } from 'antd';
+import { Layout, Menu, Icon, Dropdown } from 'antd';
 import { Route, NavLink, Switch, Redirect } from 'react-router-dom';
 import Application from '../application/index';
 import View from './view';

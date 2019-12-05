@@ -8,4 +8,22 @@
 .addApplication {
   text-align: center;
   padding-top: 50px;
+  border-top: 2px solid #A5D6FF;
+  box-shadow: 0px 2px 12px 0px #dcdcdc;
+  margin: 10px 0 0 10px;
+}
+.boxShadow {
+  border-top: 2px solid #A5D6FF;
+  box-shadow: 0px 2px 12px 0px #dcdcdc;
+  margin: 10px 0 0 10px;
+  min-width: 358px;
+}
+.boxButton{
+  display: none;
+}
+.boxShadow:hover .boxButton{
+  display: inline-block;
+}
+.boxShadow .ant-card-head-wrapper{
+  height: 55px;
 }
