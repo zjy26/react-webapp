@@ -31,22 +31,32 @@ class Application extends Component {
     } = this.props;
    
     validateFields((errors, values) => {
-      const fieldsValues = {
-        ...values,
-        "createTime": values.createTime? values.createTime.format('YYYY-MM-DD HH:mm:ss'):"",  //时间校验
-        "updateTime": values.updateTime? values.updateTime.format('YYYY-MM-DD HH:mm:ss'): ""
-      };
+
       const {data} = this.state;
 
-      var flag=false;
+      var flag=false, node;
       for(let i=0; i<data.length; i++) {
         if(data[i].id === getFieldValue('id')) {
           flag =true;
+          node = i;
         }
       }
 
       if(flag === false) {
+        const fieldsValues = {
+          ...values,
+          id: data[data.length-1].id + 1,
+          "createTime": values.createTime? values.createTime.format('YYYY-MM-DD HH:mm:ss'):"",  //时间校验
+          "updateTime": values.updateTime? values.updateTime.format('YYYY-MM-DD HH:mm:ss'): ""
+        };
         data.push(fieldsValues);
+      } else {
+        const newFieldsValues = {
+          ...values,
+          "createTime": values.createTime? values.createTime.format('YYYY-MM-DD HH:mm:ss'):"",  //时间校验
+          "updateTime": values.updateTime? values.updateTime.format('YYYY-MM-DD HH:mm:ss'): ""
+        };
+        data.splice(node, 1, newFieldsValues)
       }
       this.setState({data});
     });
@@ -153,11 +163,11 @@ class Application extends Component {
         >
           <Form layout="inline">
             <Row gutter={16}>
-            <Col span={12}><Form.Item label="序号">
+              <Col span={12} style={{display: 'none'}}><Form.Item label="序号">
                 {getFieldDecorator('id', {
-                  rules: [{ required: true }],
+                  rules: [],
                 })(
-                  <Input />,
+                  <Input  disabled/>,
                 )}
               </Form.Item></Col>
               <Col span={12}><Form.Item label="标题">
@@ -222,13 +232,15 @@ class Application extends Component {
               <Col span={24}><Form.Item label="创建时间">
                 {getFieldDecorator('createTime', {
                   rules: [],
+                  initialValue: null
                 })(
                   <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" />,
                 )}
               </Form.Item></Col>
               <Col span={24}><Form.Item label="更新时间">
                 {getFieldDecorator('updateTime', {
-                  rules: []
+                  rules: [],
+                  initialValue: null
                 })(
                   <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" />,
                 )}
