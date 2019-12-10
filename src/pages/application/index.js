@@ -16,61 +16,67 @@ class Application extends Component {
     super(props);
     this.state = {
       data: [
-        {id:1, mediaUrl: OA, title:'211隔离开关柜报警1', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'},
-        {id:2, mediaUrl: GitLab, title:'211隔离开关柜报警2', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'},
-        {id:3, mediaUrl: Password, title:'211隔离开关柜报警3', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'},
-        {id:4, mediaUrl:Wiki, title:'211隔离开关柜报警4', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'},
-        {id:5,  mediaUrl: Setting, title:'211隔离开关柜报警5', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'}
+        {id:1, mediaUrl: [{uid: '1', name: 'OA', thumbUrl:OA}],
+          title:'211隔离开关柜报警1', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'},
+        {id:2, mediaUrl: [{uid: '2', name: 'GitLab', thumbUrl:GitLab}],
+          title:'211隔离开关柜报警2', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'},
+        {id:3, mediaUrl: [{uid: '3', name: 'Wiki', thumbUrl:Wiki}],
+          title:'211隔离开关柜报警3', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'},
+        {id:4, mediaUrl: [{uid: '2', name: 'Setting', thumbUrl:Setting}],
+          title:'211隔离开关柜报警4', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'},
+        {id:5, mediaUrl: [{uid: '2', name: 'Password', thumbUrl:Password}],
+          title:'211隔离开关柜报警5', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'}
       ],
       showModal: false,
-      modalTitle: ''
+      modalTitle: '',
+      obj:{},
+      node: ''
     }
   }
 
-  comfirm = e => {
-    this.setState({
-      showModal: false,
-    });
+  comfirm = ()=> {
+
     const {
-      form: { getFieldValue, validateFields, resetFields},
+      form: { validateFields, resetFields },
     } = this.props;
-   
+    const {data} = this.state;
+
     validateFields((errors, values) => {
-
-      const {data} = this.state;
-
-      var flag=false, node;
-      for(let i=0; i<data.length; i++) {
-        if(data[i].id === getFieldValue('id')) {
-          flag =true;
-          node = i;
-        }
+      if(errors) {
+        return;
       }
-
-      if(flag === false) {
+      if(values.id) {//编辑应用
         const fieldsValues = {
           ...values,
-          id: data[data.length-1].id + 1,
-          "createTime": values.createTime? values.createTime.format('YYYY-MM-DD HH:mm:ss'):"",  //时间校验
-          "updateTime": values.updateTime? values.updateTime.format('YYYY-MM-DD HH:mm:ss'): ""
+          "createTime": values.createTime? values.createTime.format('YYYY-MM-DD HH:mm:ss'): null,  //时间校验
+          "updateTime": values.updateTime? values.updateTime.format('YYYY-MM-DD HH:mm:ss'): null
         };
-        data.push(fieldsValues);
-      } else {
+        data.splice(this.state.node, 1, fieldsValues)
+      } else {  //增加应用
         const newFieldsValues = {
           ...values,
-          "createTime": values.createTime? values.createTime.format('YYYY-MM-DD HH:mm:ss'):"",  //时间校验
-          "updateTime": values.updateTime? values.updateTime.format('YYYY-MM-DD HH:mm:ss'): ""
+          id: data[data.length-1].id + 1,
+          "createTime": values.createTime? values.createTime.format('YYYY-MM-DD HH:mm:ss'): null,  //时间校验
+          "updateTime": values.updateTime? values.updateTime.format('YYYY-MM-DD HH:mm:ss'): null,
+          "mediaUrl": values.mediaUrl || []
         };
-        data.splice(node, 1, newFieldsValues)
+        data.push(newFieldsValues);
       }
-      this.setState({data});
+
+      this.setState({
+        data,
+        showModal: false,
+        obj: {}
+      });
+      resetFields();
     });
-    resetFields();
+
   };
 
   cancel = e => {
     this.setState({
       showModal: false,
+      obj: {}
     });
   };
 
@@ -86,21 +92,19 @@ class Application extends Component {
   }
 
   edit = (index)=>{
-    const {
-      form: { setFieldsValue },
-    } = this.props;
     const fieldsValues = {
       ...this.state.data[index],
       "createTime": moment(this.state.data[index].createTime),
       "updateTime": moment(this.state.data[index].updateTime)
     };
+
     this.setState({
+      obj: fieldsValues,
       showModal: true,
-      modalTitle: '编辑应用'
+      modalTitle: '编辑应用',
+      node: index
     });
-    setFieldsValue(
-      fieldsValues
-    );
+
   }
 
   delete = (index)=> {
@@ -139,6 +143,16 @@ class Application extends Component {
         <div className="ant-upload-text">Upload</div>
       </div>
     );
+    const formItemLayout = {
+      labelCol: {
+        xs: { span: 24 },
+        sm: { span: 8 },
+      },
+      wrapperCol: {
+        xs: { span: 24 },
+        sm: { span: 16 },
+      },
+    };
     const { imageUrl } = this.state;
     return (
       <div className="cardPanel">
@@ -158,7 +172,7 @@ class Application extends Component {
                     <Col span={24}>站点：{item.site}</Col>
                     <Col span={24}>创建时间：{item.createTime}</Col>
                     <Col span={24}>更新时间：{item.updateTime}</Col>
-                    <Col span={24}><img src={item.mediaUrl} alt="" style={{width:60,height:60}}/></Col>
+                    <Col span={24}><img src={item.mediaUrl[0]&&item.mediaUrl[0].thumbUrl} alt="" style={{width:60,height:60}}/></Col>
                   </Card>
                 </Col>
               )
@@ -182,10 +196,14 @@ class Application extends Component {
           cancelText="取消"
           width="630px"
         >
-          <Form layout="inline">
+          <Form layout="horizontal"
+          {...formItemLayout}
+           >
+
             <Row gutter={16}>
-              <Col span={12} style={{display: 'none'}}><Form.Item label="序号">
+              <Col span={12}><Form.Item label="序号">
                 {getFieldDecorator('id', {
+                  initialValue: this.state.obj.id,
                   rules: [],
                 })(
                   <Input  disabled/>,
@@ -193,6 +211,7 @@ class Application extends Component {
               </Form.Item></Col>
               <Col span={12}><Form.Item label="标题">
                 {getFieldDecorator('title', {
+                  initialValue: this.state.obj.title,
                   rules: [{ required: true }],
                 })(
                   <Input />,
@@ -200,6 +219,7 @@ class Application extends Component {
               </Form.Item></Col>
               <Col span={12}><Form.Item label="线路">
                 {getFieldDecorator('line', {
+                  initialValue: this.state.obj.line,
                   rules: [{ required: true }],
                 })(
                   <Input />,
@@ -207,6 +227,7 @@ class Application extends Component {
               </Form.Item></Col>
               <Col span={12}><Form.Item label="故障令号">
                 {getFieldDecorator('fault', {
+                  initialValue: this.state.obj.fault,
                   rules: [{ required: true }],
                 })(
                   <Input />,
@@ -214,6 +235,7 @@ class Application extends Component {
               </Form.Item></Col>
               <Col span={12}><Form.Item label="专业">
                 {getFieldDecorator('major', {
+                  initialValue: this.state.obj.major,
                   rules: [],
                 })(
                   <Input />,
@@ -221,6 +243,7 @@ class Application extends Component {
               </Form.Item></Col>
               <Col span={12}><Form.Item label="创建人">
                 {getFieldDecorator('create', {
+                  initialValue: this.state.obj.create,
                   rules: [],
                 })(
                   <Input />,
@@ -228,6 +251,7 @@ class Application extends Component {
               </Form.Item></Col>
               <Col span={12}><Form.Item label="状态">
                 {getFieldDecorator('status', {
+                  initialValue: this.state.obj.status,
                   rules: [],
                 })(
                   <Select style={{width: '180px'}}>
@@ -238,6 +262,7 @@ class Application extends Component {
               </Form.Item></Col>
               <Col span={12}><Form.Item label="更新人">
                 {getFieldDecorator('update', {
+                  initialValue: this.state.obj.update,
                   rules: [],
                 })(
                   <Input />,
@@ -245,31 +270,33 @@ class Application extends Component {
               </Form.Item></Col>
               <Col span={12}><Form.Item label="站点">
                 {getFieldDecorator('site', {
+                  initialValue: this.state.obj.site,
                   rules: [],
                 })(
                   <Input />,
                 )}
               </Form.Item></Col>
-              <Col span={24}><Form.Item label="创建时间">
+              <Col span={12}><Form.Item label="创建时间">
                 {getFieldDecorator('createTime', {
                   rules: [],
-                  initialValue: null
+                  initialValue: this.state.obj.createTime
                 })(
                   <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" />,
                 )}
               </Form.Item></Col>
-              <Col span={24}><Form.Item label="更新时间">
+              <Col span={12}><Form.Item label="更新时间">
                 {getFieldDecorator('updateTime', {
                   rules: [],
-                  initialValue: null
+                  initialValue: this.state.obj.updateTime
                 })(
                   <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" />,
                 )}
               </Form.Item></Col>
-              <Col span={24}><Form.Item label="上传图片">
-                {getFieldDecorator('upload', {
+              <Col span={12}><Form.Item label="上传图片">
+                {getFieldDecorator('mediaUrl', {
                   valuePropName: 'fileList',
                   getValueFromEvent: this.normFile,
+                  initialValue: this.state.obj.mediaUrl
                 })(
                   <Upload name="icon" listType="picture-card" action="https://ant.design/upload.do">
                   {imageUrl ? <img src={imageUrl} alt="avatar" style={{ width: '100%' }} /> : uploadButton}
