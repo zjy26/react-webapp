@@ -1,8 +1,13 @@
 import React, { Component } from 'react';
-import { Card, Col, Row, Button, Modal, Form, Input, DatePicker, Select} from 'antd';
+import { Card, Col, Row, Button, Modal, Form, Input, DatePicker, Select, Upload, Icon} from 'antd';
 import '../../styles/application.css';
 import Add from '../../images/add.png';
 import moment from 'moment'; 
+import OA from '../../images/OA.png';
+import GitLab from '../../images/GitLab.png';
+import Wiki from '../../images/Wiki.png';
+import Setting from '../../images/Setting.png';
+import Password from '../../images/Password.png';
 
 const { confirm } = Modal;
 
@@ -11,11 +16,11 @@ class Application extends Component {
     super(props);
     this.state = {
       data: [
-        {id:1, title:'211隔离开关柜报警1', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'},
-        {id:2, title:'211隔离开关柜报警2', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'},
-        {id:3, title:'211隔离开关柜报警3', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'},
-        {id:4, title:'211隔离开关柜报警4', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'},
-        {id:5, title:'211隔离开关柜报警5', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'}
+        {id:1, mediaUrl: OA, title:'211隔离开关柜报警1', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'},
+        {id:2, mediaUrl: GitLab, title:'211隔离开关柜报警2', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'},
+        {id:3, mediaUrl: Password, title:'211隔离开关柜报警3', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'},
+        {id:4, mediaUrl:Wiki, title:'211隔离开关柜报警4', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'},
+        {id:5,  mediaUrl: Setting, title:'211隔离开关柜报警5', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'}
       ],
       showModal: false,
       modalTitle: ''
@@ -116,10 +121,25 @@ class Application extends Component {
     });
   }
 
+  normFile = e => {
+    console.log('Upload event:', e);
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e && e.fileList;
+  };
 
   render() {
     const { getFieldDecorator } = this.props.form;
     const { Option } = Select;
+
+    const uploadButton = (
+      <div>
+        <Icon type={this.state.loading ? 'loading' : 'plus'} />
+        <div className="ant-upload-text">Upload</div>
+      </div>
+    );
+    const { imageUrl } = this.state;
     return (
       <div className="cardPanel">
         <Row style={{padding:20}}>
@@ -138,6 +158,7 @@ class Application extends Component {
                     <Col span={24}>站点：{item.site}</Col>
                     <Col span={24}>创建时间：{item.createTime}</Col>
                     <Col span={24}>更新时间：{item.updateTime}</Col>
+                    <Col span={24}><img src={item.mediaUrl} alt="" style={{width:60,height:60}}/></Col>
                   </Card>
                 </Col>
               )
@@ -243,6 +264,16 @@ class Application extends Component {
                   initialValue: null
                 })(
                   <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" />,
+                )}
+              </Form.Item></Col>
+              <Col span={24}><Form.Item label="上传图片">
+                {getFieldDecorator('upload', {
+                  valuePropName: 'fileList',
+                  getValueFromEvent: this.normFile,
+                })(
+                  <Upload name="icon" listType="picture-card" action="https://ant.design/upload.do">
+                  {imageUrl ? <img src={imageUrl} alt="avatar" style={{ width: '100%' }} /> : uploadButton}
+                </Upload>,
                 )}
               </Form.Item></Col>
             </Row>
