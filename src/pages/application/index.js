@@ -16,21 +16,23 @@ class Application extends Component {
     super(props);
     this.state = {
       data: [
-        {id:1, mediaUrl: [{uid: '1', name: 'OA', thumbUrl:OA}],
+        {id:1, iconFile: {uid: '1', name: 'OA', thumbUrl:OA}, icon:OA,
           title:'211隔离开关柜报警1', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'},
-        {id:2, mediaUrl: [{uid: '2', name: 'GitLab', thumbUrl:GitLab}],
+        {id:2, iconFile: {uid: '2', name: 'GitLab', thumbUrl:GitLab},icon:GitLab,
           title:'211隔离开关柜报警2', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'},
-        {id:3, mediaUrl: [{uid: '3', name: 'Wiki', thumbUrl:Wiki}],
+        {id:3, iconFile: {uid: '3', name: 'Wiki', thumbUrl:Wiki},icon:Wiki,
           title:'211隔离开关柜报警3', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'},
-        {id:4, mediaUrl: [{uid: '2', name: 'Setting', thumbUrl:Setting}],
+        {id:4, iconFile: {uid: '2', name: 'Setting', thumbUrl:Setting},icon:Setting,
           title:'211隔离开关柜报警4', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'},
-        {id:5, mediaUrl: [{uid: '2', name: 'Password', thumbUrl:Password}],
+        {id:5, iconFile: {uid: '2', name: 'Password', thumbUrl:Password},icon:Password,
           title:'211隔离开关柜报警5', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'}
       ],
       showModal: false,
       modalTitle: '',
       obj:{},
-      node: ''
+      node: '',
+      iconFile:[{"uid": "-1", "name": "test", "thumbUrl": "../../images/Setting.png"}],  //设置默认图标
+      icon: Setting
     }
   }
 
@@ -58,7 +60,8 @@ class Application extends Component {
           id: data[data.length-1].id + 1,
           "createTime": values.createTime? values.createTime.format('YYYY-MM-DD HH:mm:ss'): null,  //时间校验
           "updateTime": values.updateTime? values.updateTime.format('YYYY-MM-DD HH:mm:ss'): null,
-          "mediaUrl": values.mediaUrl || []
+          "iconFile": this.state.iconFile,
+          "icon": this.state.icon
         };
         data.push(newFieldsValues);
       }
@@ -153,7 +156,17 @@ class Application extends Component {
         sm: { span: 16 },
       },
     };
-    const { imageUrl } = this.state;
+    const uploadProps = {
+      name: "avatar",
+      listType: "picture-card",
+      action: "https://ant.design/upload.do",
+      showUploadList: false,
+      accept: "image/*",
+      onChange: ({ file }) => {
+        console.log(file)
+      }
+    }
+
     return (
       <div className="cardPanel">
         <Row style={{padding:20}}>
@@ -172,7 +185,7 @@ class Application extends Component {
                     <Col span={24}>站点：{item.site}</Col>
                     <Col span={24}>创建时间：{item.createTime}</Col>
                     <Col span={24}>更新时间：{item.updateTime}</Col>
-                    <Col span={24}><img src={item.mediaUrl[0]&&item.mediaUrl[0].thumbUrl} alt="" style={{width:60,height:60}}/></Col>
+                    <Col span={24}><img src={item.icon} alt="" style={{width:60,height:60}}/></Col>
                   </Card>
                 </Col>
               )
@@ -293,14 +306,14 @@ class Application extends Component {
                 )}
               </Form.Item></Col>
               <Col span={12}><Form.Item label="上传图片">
-                {getFieldDecorator('mediaUrl', {
-                  valuePropName: 'fileList',
+                {getFieldDecorator('iconFile', {
+                  valuePropName: 'file',
                   getValueFromEvent: this.normFile,
-                  initialValue: this.state.obj.mediaUrl
+                  initialValue: this.state.obj.iconFile
                 })(
-                  <Upload name="icon" listType="picture-card" action="https://ant.design/upload.do">
-                  {imageUrl ? <img src={imageUrl} alt="avatar" style={{ width: '100%' }} /> : uploadButton}
-                </Upload>,
+                  <Upload {...uploadProps}>
+                    {this.state.obj.icon ? <img src={this.state.obj.icon} alt="avatar" /> : uploadButton }
+                  </Upload>
                 )}
               </Form.Item></Col>
             </Row>
