@@ -8,6 +8,7 @@ import GitLab from '../../images/GitLab.png';
 import Wiki from '../../images/Wiki.png';
 import Setting from '../../images/Setting.png';
 import Password from '../../images/Password.png';
+import EditPassword from '../home/editPassword';
 
 const { confirm } = Modal;
 
@@ -187,6 +188,7 @@ class Application extends Component {
             </Card>
           </Col>
         </Row>
+        <EditPassword />
         <Modal
           title={this.state.modalTitle}
           visible={this.state.showModal}

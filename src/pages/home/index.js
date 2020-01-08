@@ -1,44 +1,38 @@
-import React, { Component } from 'react';
-import { Layout, Menu, Icon, Dropdown } from 'antd';
+import React, { useRef } from 'react';
+import { Layout, Menu, Icon, Dropdown,Form } from 'antd';
 import { Route, NavLink, Switch, Redirect } from 'react-router-dom';
 import Application from '../application/index';
 import View from './view';
 import EditPassword from './editPassword';
 import '../../styles/header.css';
+import {connect} from 'react-redux';
+
+
 
 const { Header, Content } = Layout;
 
-class Index extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      visible: false
-    }
+const Index =(props)=> {
+  const childRef = useRef()
+
+
+  const showModal = () => {
+    props.showModal1()
+    console.log(childRef)
   }
-  showModal = () => {
-    this.setState({
-      visible: true,
-    });
-  };
-  handleOk = e => {
-    console.log(e);
-    this.setState({
-      visible: false,
-    });
-  };
 
-  handleCancel = e => {
-    console.log(e);
-    this.setState({
-      visible: false,
-    });
-  };
-
-  render() {
+  const handleOk = (values) => {
+    console.log(values)
+    
+  }
+  const handleCancel = ()=> {
+    props.closeModal()
+  }
+ 
+    console.log(props)
     const menu = (
       <Menu className="dropMenu">
         <Menu.Item key="setting">个人设置</Menu.Item>
-        <Menu.Item key="editPassword" onClick={this.showModal}>修改密码</Menu.Item>
+        <Menu.Item key="editPassword" onClick={showModal}>修改密码</Menu.Item>
         <Menu.Divider />
         <Menu.Item key="logout"><NavLink to="/login">退出</NavLink></Menu.Item>
       </Menu>
@@ -72,10 +66,32 @@ class Index extends Component {
           </Switch>
         </Content>
       </Layout>
-      <EditPassword visible={this.state.visible} {...{handleOk: this.handleOk, handleCancel: this.handleCancel}}/>
+      <EditPassword form={props.form} ref={childRef} visible={props.visible} {...{ handleOk, handleCancel}}/>
     </div>
     );
   }
+
+const mapStateToProps = (state) => {
+  console.log(state)
+  return {
+      visible: state.visible
+  }
+}
+const mapDispatchToProps = (dispatch) => {
+  return {
+      showModal1(e) {
+          let action = {
+              type:'showModal'
+          }
+          dispatch(action)
+      },
+      closeModal() {
+        let action = {
+          type:'closeModal'
+        }
+        dispatch(action)
+      }
+  }
 }
 
-export default Index;
+export default connect(mapStateToProps, mapDispatchToProps)(React.memo(Form.create()(Index)));

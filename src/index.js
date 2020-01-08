@@ -8,8 +8,8 @@ import './index.css';
 
 //使用react-redux实现todolist
 // import NewTodoList from './NewTodoList';
-// import {Provider} from 'react-redux';
-// import newStore from './newstore';
+ import {Provider} from 'react-redux';
+ import newStore from './newstore';
 // const App = (
 //     <Provider store = {newStore}>
 //         <NewTodoList/>
@@ -35,6 +35,7 @@ import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-d
 import Login from './pages/login'
 import Index from './pages/home/index'
 ReactDOM.render(
+  <Provider store = {newStore}>
   <Router>
     <Switch>
       <Route path="/login" exact component = {Login}></Route>
@@ -42,4 +43,5 @@ ReactDOM.render(
       <Redirect to='/login' />
     </Switch>
   </Router>
+  </Provider>
   , document.getElementById("root"));
