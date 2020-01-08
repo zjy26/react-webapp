@@ -29,6 +29,8 @@ const Index =(props)=> {
   }
  
     console.log(props)
+ 
+    const pathname = this.props.history.location.pathname.split('/').slice(1);  //获取当前页面的路径
     const menu = (
       <Menu className="dropMenu">
         <Menu.Item key="setting">个人设置</Menu.Item>
@@ -44,11 +46,12 @@ const Index =(props)=> {
           <Menu
             theme="dark"
             mode="horizontal"
-            defaultSelectedKeys={['index']}
+            defaultSelectedKeys={['home']}
+            selectedKeys={pathname}
             style={{ lineHeight: '64px' }}
           >
-            <Menu.Item key="index"><NavLink to="/home/index/">首页</NavLink></Menu.Item>
-            <Menu.Item key="application"><NavLink to="/application/index/">应用管理</NavLink></Menu.Item>
+            <Menu.Item key="home"><NavLink to="/home">首页</NavLink></Menu.Item>
+            <Menu.Item key="applications"><NavLink to="/applications">应用管理</NavLink></Menu.Item>
             <Menu.Item key="user" style={{float: 'right'}}>
               <Dropdown overlay={menu} trigger={['click']}>
                <span>
@@ -60,9 +63,9 @@ const Index =(props)=> {
         </Header>
         <Content>
           <Switch>
-            <Route path="/home/index/" exact component= {View}></Route>
-            <Route path="/application/index/" component= {Application}></Route>
-            <Redirect to='/home/index/' />
+            <Route path="/home" exact component= {View}></Route>
+            <Route path="/applications" component= {Application}></Route>
+            <Redirect to='/home' />
           </Switch>
         </Content>
       </Layout>

@@ -6,7 +6,6 @@ import Wiki from '../../images/Wiki.png';
 import Setting from '../../images/Setting.png';
 import Password from '../../images/Password.png';
 import '../../styles/view.css';
-import EditPassword from './editPassword'
 import {connect} from 'react-redux';
 
 const data = [
