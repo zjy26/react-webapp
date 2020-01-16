@@ -1,127 +1,150 @@
-import React, { Component } from 'react';
-import { Card, Col, Row, Button, Modal, Form, Input, DatePicker, Select, Upload, Icon} from 'antd';
-import '../../styles/application.css';
-import Add from '../../images/add.png';
-import moment from 'moment'; 
-import OA from '../../images/OA.png';
-import GitLab from '../../images/GitLab.png';
-import Wiki from '../../images/Wiki.png';
-import Setting from '../../images/Setting.png';
-import Password from '../../images/Password.png';
-import EditPassword from '../home/editPassword';
+import React, { useState, useEffect } from 'react';
+import { Card, Col, Row, Modal, Form, Input, Upload, Icon, Typography, Button, Spin } from 'antd';
+import style from './Application.module.scss';
+import Axios from 'axios';
+import Error from '../error';
 
 const { confirm } = Modal;
+const { Text } = Typography;
+const formItemLayout = {
+  labelCol: {
+    xs: { span: 12 },
+    sm: { span: 4 },
+  },
+  wrapperCol: {
+    xs: { span: 24 },
+    sm: { span: 16 },
+  },
+};
 
-class Application extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      data: [
-        {id:1, iconFile: {uid: '1', name: 'OA', thumbUrl:OA}, icon:OA,
-          title:'211隔离开关柜报警1', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'},
-        {id:2, iconFile: {uid: '2', name: 'GitLab', thumbUrl:GitLab},icon:GitLab,
-          title:'211隔离开关柜报警2', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'},
-        {id:3, iconFile: {uid: '3', name: 'Wiki', thumbUrl:Wiki},icon:Wiki,
-          title:'211隔离开关柜报警3', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'},
-        {id:4, iconFile: {uid: '2', name: 'Setting', thumbUrl:Setting},icon:Setting,
-          title:'211隔离开关柜报警4', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'},
-        {id:5, iconFile: {uid: '2', name: 'Password', thumbUrl:Password},icon:Password,
-          title:'211隔离开关柜报警5', line:'17号线', fault:'1111111', major:'17号线变电专业', create:'供电调度', status:'新建', update:'供电调度', site:'东方绿洲', createTime:'2019-10-11 10:22:00', updateTime:'2019-11-13 09:12:00'}
-      ],
-      showModal: false,
-      modalTitle: '',
-      obj:{},
-      node: '',
-      iconFile:[{"uid": "-1", "name": "test", "thumbUrl": "../../images/Setting.png"}],  //设置默认图标
-      icon: Setting
-    }
-  }
+const Application = props => {
+  const [data, setData] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+  const [obj, setObj] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [statusCode, setStatusCode] = useState(200);
+  const img = {icon: "/images/Setting.png", iconFile: [{"uid": "-1", "name": "test", "thumbUrl": "/images/Setting.png"}]};  //设置默认图标
 
-  comfirm = ()=> {
+  useEffect(() => {
+    Axios.get('/api/applications').then(res =>{
+      if(res.status === 200){
+        setData(res.data)
+        setLoading(false)
+      }
+   }).catch((err) =>{
+      setStatusCode(err.response.status)
+      setLoading(true)
+   })
+  }, [loading]);
 
+  //应用弹窗
+  //弹窗确认
+  const comfirm = () => {
     const {
-      form: { validateFields, resetFields },
-    } = this.props;
-    const {data} = this.state;
+      form: { validateFields, isFieldsTouched},
+    } = props;
 
     validateFields((errors, values) => {
       if(errors) {
         return;
       }
-      if(values.id) {//编辑应用
-        const fieldsValues = {
-          ...values,
-          "createTime": values.createTime? values.createTime.format('YYYY-MM-DD HH:mm:ss'): null,  //时间校验
-          "updateTime": values.updateTime? values.updateTime.format('YYYY-MM-DD HH:mm:ss'): null
-        };
-        data.splice(this.state.node, 1, fieldsValues)
-      } else {  //增加应用
-        const newFieldsValues = {
-          ...values,
-          id: data[data.length-1].id + 1,
-          "createTime": values.createTime? values.createTime.format('YYYY-MM-DD HH:mm:ss'): null,  //时间校验
-          "updateTime": values.updateTime? values.updateTime.format('YYYY-MM-DD HH:mm:ss'): null,
-          "iconFile": this.state.iconFile,
-          "icon": this.state.icon
-        };
-        data.push(newFieldsValues);
+
+      if(values.id) {//修改
+        if(isFieldsTouched() === true) {  //判断是否有修改
+          confirm({
+            title: '确认提示',
+            content: '是否确认修改？',
+            okText: '确认',
+            okType: 'danger',
+            cancelText: '取消',
+            onOk: ()=> {
+              const fieldsValues = {...values};
+              Axios.put('/api/applications/'+values.id,
+              {
+                name: fieldsValues.name,
+                href: fieldsValues.href,
+                iconFile: img.iconFile,
+                icon: img.icon
+              }
+              ).then((res)=>{
+                setObj({})
+                setShowModal(false)
+                setLoading(true)
+              })
+            },
+            onCancel() {
+            },
+          });
+        } else {
+          setShowModal(false)
+        }
+      } else {//添加
+        const newFieldsValues = {...values};
+        Axios.post('/api/applications',
+        {
+          name: newFieldsValues.name,
+          href: newFieldsValues.href,
+          iconFile: img.iconFile,
+          icon: img.icon
+        }
+        ).then((res)=>{
+          setShowModal(false)
+          setLoading(true)
+        });
       }
 
-      this.setState({
-        data,
-        showModal: false,
-        obj: {}
-      });
-      resetFields();
     });
+
 
   };
 
-  cancel = e => {
-    this.setState({
-      showModal: false,
-      obj: {}
-    });
-  };
-
-  addApplication = ()=>{
+  //弹窗取消
+  const cancel = () => {
     const {
-      form: { resetFields},
-    } = this.props;
+      form: { resetFields },
+    } = props;
+    setShowModal(false);
     resetFields();
-    this.setState({
-      showModal: true,
-      modalTitle: '添加应用'
-    });
+  };
+
+  //添加应用
+  const addApplication = ()=>{
+    const {
+      form: { resetFields },
+    } = props;
+    resetFields();
+    setShowModal(true);
+    setObj({});
+    setModalTitle("添加应用");
   }
 
-  edit = (index)=>{
-    const fieldsValues = {
-      ...this.state.data[index],
-      "createTime": moment(this.state.data[index].createTime),
-      "updateTime": moment(this.state.data[index].updateTime)
-    };
-
-    this.setState({
-      obj: fieldsValues,
-      showModal: true,
-      modalTitle: '编辑应用',
-      node: index
-    });
-
+  //编辑
+  const edit = (id)=>{
+    Axios.get('/api/applications/'+id)
+    .then((res) =>{
+      if(res.status === 200){
+        setShowModal(true);
+        setObj(res.data);
+        setModalTitle("编辑应用");
+      }
+    })
   }
 
-  delete = (index)=> {
-    confirm({          //删除提示框
+  //删除
+  const handleDelete = (id)=> {
+    confirm({
       title: '删除提示',
       content: '是否确认删除，如果删除，将不能恢复',
       okText: '删除',
       okType: 'danger',
       cancelText: '取消',
       onOk: ()=> {
-        const {data} = this.state;
-        data.splice(index,1);
-        this.setState({data});
+        Axios.delete('/api/applications/'+id)
+        .then((res) =>{
+          setLoading(true);
+        })
+
       },
       onCancel() {
 
@@ -129,7 +152,7 @@ class Application extends Component {
     });
   }
 
-  normFile = e => {
+  const normFile = e => {
     console.log('Upload event:', e);
     if (Array.isArray(e)) {
       return e;
@@ -137,184 +160,114 @@ class Application extends Component {
     return e && e.fileList;
   };
 
-  render() {
-    const { getFieldDecorator } = this.props.form;
-    const { Option } = Select;
 
-    const uploadButton = (
-      <div>
-        <Icon type={this.state.loading ? 'loading' : 'plus'} />
-        <div className="ant-upload-text">Upload</div>
-      </div>
-    );
-    const formItemLayout = {
-      labelCol: {
-        xs: { span: 24 },
-        sm: { span: 8 },
-      },
-      wrapperCol: {
-        xs: { span: 24 },
-        sm: { span: 16 },
-      },
-    };
-    const uploadProps = {
-      name: "avatar",
-      listType: "picture-card",
-      action: "https://ant.design/upload.do",
-      showUploadList: false,
-      accept: "image/*",
-      onChange: ({ file }) => {
-        console.log(file)
-      }
+  const { getFieldDecorator } = props.form;
+  const uploadButton = (
+    <div>
+      <Icon type={loading ? 'loading' : 'plus'} />
+      <div className="ant-upload-text">Upload</div>
+    </div>
+  );
+
+  const uploadProps = {
+    name: "avatar",
+    listType: "picture-card",
+    action: "https://ant.design/upload.do",
+    showUploadList: false,
+    accept: "image/*",
+    onChange: ({ file }) => {
+      console.log(file)
     }
+  }
 
+  if(loading === true) {
+    if(statusCode === 500 || statusCode === 404){
+      return(
+        <Error status={statusCode}/>
+      )
+    }else{
+      return (
+      //加载中状态
+      <div className={style.loading}>
+        <Spin />
+      </div>
+      )
+    }
+  } else {
     return (
-      <div className="cardPanel">
-        <Row style={{padding:20}}>
+      <div className={style.cardPanel}>
+        <Row>
           {
-            this.state.data.map((item, index)=>{
+            data.map((item, index)=>{
               return(
-                <Col md={12} lg={12} xl={8} xxl={6} key={index}>
-                  <Card className="boxShadow" title={item.title} extra={[<Button className="boxButton" key="edit" onClick={this.edit.bind(this, index)}>编辑</Button>,<Button className="boxButton" key="delete" onClick={this.delete.bind(this, index)}>删除</Button>]}>
-                    <Col span={12}>序号：{item.id}</Col>
-                    <Col span={12}>线路：{item.line}</Col>
-                    <Col span={12}>故障令号：{item.fault}</Col>
-                    <Col span={12}>专业：{item.major}</Col>
-                    <Col span={12}>创建人：{item.create}</Col>
-                    <Col span={12}>状态：{item.status}</Col>
-                    <Col span={12}>更新人：{item.update}</Col>
-                    <Col span={24}>站点：{item.site}</Col>
-                    <Col span={24}>创建时间：{item.createTime}</Col>
-                    <Col span={24}>更新时间：{item.updateTime}</Col>
-                    <Col span={24}><img src={item.icon} alt="" style={{width:60,height:60}}/></Col>
+                <Col md={12} lg={8} xl={6} xxl={6} key={index}>
+                  <Card title={item.name}
+                    actions={[
+                    <Button type="primary" shape="circle" icon="link" href={item.href} target="_blank" />,
+                    <Button type="primary" shape="circle" icon="edit" onClick={()=>{edit(item.id)}} />,
+                    <Button type="primary" shape="circle" icon="delete" onClick={()=>{handleDelete(item.id)}} />,
+                  ]}>
+                    <Col span={10}><img src={item.icon} alt="" style={{width:60,height:60}} /></Col>
+                    <Col span={14}><Text strong>ID：{item.id}</Text></Col>
                   </Card>
                 </Col>
               )
             })
           }
-          <Col md={12} lg={12} xl={8} xxl={6}>
-            <Card className="addApplication">
-              <div onClick={this.addApplication}>
-                <img src={Add} alt=""/>
-                <div>添加应用</div>
-              </div>
+          <Col md={12} lg={8} xl={6} xxl={6}>
+            <Card className={style.addApplication}>
+              <Button type="primary" shape="circle" style={{width:'66px',height:'66px'}} onClick={addApplication}>
+                <Icon type="plus" style={{width:'35px',height:'35px',fontSize:'35px'}} />
+              </Button>
+              <div>添加应用</div>
             </Card>
           </Col>
         </Row>
-        <EditPassword />
+
         <Modal
-          title={this.state.modalTitle}
-          visible={this.state.showModal}
-          onOk={this.comfirm}
-          onCancel={this.cancel}
+          title={modalTitle}
+          visible={showModal}
+          onOk={comfirm}
+          onCancel={cancel}
           okText="确认"
           cancelText="取消"
           width="630px"
         >
-          <Form layout="horizontal"
-          {...formItemLayout}
-           >
-
-            <Row gutter={16}>
-              <Col span={12}><Form.Item label="序号">
+          <Form {...formItemLayout} className={style.applicationForm}>
+            <Row gutter={24}>
+            <Col span={24}><Form.Item label="ID" style={{display: 'none'}}>
                 {getFieldDecorator('id', {
-                  initialValue: this.state.obj.id,
-                  rules: [],
+                  initialValue: obj.id
                 })(
                   <Input  disabled/>,
                 )}
               </Form.Item></Col>
-              <Col span={12}><Form.Item label="标题">
-                {getFieldDecorator('title', {
-                  initialValue: this.state.obj.title,
-                  rules: [{ required: true }],
+              <Col span={24}>
+                <Form.Item label="标题">
+                {getFieldDecorator('name', {
+                  initialValue: obj.name,
+                  rules: [{required: true, whitespace: true, message: "必填项不能为空"}],
+                })(
+                  <Input />,
+                )}
+                </Form.Item></Col>
+              <Col span={24}><Form.Item label="链接">
+                {getFieldDecorator('href', {
+                  initialValue: obj.href,
+                  rules: [{ required: true , whitespace: true, message: "必填项不能为空" }],
                 })(
                   <Input />,
                 )}
               </Form.Item></Col>
-              <Col span={12}><Form.Item label="线路">
-                {getFieldDecorator('line', {
-                  initialValue: this.state.obj.line,
-                  rules: [{ required: true }],
-                })(
-                  <Input />,
-                )}
-              </Form.Item></Col>
-              <Col span={12}><Form.Item label="故障令号">
-                {getFieldDecorator('fault', {
-                  initialValue: this.state.obj.fault,
-                  rules: [{ required: true }],
-                })(
-                  <Input />,
-                )}
-              </Form.Item></Col>
-              <Col span={12}><Form.Item label="专业">
-                {getFieldDecorator('major', {
-                  initialValue: this.state.obj.major,
-                  rules: [],
-                })(
-                  <Input />,
-                )}
-              </Form.Item></Col>
-              <Col span={12}><Form.Item label="创建人">
-                {getFieldDecorator('create', {
-                  initialValue: this.state.obj.create,
-                  rules: [],
-                })(
-                  <Input />,
-                )}
-              </Form.Item></Col>
-              <Col span={12}><Form.Item label="状态">
-                {getFieldDecorator('status', {
-                  initialValue: this.state.obj.status,
-                  rules: [],
-                })(
-                  <Select style={{width: '180px'}}>
-                    <Option value="新建">新建</Option>
-                    <Option value="完成">完成</Option>
-                  </Select>,
-                )}
-              </Form.Item></Col>
-              <Col span={12}><Form.Item label="更新人">
-                {getFieldDecorator('update', {
-                  initialValue: this.state.obj.update,
-                  rules: [],
-                })(
-                  <Input />,
-                )}
-              </Form.Item></Col>
-              <Col span={12}><Form.Item label="站点">
-                {getFieldDecorator('site', {
-                  initialValue: this.state.obj.site,
-                  rules: [],
-                })(
-                  <Input />,
-                )}
-              </Form.Item></Col>
-              <Col span={12}><Form.Item label="创建时间">
-                {getFieldDecorator('createTime', {
-                  rules: [],
-                  initialValue: this.state.obj.createTime
-                })(
-                  <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" />,
-                )}
-              </Form.Item></Col>
-              <Col span={12}><Form.Item label="更新时间">
-                {getFieldDecorator('updateTime', {
-                  rules: [],
-                  initialValue: this.state.obj.updateTime
-                })(
-                  <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" />,
-                )}
-              </Form.Item></Col>
-              <Col span={12}><Form.Item label="上传图片">
+              <Col span={24}><Form.Item label="上传图片">
                 {getFieldDecorator('iconFile', {
+                  initialValue: obj.iconFile,
                   valuePropName: 'file',
-                  getValueFromEvent: this.normFile,
-                  initialValue: this.state.obj.iconFile
+                  getValueFromEvent: normFile,
+                  rules: [{ required: true , message: "必填项不能为空" }],
                 })(
                   <Upload {...uploadProps}>
-                    {this.state.obj.icon ? <img src={this.state.obj.icon} alt="avatar" /> : uploadButton }
+                    {obj.icon ? <img src={obj.icon} alt="avatar" /> : uploadButton }
                   </Upload>
                 )}
               </Form.Item></Col>

@@ -1,40 +1,63 @@
-import React from 'react';
-import OA from '../../images/OA.png';
-import GitLab from '../../images/GitLab.png';
-import GitLabHelper from '../../images/GitLabHelper.png';
-import Wiki from '../../images/Wiki.png';
-import Setting from '../../images/Setting.png';
-import Password from '../../images/Password.png';
-import '../../styles/view.css';
+import React, { useState, useEffect } from 'react';
+import { Row, Col } from 'antd';
 import {connect} from 'react-redux';
+import Axios from 'axios';
+import 'antd/dist/antd.css';
+import '../../styles/view.css';
 
-const data = [
-  {name: 'OA', mediaUrl: OA, href: 'https://github.com/'},
-  {name: 'GitLab', mediaUrl: GitLab, href: 'https://github.com'},
-  {name: 'GitLabHelper', mediaUrl: GitLabHelper, href: 'https://github.com'},
-  {name: 'Wiki', mediaUrl:Wiki, href: 'https://github.com'},
-  {name: 'Setting', mediaUrl: Setting, href: 'https://github.com'},
-  {name: 'Password', mediaUrl: Password, href: '#'},
-]
-const View = props=>{
+const View = (props) => {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [statusCode, setStatusCode] = useState(200);
   const showModal = ()=>{
     props.showModal1()
   }
-  return (
-    <span>
-      {
-        data.map((item, index)=>{
-          if(item.name === "Password") {
-            return <div key={index} onClick={showModal}><img src={item.mediaUrl} alt="" className="img"/></div>
-          } else {
-            return (<a key={index} href={item.href}><img src={item.mediaUrl} alt="" className="img"/></a>)
-          }
-        })
-      }
-    </span>
-  )
-}
 
+  useEffect(() => {
+    Axios.get('/api/applications').then(res =>{
+      if(res.status === 200){
+        setData(res.data)
+        setLoading(false)
+      }
+    }).catch((err) =>{
+      setStatusCode(err.response.status)
+    })
+  }, []);
+
+  if(loading === true) {
+    console.log(1111111)
+  } else {
+    return (
+      <div>
+        <Row style={{textAlign: 'center'}}>
+          {
+            data.map((item, index)=>{
+              if(item.name === "Password") {
+                return (
+                  <Col xs={12} sm={8} md={6} lg={4} key={index}>
+                    <span>
+                      <img src={item.icon} alt={item.name} onClick={showModal}  />
+                      <label>{item.name}</label>
+                    </span>
+                  </Col>
+                )
+              } else {
+                return (
+                  <Col xs={12} sm={8} md={6} lg={4} key={index}>
+                    <a href={item.href}>
+                      <img src={item.icon} alt={item.name}/>
+                      <label>{item.name}</label>
+                    </a>
+                  </Col>
+                )
+              }
+            })
+          }
+        </Row>
+      </div>
+    );
+  }
+}
 const mapDispatchToProps = (dispatch) => {
   return {
       showModal1(e) {

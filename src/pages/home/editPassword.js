@@ -3,8 +3,7 @@ import { Modal, Form, Icon, Input, Button, Checkbox } from 'antd';
 
 const EditPassword = (props, ref) => {
   const modalRef = useRef();
-  console.log("*******", modalRef)
-   
+
   const { getFieldDecorator } = props.form;
   const handleSubmit = e => {
     e.preventDefault();
@@ -59,17 +58,17 @@ const EditPassword = (props, ref) => {
               valuePropName: 'checked',
               initialValue: true,
             })(<Checkbox>Remember me</Checkbox>)}
-            <a className="login-form-forgot" href="">
+            <a className="login-form-forgot" href=" ">
               Forgot password
             </a>
             <Button type="primary" htmlType="submit" className="login-form-button">
               Log in
             </Button>
-            Or <a href="">register now!</a>
+            Or <a href=" ">register now!</a>
           </Form.Item>
         </Form>
       </Modal>
     </div>
   ); 
 }
-export default forwardRef(EditPassword);
+export default Form.create()(forwardRef(EditPassword));

@@ -2,18 +2,16 @@ import React, { useRef } from 'react';
 import { Layout, Menu, Icon, Dropdown,Form } from 'antd';
 import { Route, NavLink, Switch, Redirect } from 'react-router-dom';
 import Application from '../application/index';
+import Setting from './setting';
 import View from './view';
 import EditPassword from './editPassword';
 import '../../styles/header.css';
 import {connect} from 'react-redux';
 
-
-
 const { Header, Content } = Layout;
 
 const Index =(props)=> {
   const childRef = useRef()
-
 
   const showModal = () => {
     props.showModal1()
@@ -30,10 +28,10 @@ const Index =(props)=> {
  
     console.log(props)
  
-    const pathname = this.props.history.location.pathname.split('/').slice(1);  //获取当前页面的路径
+    const pathname = props.history.location.pathname.split('/').slice(1);  //获取当前页面的路径
     const menu = (
       <Menu className="dropMenu">
-        <Menu.Item key="setting">个人设置</Menu.Item>
+        <Menu.Item key="setting"><NavLink to="/setting">个人设置</NavLink></Menu.Item>
         <Menu.Item key="editPassword" onClick={showModal}>修改密码</Menu.Item>
         <Menu.Divider />
         <Menu.Item key="logout"><NavLink to="/login">退出</NavLink></Menu.Item>
@@ -65,6 +63,7 @@ const Index =(props)=> {
           <Switch>
             <Route path="/home" exact component= {View}></Route>
             <Route path="/applications" component= {Application}></Route>
+            <Route path="/setting" component= {Setting}></Route>
             <Redirect to='/home' />
           </Switch>
         </Content>

@@ -1,0 +1,39 @@
+{
+  "applications": [
+    { "id": 1,"name": "OA", "iconFile":{"uid": "1", "name": "OA", "thumbUrl": "/images/OA.png"}, "icon":"/images/OA.png", "href": "https://github.com"},
+    { "id": 2,"name": "GitLab","iconFile":{"uid": "2", "name": "GitLab", "thumbUrl": "/images/GitLab.png"}, "icon":"/images/GitLab.png", "href": "https://github.com"},
+    { "id": 3,"name": "GitLabHelper", "iconFile":{"uid": "3", "name": "GitLabHelper", "thumbUrl": "/images/GitLabHelper.png"}, "icon":"/images/GitLabHelper.png", "href": "https://github.com"},
+    { "id": 4,"name": "Wiki", "iconFile":{"uid": "4", "name": "Wiki", "thumbUrl": "/images/Wiki.png"}, "icon":"/images/Wiki.png", "href": "https://github.com"},
+    { "id": 5,"name": "Setting", "iconFile":{"uid": "5", "name": "Setting", "thumbUrl": "/images/Setting.png"}, "icon":"/images/Setting.png",  "href": "/setting"},
+    { "id": 6,"name": "Password", "iconFile":{"uid": "6", "name": "Password", "thumbUrl": "/images/Password.png"}, "icon":"/images/Password.png", "href": "#"}
+  ],
+  "login": [
+   {
+     "id": 0,
+     "username": "admin",
+     "password": "1"
+   }, {
+    "id": 1,
+    "username": "guest",
+    "password": "1"
+   }
+  ],
+  "setting": [
+    {
+     "id": 1,
+     "IDNumber": 123456,
+     "QQ": 123456,
+     "Wechat": 123456,
+     "avatar": "/images/Setting.png",
+     "email": "admin@163.com",
+     "introduction": "",
+     "language": "中文",
+     "line": "17号线",
+     "location": "浙江杭州",
+     "mobile": "18811111111",
+     "phone": "057188888888",
+     "theme": "普通",
+     "username": "admin"
+    }
+  ]
+}

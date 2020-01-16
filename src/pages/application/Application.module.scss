@@ -1,0 +1,49 @@
+.cardPanel {
+  padding: 20px;
+
+  :global{
+    .ant-card{
+      height: 214px;
+      box-shadow: 0px 2px 12px 0px #dcdcdc;
+      margin: 10px;
+  
+      .ant-card-actions{
+        background: #fff;
+        li {
+          margin: 6px 0;
+          .ant-btn{
+            background-color: #4ba6f3;
+            border-color: #4ba6f3;
+          }
+        }
+      }
+    }
+    .ant-col:nth-child(odd) .ant-card{
+      border-top: 2px solid #A5D6FF;
+    }
+
+    .ant-col:nth-child(even) .ant-card{
+      border-top: 2px solid #B2FAC5;
+    }
+  }
+
+}
+
+.addApplication {
+  text-align: center;
+  padding-top: 40px;
+}
+
+.applicationForm {
+  :global{
+    .avatar-uploader > .ant-upload {
+      width: 128px;
+      height: 128px;
+    }
+  }
+}
+
+.loading {
+  text-align: center;
+  margin: 50px 0;
+}

@@ -1,0 +1,71 @@
+
+.login {
+  width: 100%;
+  height: 100%;
+  background: url(/images/login_bg1.png) no-repeat;
+  background-size: 100% 100%;
+  overflow: hidden;
+  height: 100vh;
+
+  :global {
+    h2 {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+  
+    label {
+      float: left;
+      font-weight: 500;
+    }
+  
+    a {
+      margin-left: 5px;
+      font-size: 12px;
+    }
+  
+    .ant-input {
+      max-width: 300px;
+      border-width:0 0 1px 0;
+      border-radius:0px;
+      border-color:#969696;
+    }
+  
+    .ant-input:hover{
+      max-width: 300px;
+      border:0 0 1px 0;
+      border-radius:0px;
+      border-color:#00ADF2;
+      box-shadow:0 0 0 0 #00ADF2;
+      border-right:none;
+    }
+  
+    .ant-input:focus{
+      max-width: 300px;
+      border-bottom-width: 1px;
+      border-radius:0px;
+      border-color:#00ADF2;
+      box-shadow:0 0 0 0 #FFF;
+      border-right:none;
+    }
+  
+    .ant-btn {
+      width: 100%;
+      border-radius:20px;
+    }
+  }
+}
+
+.loginPanel {
+  background: #FFFFFF;
+  margin:74px auto;
+  padding-top: 78px;
+  height: 606px;
+  width: 492px;
+  border-radius:5px;
+}
+
+.loginForm {
+  max-width: 300px;
+  text-align: center;
+  margin: 0 auto;
+}
