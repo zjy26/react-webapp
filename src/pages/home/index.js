@@ -5,6 +5,7 @@ import Application from '../application/index';
 import Setting from './setting';
 import View from './view';
 import EditPassword from './editPassword';
+import Demo from '../demo/index';
 import '../../styles/header.css';
 import {connect} from 'react-redux';
 
@@ -31,10 +32,10 @@ const Index =(props)=> {
     const pathname = props.history.location.pathname.split('/').slice(1);  //获取当前页面的路径
     const menu = (
       <Menu className="dropMenu">
-        <Menu.Item key="setting"><NavLink to="/setting">个人设置</NavLink></Menu.Item>
+        <Menu.Item key="setting"><NavLink to="/en/setting">个人设置</NavLink></Menu.Item>
         <Menu.Item key="editPassword" onClick={showModal}>修改密码</Menu.Item>
         <Menu.Divider />
-        <Menu.Item key="logout"><NavLink to="/login">退出</NavLink></Menu.Item>
+        <Menu.Item key="logout"><NavLink to="/en/login">退出</NavLink></Menu.Item>
       </Menu>
     );
     return (
@@ -48,8 +49,9 @@ const Index =(props)=> {
             selectedKeys={pathname}
             style={{ lineHeight: '64px' }}
           >
-            <Menu.Item key="home"><NavLink to="/home">首页</NavLink></Menu.Item>
-            <Menu.Item key="applications"><NavLink to="/applications">应用管理</NavLink></Menu.Item>
+            <Menu.Item key="home"><NavLink to="/en/home">首页</NavLink></Menu.Item>
+            <Menu.Item key="applications"><NavLink to="/en/applications">应用管理</NavLink></Menu.Item>
+            <Menu.Item key="demo"><NavLink to="/cn/demo">Demo</NavLink></Menu.Item>
             <Menu.Item key="user" style={{float: 'right'}}>
               <Dropdown overlay={menu} trigger={['click']}>
                <span>
@@ -61,10 +63,11 @@ const Index =(props)=> {
         </Header>
         <Content>
           <Switch>
-            <Route path="/home" exact component= {View}></Route>
-            <Route path="/applications" component= {Application}></Route>
-            <Route path="/setting" component= {Setting}></Route>
-            <Redirect to='/home' />
+            <Route path="/:lang/home" exact component= {View}></Route>
+            <Route path="/:lang/applications" component= {Application}></Route>
+            <Route path="/:lang/demo" component= {Demo}></Route>
+            <Route path="/:lang/setting" component= {Setting}></Route>
+            <Redirect to='/:lang/home' />
           </Switch>
         </Content>
       </Layout>

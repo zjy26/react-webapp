@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col } from 'antd';
 import {connect} from 'react-redux';
+import { Row, Col, Spin } from 'antd';
 import Axios from 'axios';
-import 'antd/dist/antd.css';
+import Error from '../error';
 import '../../styles/view.css';
 
 const View = (props) => {
@@ -25,7 +25,16 @@ const View = (props) => {
   }, []);
 
   if(loading === true) {
-    console.log(1111111)
+    if(statusCode === 500 || statusCode === 404){
+      return(
+        <Error status={statusCode}/>
+      )
+    } else {
+      return (
+      //加载中状态
+      <Spin />
+      )
+    }
   } else {
     return (
       <div>
