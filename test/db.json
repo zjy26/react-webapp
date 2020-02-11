@@ -35,5 +35,56 @@
      "theme": "普通",
      "username": "admin"
     }
+  ],
+  "objectList": [
+    {
+      "key": 1,
+      "objName": "UPS配电柜1",
+      "number": "1752000",
+      "line": "17号线",
+      "site": "控制中心",
+      "type": "机器人",
+      "model": "CTXD—D",
+      "brand": "西门子",
+      "fault": "11",
+      "startTime": "2019-11-12",
+      "endTime": "-",
+      "timeRange":"111",
+      "milesRange":"111",
+      "status":"空闲中",
+      "opton":"查看视频"
+    }, {
+      "key": 2,
+      "objName": "UPS配电柜2",
+      "number": "1752002",
+      "line": "17号线",
+      "site": "虹桥火车站",
+      "type": "摄像头",
+      "model": "CTXD—D",
+      "brand": "西门子",
+      "fault": "11",
+      "startTime": "2019-11-12",
+      "endTime": "-",
+      "timeRange":"123",
+      "milesRange":"141",
+      "status":"空闲中",
+      "opton":"查看视频"
+    }, {
+      "key": 3,
+      "objName": "UPS配电柜3",
+      "number": "1752003",
+      "line": "17号线",
+      "site": "控制中心",
+      "type": "机器人",
+      "model": "CTXD—D",
+      "brand": "西门子",
+      "fault": "11",
+      "startTime": "2019-11-12",
+      "endTime": "-",
+      "timeRange":"111",
+      "milesRange":"111",
+      "status":"空闲中",
+      "opton":"查看视频"
+    }
   ]
 }

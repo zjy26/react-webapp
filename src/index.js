@@ -21,9 +21,9 @@ ReactDOM.render(
   <Provider store = {newStore}>
   <Router>
     <Switch>
-      <Route path="/:lang/login" exact component = {Login}></Route>
-      <Route path="/:lang/" component = {Index}></Route>
-      <Redirect to='/:lang/login' />
+      <Route path="/login" exact component = {Login}></Route>
+      <Route path="/" component = {Index}></Route>
+      <Redirect to='/login' />
     </Switch>
   </Router>
   </Provider>
