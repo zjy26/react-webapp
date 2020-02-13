@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import Axios from 'axios';
-import { Row, Col, Form, Input, Select, Button, Cascader, DatePicker, InputNumber, Table, Checkbox, Tag  } from 'antd';
+import { Row, Col, Form, Input, Select, Button, Cascader, DatePicker, InputNumber, Table, Checkbox, Tag, Menu, Dropdown, Icon} from 'antd';
+import AddModal from './addModal';
+//更多功能按钮
+const menu = (
+  <Menu>
+    <Menu.Item key="import">信息导入</Menu.Item>
+    <Menu.Item key="download">下载</Menu.Item>
+    <Menu.Item key="audit">审计</Menu.Item>
+  </Menu>
+);
+
+//列表条目
 const columns = [
   {
     title: '设备名称',
@@ -61,58 +72,65 @@ const columns = [
   }
 ];
 
+//列表逐条数据选择
 const rowSelection = {
   onChange: (selectedRowKeys, selectedRows) => {
     console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
   }
 };
-const lineSiteOptions = [
-  {
-    value: '1117',
-    label: '17号线',
-    children: [
-      {
-        value: '111701',
-        label: '控制中心'
-      }, {
-        value: '111702',
-        label: '虹桥火车站'
-      }, {
-        value: '111703',
-        label: '诸光路'
-      }
-    ]
-  },
-  {
-    value: '1102',
-    label: '2号线',
-    children: [
-      {
-        value: '110201',
-        label: '中山公园'
-      }, {
-        value: '110202',
-        label: '人民广场'
-      }
-    ]
-  }
-];
+
 const { Option } = Select;
 const brands = [];
 for (let i = 10; i < 36; i++) {
   brands.push(<Option key={i.toString(36) + i}>{i.toString(36) + i}</Option>);
 }
+
+const { CheckableTag } = Tag;
 const { RangePicker } = DatePicker;
 const ObjectModule = props => {
   const { getFieldDecorator } = props.form;
-  const [data, setData] = useState([]);
+  const [lineSite, setLineSite] =  useState([]);  //线路站点
+  const [data, setData] = useState([]);  //列表数据
+  const [tagChecked, setTagChecked] = useState({  //筛选标签选择状态
+    all: true,
+    free: true,
+    patrol: true,
+    control: true,
+    maintenance: true,
+    fault: true,
+    stop: true
+  });
+  const [time, setTime] = useState("3");  //维护时间间隔
+  const [mile, setMile] = useState("3");  //维护里程间隔
+  const [visible, setVisible] = useState(false);  //新建弹窗
+
+  //新建弹窗
+  const showModal = () => {
+    setVisible(true)
+  }
+  const handleCancel = () => {
+    setVisible(false);
+  }
+
+  //获取线路站点
+  useEffect(() => {
+    Axios.get('/api/lineSite').then(res =>{
+      if(res.status === 200){
+        setLineSite(res.data);
+      }
+    }).catch((err) =>{
+        console.log("线路站点数据加载失败")
+    });
+  }, []);
+
+  //获取列表数据
   useEffect(() => {
     Axios.get('/api/objectList').then(res =>{
       if(res.status === 200){
         setData(res.data);
       }
     }).catch((err) =>{
-        console.log("数据加载失败")
+        console.log("列表数据加载失败")
     });
   }, []);
 
@@ -120,7 +138,7 @@ const ObjectModule = props => {
     <div>
       <Form layout="inline">
         <Row gutter={16}>
-          <Col span={6}>
+          <Col span={5}>
             <Form.Item>
               {getFieldDecorator('objectName', {
                 rules: [],
@@ -129,7 +147,7 @@ const ObjectModule = props => {
               )}
             </Form.Item>
           </Col>
-          <Col span={6}>
+          <Col span={5}>
             <Form.Item>
               {getFieldDecorator('brand', {
                 rules: [],
@@ -140,72 +158,66 @@ const ObjectModule = props => {
               )}
             </Form.Item>
           </Col>
-          <Col span={6}>
+          <Col span={5}>
             <Form.Item>
               {getFieldDecorator('lineSite', {
                 rules: [],
               })(
-                <Cascader options={lineSiteOptions} placeholder="请选择线路/站点" />,
+                <Cascader options={lineSite} placeholder="请选择线路/站点" />,
               )}
             </Form.Item>
           </Col>
-          <Col span={6}>
+          <Col span={4}>
             <Form.Item>
-              {getFieldDecorator('rangeDate', {
+              {getFieldDecorator('startDate', {
                 rules: [],
               })(
-                <RangePicker
-                  dateFormat ="YYYY-MM-DD"
-                  placeholder={['启用日期', '停用日期']}
-                />,
+                <DatePicker placeholder="请选择启用日期" />
               )}
             </Form.Item>
           </Col>
-          <Col span={10}>
+          <Col span={5}>
+            <Form.Item>
+              {getFieldDecorator('stopDate', {
+                rules: [],
+              })(
+                <DatePicker placeholder="请选择停用日期" />
+              )}
+            </Form.Item>
+          </Col>
+          <Col span={8}>
             <Form.Item>
               {getFieldDecorator('mileage', {
                 rules: [],
               })(
-                <Select placeholder="维护里程间隔" style={{ width: 130 }}>
-                  <Option value="1">大于</Option>
-                  <Option value="2">小于</Option>
-                  <Option value="3">介于</Option>
+                <Select placeholder="维护里程间隔" style={{ width: 160 }} onChange={(value)=>{setMile(value)}}>
+                  <Option value="1">维护里程间隔大于</Option>
+                  <Option value="2">维护里程间隔小于</Option>
+                  <Option value="3">维护里程间隔介于</Option>
                 </Select>,
               )}
             </Form.Item>
             <Form.Item>
-              {getFieldDecorator('minMileage')(
-                <InputNumber />,
-              )}
-            </Form.Item>
-            <Form.Item><label>~</label></Form.Item>
-            <Form.Item>
-              {getFieldDecorator('maxMileage')(
-                <InputNumber />,
+              {getFieldDecorator('mileNum')(
+                mile ==="3" ? <InputNumber /> : <span><InputNumber />~<InputNumber /></span>,
               )}
             </Form.Item>
           </Col>
-          <Col span={10}>
+          <Col span={8}>
             <Form.Item>
               {getFieldDecorator('timeRange', {
                 rules: [],
               })(
-                <Select placeholder="维护时间间隔" style={{ width: 130 }}>
-                  <Option value="1">大于</Option>
-                  <Option value="2">小于</Option>
-                  <Option value="3">介于</Option>
+                <Select placeholder="维护时间间隔" style={{ width: 160 }} onChange={(value)=>{setTime(value);}}>
+                  <Option value="1">维护时间间隔大于</Option>
+                  <Option value="2">维护时间间隔小于</Option>
+                  <Option value="3">维护时间间隔介于</Option>
                 </Select>,
               )}
             </Form.Item>
             <Form.Item>
-              {getFieldDecorator('minTime')(
-                <InputNumber />,
-              )}
-            </Form.Item>
-            <Form.Item><label>~</label></Form.Item>
-            <Form.Item>
-              {getFieldDecorator('maxTime')(
-                <InputNumber />,
+              {getFieldDecorator('timeNum')(
+                time ==="3" ? <InputNumber /> : <span><InputNumber />~<InputNumber /></span>,
               )}
             </Form.Item>
           </Col>
@@ -218,14 +230,22 @@ const ObjectModule = props => {
       <div>
         <Row>
           <Col span={1}><label>标签:</label></Col>
-          <Col span={23}>
-            <Tag color="#f50">全部</Tag>
-            <Tag color="#2db7f5">空闲中</Tag>
-            <Tag color="#87d068">巡检中</Tag>
-            <Tag color="#108ee9">控制中</Tag>
-            <Tag color="#2db7f5">维护中</Tag>
-            <Tag color="#87d068">故障中</Tag>
-            <Tag color="#108ee9">已停用</Tag>
+          <Col span={18}>
+            <CheckableTag checked={tagChecked.all} onChange={(checked)=>{setTagChecked({all: checked, free: checked, patrol: checked, control: checked, maintenance: checked, fault: checked, stop: checked})}}>全部</CheckableTag>
+            <CheckableTag checked={tagChecked.free} onChange={(checked)=>{setTagChecked({...tagChecked, all: false, free: checked})}}>空闲中</CheckableTag>
+            <CheckableTag checked={tagChecked.patrol} onChange={(checked)=>{setTagChecked({...tagChecked, all: false, patrol: checked})}}>巡检中</CheckableTag>
+            <CheckableTag checked={tagChecked.control} onChange={(checked)=>{setTagChecked({...tagChecked, all: false, control: checked})}}>控制中</CheckableTag>
+            <CheckableTag checked={tagChecked.maintenance} onChange={(checked)=>{setTagChecked({...tagChecked, all: false, maintenance: checked})}}>维护中</CheckableTag>
+            <CheckableTag checked={tagChecked.fault} onChange={(checked)=>{setTagChecked({...tagChecked, all: false, fault: checked})}}>故障中</CheckableTag>
+            <CheckableTag checked={tagChecked.stop} onChange={(checked)=>{setTagChecked({...tagChecked, all: false, stop: checked})}}>已停用</CheckableTag>
+          </Col>
+          <Col span={2}>
+            <Button type="danger" onClick={showModal}>新建</Button>
+            </Col>
+            <Col span={3}>
+            <Dropdown overlay={menu}>
+              <Button type="danger">更多功能<Icon type="down" /></Button>
+            </Dropdown>
           </Col>
         </Row>
       </div>
@@ -237,6 +257,8 @@ const ObjectModule = props => {
       <Button type="danger" ghost>批量修改</Button>
       <Button type="danger" ghost>添加维护记录</Button>
       <Button type="danger" ghost>维护完成</Button>
+
+      <AddModal {...{visible, handleCancel}}/>
     </div>
   )
 }
