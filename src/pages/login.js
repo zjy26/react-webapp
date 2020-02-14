@@ -94,7 +94,7 @@ const Login = props => {
             {getFieldDecorator('username', {
               rules: [{ required: true, whitespace: true, message: '请输入账号' }],
             })(
-              <Input placeholder="请输入账号" />,
+              <Input placeholder="admin" />,
             )}
           </Form.Item>
           <label>密码</label>
@@ -102,7 +102,7 @@ const Login = props => {
             {getFieldDecorator('password', {
               rules: [{ required: true, whitespace: true, message: '请输入密码' }],
             })(
-              <Input type="password" placeholder="请输入密码" />,
+              <Input type="password" placeholder="1" />,
             )}
           </Form.Item>
           <Col span={24}>

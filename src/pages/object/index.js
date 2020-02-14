@@ -2,15 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Axios from 'axios';
 import { Row, Col, Form, Input, Select, Button, Cascader, DatePicker, InputNumber, Table, Checkbox, Tag, Menu, Dropdown, Icon} from 'antd';
 import AddModal from './addModal';
-//更多功能按钮
-const menu = (
-  <Menu>
-    <Menu.Item key="import">信息导入</Menu.Item>
-    <Menu.Item key="download">下载</Menu.Item>
-    <Menu.Item key="audit">审计</Menu.Item>
-  </Menu>
-);
-
+import ImportModal from './importModal';
+import AuditModal from './auditModal';
 //列表条目
 const columns = [
   {
@@ -86,7 +79,6 @@ for (let i = 10; i < 36; i++) {
 }
 
 const { CheckableTag } = Tag;
-const { RangePicker } = DatePicker;
 const ObjectModule = props => {
   const { getFieldDecorator } = props.form;
   const [lineSite, setLineSite] =  useState([]);  //线路站点
@@ -102,15 +94,40 @@ const ObjectModule = props => {
   });
   const [time, setTime] = useState("3");  //维护时间间隔
   const [mile, setMile] = useState("3");  //维护里程间隔
-  const [visible, setVisible] = useState(false);  //新建弹窗
+  const [visible, setVisible] = useState({  //弹窗
+    showAdd: false,
+    showImport: false,
+    setShowAudit: false
+  });
+  const [loading, setLoading] = useState(true);
 
-  //新建弹窗
-  const showModal = () => {
-    setVisible(true)
-  }
+  //关闭弹窗
   const handleCancel = () => {
-    setVisible(false);
+    setVisible({
+      showAdd: false,
+      showImport: false,
+      setShowAudit: false
+    });
   }
+  const handleOk = (values) => {
+    //新增数据
+    const newListValues = {...values, id:data.length+1, key: data.length+1};
+    console.log(newListValues);
+    Axios.post('/api/objectList', newListValues
+    ).then((res)=>{
+      setVisible({...visible, showAdd:false});
+      setLoading(true);
+    });
+  }
+
+  //更多功能按钮
+const menu = (
+  <Menu>
+    <Menu.Item key="import" onClick={ ()=>{setVisible({...visible, showImport:true})} }>信息导入</Menu.Item>
+    <Menu.Item key="download">下载</Menu.Item>
+    <Menu.Item key="audit" onClick={ ()=>{setVisible({...visible, showAudit:true})} }>审计</Menu.Item>
+  </Menu>
+);
 
   //获取线路站点
   useEffect(() => {
@@ -128,15 +145,17 @@ const ObjectModule = props => {
     Axios.get('/api/objectList').then(res =>{
       if(res.status === 200){
         setData(res.data);
+        setLoading(false);
       }
     }).catch((err) =>{
+        setLoading(true);
         console.log("列表数据加载失败")
     });
-  }, []);
+  }, [loading]);
 
   return (
     <div>
-      <Form layout="inline">
+      <Form layout="inline" style={{margin: 30}}>
         <Row gutter={16}>
           <Col span={5}>
             <Form.Item>
@@ -229,8 +248,8 @@ const ObjectModule = props => {
 
       <div>
         <Row>
-          <Col span={1}><label>标签:</label></Col>
-          <Col span={18}>
+          <Col span={2} style={{textAlign: "center"}}><label>标签:</label></Col>
+          <Col span={17}>
             <CheckableTag checked={tagChecked.all} onChange={(checked)=>{setTagChecked({all: checked, free: checked, patrol: checked, control: checked, maintenance: checked, fault: checked, stop: checked})}}>全部</CheckableTag>
             <CheckableTag checked={tagChecked.free} onChange={(checked)=>{setTagChecked({...tagChecked, all: false, free: checked})}}>空闲中</CheckableTag>
             <CheckableTag checked={tagChecked.patrol} onChange={(checked)=>{setTagChecked({...tagChecked, all: false, patrol: checked})}}>巡检中</CheckableTag>
@@ -240,7 +259,7 @@ const ObjectModule = props => {
             <CheckableTag checked={tagChecked.stop} onChange={(checked)=>{setTagChecked({...tagChecked, all: false, stop: checked})}}>已停用</CheckableTag>
           </Col>
           <Col span={2}>
-            <Button type="danger" onClick={showModal}>新建</Button>
+            <Button type="danger" onClick={ () => {setVisible({showAdd: true})} }>新建</Button>
             </Col>
             <Col span={3}>
             <Dropdown overlay={menu}>
@@ -258,7 +277,9 @@ const ObjectModule = props => {
       <Button type="danger" ghost>添加维护记录</Button>
       <Button type="danger" ghost>维护完成</Button>
 
-      <AddModal {...{visible, handleCancel}}/>
+      <AddModal visible={visible.showAdd} {...{handleOk, handleCancel}} />
+      <ImportModal visible={visible.showImport} {...{handleCancel}}/>
+      <AuditModal visible={visible.showAudit} {...{handleCancel}}/>
     </div>
   )
 }
