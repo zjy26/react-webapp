@@ -1,15 +1,103 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import Axios from 'axios';
-import { Row, Col, Form, Input, Select, Button, Cascader, DatePicker, InputNumber, Table, Checkbox, Tag, Menu, Dropdown, Icon} from 'antd';
+import { Row, Col, Form, Input, Select, Button, Cascader, DatePicker, InputNumber, Table, Checkbox, Tag, Menu, Dropdown, Icon, Pagination } from 'antd';
+import Detail from './detail';
 import AddModal from './addModal';
 import ImportModal from './importModal';
 import AuditModal from './auditModal';
-//列表条目
+import AddRecordModal from './addRecordModal';
+import ChangeStatusModal from './changeStatusModal';
+import EditModal from './editModal'
+
+//列表逐条数据选择
+const rowSelection = {
+  onChange: (selectedRowKeys, selectedRows) => {
+    console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+  }
+};
+
+const { Option } = Select;
+const brands = [];
+for (let i = 10; i < 36; i++) {
+  brands.push(<Option key={i.toString(36) + i}>{i.toString(36) + i}</Option>);
+}
+
+const { CheckableTag } = Tag;
+const ObjectModule = props => {
+  const { getFieldDecorator } = props.form;
+  const [lineSite, setLineSite] =  useState([]);  //线路站点
+  const [data, setData] = useState([]);  //列表数据
+  const [tagChecked, setTagChecked] = useState({  //筛选标签选择状态
+    all: true,
+    free: true,
+    patrol: true,
+    control: true,
+    maintenance: true,
+    fault: true,
+    stop: true
+  });
+  const [time, setTime] = useState("3");  //维护时间间隔
+  const [mile, setMile] = useState("3");  //维护里程间隔
+  const [visible, setVisible] = useState({  //弹窗
+    showAdd: false,
+    showImport: false,
+    showAudit: false,
+    showAddRecord: false,
+    showChangeStatus: false,
+    showEdit: false
+  });
+  const [loading, setLoading] = useState(true);
+
+  //关闭弹窗
+  const handleCancel = () => {
+    setVisible({
+      showAdd: false,
+      showImport: false,
+      showAudit: false,
+      showAddRecord: false,
+      showChangeStatus: false,
+      showEdit: false
+    });
+  }
+  const handleOk = (values) => {
+    //新增数据
+    const newListValues = {...values, status:"空闲中", id:data.length+1, key: data.length+1};
+    Axios.post('/api/objectList', newListValues
+    ).then((res)=>{
+      setVisible({...visible, showAdd:false});
+      setLoading(true);
+    });
+  }
+
+  //更多功能按钮
+  const menu = (
+    <Menu>
+      <Menu.Item key="import" onClick={ ()=>{setVisible({...visible, showImport:true})} }>信息导入</Menu.Item>
+      <Menu.Item key="download">下载</Menu.Item>
+      <Menu.Item key="audit" onClick={ ()=>{setVisible({...visible, showAudit:true})} }>审计</Menu.Item>
+    </Menu>
+  );
+
+  //表格内单行记录操作按钮
+  const recordOption = (
+    <Menu>
+      <Menu.Item key="1" onClick={ ()=>{setVisible({...visible, showChangeStatus:true})} }>变更状态</Menu.Item>
+      <Menu.Item key="2">查看详情</Menu.Item>
+      <Menu.Item key="3" onClick={ ()=>{setVisible({...visible, showAddRecord:true})} }>添加维护记录</Menu.Item>
+    </Menu>
+  );
+
+  //列表条目
 const columns = [
   {
     title: '设备名称',
     dataIndex: 'objName',
-    render: text => <a>{text}</a>,
+    render: (text, record) => {
+      return (
+        record.status ==="维护中" ? <span><label style={{color:"#ff0000"}}>维护</label>&nbsp;&nbsp;<a><Link to="/detail">{text}</Link></a></span> : <a>{text}</a>
+      )
+    }
   },
   {
     title: '编号',
@@ -62,72 +150,20 @@ const columns = [
   {
     title: '操作',
     dataIndex: 'option',
+    render: () => {
+      return (
+        <span>
+          <a>查看视频</a>
+          <Dropdown overlay={recordOption}>
+            <Button>
+              <Icon type="down" />
+            </Button>
+          </Dropdown>
+        </span>
+      )
+    }
   }
 ];
-
-//列表逐条数据选择
-const rowSelection = {
-  onChange: (selectedRowKeys, selectedRows) => {
-    console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-  }
-};
-
-const { Option } = Select;
-const brands = [];
-for (let i = 10; i < 36; i++) {
-  brands.push(<Option key={i.toString(36) + i}>{i.toString(36) + i}</Option>);
-}
-
-const { CheckableTag } = Tag;
-const ObjectModule = props => {
-  const { getFieldDecorator } = props.form;
-  const [lineSite, setLineSite] =  useState([]);  //线路站点
-  const [data, setData] = useState([]);  //列表数据
-  const [tagChecked, setTagChecked] = useState({  //筛选标签选择状态
-    all: true,
-    free: true,
-    patrol: true,
-    control: true,
-    maintenance: true,
-    fault: true,
-    stop: true
-  });
-  const [time, setTime] = useState("3");  //维护时间间隔
-  const [mile, setMile] = useState("3");  //维护里程间隔
-  const [visible, setVisible] = useState({  //弹窗
-    showAdd: false,
-    showImport: false,
-    setShowAudit: false
-  });
-  const [loading, setLoading] = useState(true);
-
-  //关闭弹窗
-  const handleCancel = () => {
-    setVisible({
-      showAdd: false,
-      showImport: false,
-      setShowAudit: false
-    });
-  }
-  const handleOk = (values) => {
-    //新增数据
-    const newListValues = {...values, id:data.length+1, key: data.length+1};
-    console.log(newListValues);
-    Axios.post('/api/objectList', newListValues
-    ).then((res)=>{
-      setVisible({...visible, showAdd:false});
-      setLoading(true);
-    });
-  }
-
-  //更多功能按钮
-const menu = (
-  <Menu>
-    <Menu.Item key="import" onClick={ ()=>{setVisible({...visible, showImport:true})} }>信息导入</Menu.Item>
-    <Menu.Item key="download">下载</Menu.Item>
-    <Menu.Item key="audit" onClick={ ()=>{setVisible({...visible, showAudit:true})} }>审计</Menu.Item>
-  </Menu>
-);
 
   //获取线路站点
   useEffect(() => {
@@ -269,21 +305,26 @@ const menu = (
         </Row>
       </div>
 
-      <Table rowSelection={rowSelection} columns={columns} dataSource={data} scroll={{ x: 1600 }}/>
-
-      <Checkbox>全选</Checkbox>
-      <Button type="danger" ghost>批量变更</Button>
-      <Button type="danger" ghost>批量修改</Button>
-      <Button type="danger" ghost>添加维护记录</Button>
-      <Button type="danger" ghost>维护完成</Button>
+      <Table rowSelection={rowSelection} columns={columns} dataSource={data} scroll={{ x: 1600 }} pagination={false}/>
+      <Row type="flex" justify="space-between" style={{margin:30}}>
+        <Col>
+          <Checkbox>全选</Checkbox>
+          <Button type="danger" ghost onClick={ ()=>{setVisible({...visible, showChangeStatus:true})} }>批量变更</Button>
+          <Button type="danger" ghost onClick={ ()=>{setVisible({...visible, showEdit:true})} }>批量修改</Button>
+          <Button type="danger" ghost onClick={ ()=>{setVisible({...visible, showAddRecord:true})} }>添加维护记录</Button>
+          <Button type="danger" ghost>维护完成</Button>
+        </Col>
+        <Col><Pagination total={20} showSizeChanger showQuickJumper /></Col>
+      </Row>
 
       <AddModal visible={visible.showAdd} {...{handleOk, handleCancel}} />
       <ImportModal visible={visible.showImport} {...{handleCancel}}/>
       <AuditModal visible={visible.showAudit} {...{handleCancel}}/>
+      <AddRecordModal visible={visible.showAddRecord} {...{handleCancel}}/>
+      <ChangeStatusModal visible={visible.showChangeStatus} {...{handleCancel}}/>
+      <EditModal visible={visible.showEdit} {...{handleCancel}}/>
     </div>
   )
 }
 
 export default Form.create()(ObjectModule);
-
-

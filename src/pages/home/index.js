@@ -3,6 +3,7 @@ import { Layout, Menu, Icon, Dropdown,Form } from 'antd';
 import { Route, NavLink, Switch, Redirect } from 'react-router-dom';
 import Application from '../application/index';
 import ObjectModule from '../object/index';
+import Detail from '../object/detail';
 import Setting from './setting';
 import View from './view';
 import EditPassword from './editPassword';
@@ -70,6 +71,7 @@ const Index =(props)=> {
             <Route path="/demo" component= {Demo}></Route>
             <Route path="/objects" component= {ObjectModule}></Route>
             <Route path="/setting" component= {Setting}></Route>
+            <Route path="/detail" component= {Detail}></Route>
             <Redirect to='/home' />
           </Switch>
         </Content>
