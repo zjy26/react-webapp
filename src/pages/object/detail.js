@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Axios from 'axios';
 import { Form, Button, Input, Select, Row, Col, Tabs } from 'antd';
 
 const { Option } = Select;
@@ -13,6 +14,7 @@ const formItemLayout = {
     sm: { span: 16 },
   },
 };
+
 const Detail = props => {
   const [edit, setEdit] = useState({
     basicEdit: false,
@@ -21,6 +23,14 @@ const Detail = props => {
     originalEdit: false
   });
   const { getFieldDecorator } = props.form;
+  const checkDetail = values => {
+    Axios.get('/api/objectList').then(res =>{
+      if(res.status === 200){
+        props.form.setFieldsValue(res.data[0]);
+      }
+    });
+  }
+
   return (
     <Tabs tabPosition="left" defaultActiveKey="1">
       <TabPane tab="Tab1" key="1">
@@ -131,6 +141,46 @@ const Detail = props => {
                 )}
               </Form.Item>
             </Col>
+            {
+              edit.basicEdit === false ?
+              <div>
+                <Col span={12}>
+                  <Form.Item label="故障描述">
+                    {getFieldDecorator("faultDescr")(
+                      <Input.TextArea placeholder="请输入故障描述" />
+                    )}
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label="启用时间">
+                    {getFieldDecorator("startTime")(
+                      <Input placeholder="请输入启用时间" />
+                    )}
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label="停用时间">
+                    {getFieldDecorator("endTime")(
+                      <Input placeholder="请输入停用时间" />
+                    )}
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label="创建时间">
+                    {getFieldDecorator("createTime")(
+                      <Input placeholder="请输入启用时间" />
+                    )}
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label="更新时间">
+                    {getFieldDecorator("updateTime")(
+                      <Input placeholder="请输入停用时间" />
+                    )}
+                  </Form.Item>
+                </Col>
+              </div> : null
+            }
 
             <Col span={24}>
               <label style={{fontSize:18, marginRight:20}}>参数信息</label>
@@ -230,8 +280,8 @@ const Detail = props => {
                   rules: [{required: true}],
                 })(
                   <Select>
-                    <Option value="1">HLS</Option>
-                    <Option value="2">RTSP</Option>
+                    <Option value="HLS">HLS</Option>
+                    <Option value="RTSP">RTSP</Option>
                   </Select>
                 )}
               </Form.Item>

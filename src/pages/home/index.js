@@ -4,6 +4,11 @@ import { Route, NavLink, Switch, Redirect } from 'react-router-dom';
 import Application from '../application/index';
 import ObjectModule from '../object/index';
 import Detail from '../object/detail';
+import PatrolPlan from '../patrolPlan/index';
+import PatrolSheet from '../patrolSheet/index';
+import PatrolConfig from '../patrolConfig/index';
+import DataStatistics from '../dataStatistics/index';
+import PatrolPlanDetail from '../patrolPlan/patrolPlan';
 import Setting from './setting';
 import View from './view';
 import EditPassword from './editPassword';
@@ -54,6 +59,10 @@ const Index =(props)=> {
             <Menu.Item key="home"><NavLink to="/home">首页</NavLink></Menu.Item>
             <Menu.Item key="applications"><NavLink to="/applications">应用管理</NavLink></Menu.Item>
             <Menu.Item key="objects"><NavLink to="/objects">设备管理</NavLink></Menu.Item>
+            <Menu.Item key="patrolPlan"><NavLink to="/patrolPlan">巡检计划</NavLink></Menu.Item>
+            <Menu.Item key="patrolSheet"><NavLink to="/patrolSheet">巡检单</NavLink></Menu.Item>
+            <Menu.Item key="patrolConfig"><NavLink to="/patrolConfig">巡检配置</NavLink></Menu.Item>
+            <Menu.Item key="dataStatistics"><NavLink to="/dataStatistics">数据统计</NavLink></Menu.Item>
             <Menu.Item key="demo"><NavLink to="/demo">Demo</NavLink></Menu.Item>
             <Menu.Item key="user" style={{float: 'right'}}>
               <Dropdown overlay={menu} trigger={['click']}>
@@ -72,6 +81,11 @@ const Index =(props)=> {
             <Route path="/objects" component= {ObjectModule}></Route>
             <Route path="/setting" component= {Setting}></Route>
             <Route path="/detail" component= {Detail}></Route>
+            <Route path="/patrolPlan" component= {PatrolPlan}></Route>
+            <Route path="/patrolSheet" component= {PatrolSheet}></Route>
+            <Route path="/patrolConfig" component= {PatrolConfig}></Route>
+            <Route path="/dataStatistics" component= {DataStatistics}></Route>
+            <Route path="/patrolPlanDetail" component= {PatrolPlanDetail}></Route>
             <Redirect to='/home' />
           </Switch>
         </Content>

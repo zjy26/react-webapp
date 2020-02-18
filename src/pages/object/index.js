@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Axios from 'axios';
 import { Row, Col, Form, Input, Select, Button, Cascader, DatePicker, InputNumber, Table, Checkbox, Tag, Menu, Dropdown, Icon, Pagination } from 'antd';
-import Detail from './detail';
 import AddModal from './addModal';
 import ImportModal from './importModal';
 import AuditModal from './auditModal';
@@ -83,7 +82,7 @@ const ObjectModule = props => {
   const recordOption = (
     <Menu>
       <Menu.Item key="1" onClick={ ()=>{setVisible({...visible, showChangeStatus:true})} }>变更状态</Menu.Item>
-      <Menu.Item key="2">查看详情</Menu.Item>
+      <Menu.Item key="2"><Link to="/detail">查看详情</Link></Menu.Item>
       <Menu.Item key="3" onClick={ ()=>{setVisible({...visible, showAddRecord:true})} }>添加维护记录</Menu.Item>
     </Menu>
   );

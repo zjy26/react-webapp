@@ -52,7 +52,21 @@
       "timeRange":"111",
       "milesRange":"111",
       "status":"维护中",
-      "opton":"查看视频"
+      "opton":"查看视频",
+      "location": "备控UPS室",
+      "supplier": "上海航天技术有限公司",
+      "manufacturers": "上海航天技术有限公司",
+      "objDescr": "设备描述……",
+      "faultDescr": "故障描述……",
+      "volume": "600*500*100",
+      "weight": "357",
+      "attributeName": "35KV开关柜",
+      "runningTime": 1111,
+      "runningMiles": 2222,
+      "connectLogo": "1233",
+      "video": "HLS",
+      "createTime": "2020-01-01",
+      "updateTime": "2020-01-01"
     }, {
       "key": 2,
       "objName": "UPS配电柜2",
@@ -116,6 +130,47 @@
           "label": "徐家汇"
         }
       ]
+    }
+  ],
+  "patrolPlanList": [
+    {
+      "key": 1,
+      "patrolName": "虹桥火车站每日巡检1",
+      "line": "17号线",
+      "site": "虹桥火车站",
+      "patrolPeople": "张三",
+      "cycle": "手动",
+      "brand": "西门子",
+      "status": true,
+      "creator": "张三",
+      "createTime": "2019-11-12",
+      "opton":"查看视频"
+    },
+    {
+      "key": 2,
+      "patrolName": "虹桥火车站每日巡检2",
+      "line": "17号线",
+      "site": "虹桥火车站",
+      "patrolPeople": "张三",
+      "cycle": "按日",
+      "brand": "西门子",
+      "status": false,
+      "creator": "张三",
+      "createTime": "2019-11-12",
+      "opton":"查看视频"
+    },
+    {
+      "key": 3,
+      "patrolName": "虹桥火车站每日巡检3",
+      "line": "17号线",
+      "site": "虹桥火车站",
+      "patrolPeople": "张三",
+      "cycle": "按月",
+      "brand": "西门子",
+      "status": true,
+      "creator": "张三",
+      "createTime": "2019-11-12",
+      "opton":"查看视频"
     }
   ]
 }
