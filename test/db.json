@@ -172,5 +172,49 @@
       "createTime": "2019-11-12",
       "opton":"查看视频"
     }
+  ],
+  "patrolConfigList": [
+    {
+      "key": 1,
+      "line": "17号线",
+      "site": "虹桥火车站",
+      "serverIP": "192.168.10.11",
+      "serverPort": "22",
+      "videoUrl": "-"
+    },
+    {
+      "key": 2,
+      "line": "17号线",
+      "site": "诸光路",
+      "serverIP": "192.168.10.11",
+      "serverPort": "80",
+      "videoUrl": "-"
+    }
+  ],
+  "patrolSheetList": [
+    {
+      "key": 1,
+      "name":"虹桥火车站定巡检",
+      "line": "17号线",
+      "site": "虹桥火车站",
+      "leader": "张三",
+      "patrolTime": "2020-2-18",
+      "status": "待巡检",
+      "result": "-",
+      "handleConfirm":"-",
+      "CancelReason": "-"
+    },
+    {
+      "key": 2,
+      "name":"虹桥火车站定巡检",
+      "line": "17号线",
+      "site": "虹桥火车站",
+      "leader": "李四",
+      "patrolTime": "2020-01-07",
+      "status": "巡检中",
+      "result": "异常",
+      "handleConfirm":"-",
+      "CancelReason": "-"
+    }
   ]
 }

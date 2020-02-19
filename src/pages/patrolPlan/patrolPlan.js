@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import Axios from 'axios';
-import { Form, Button, Input, Select, Row, Col, Tabs, DatePicker, InputNumber } from 'antd';
+import { Form, Button, Input, Select, Row, Col, Tabs, DatePicker, InputNumber, Table, Menu, Badge, Dropdown, Icon } from 'antd';
 import AddObjModal from './addObjModal';
+import AddPatrolItemModal from './addPatrolItemModal';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -17,6 +18,30 @@ const formItemLayout = {
 };
 const weekOption = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
 
+//设备信息表格
+const menu = (
+  <Menu>
+    <Menu.Item>Action 1</Menu.Item>
+    <Menu.Item>Action 2</Menu.Item>
+  </Menu>
+);
+
+  const columns = [
+    { title: '房间位置', dataIndex: 'rommLocation', key: 'rommLocation' },
+    { title: '设备名称', dataIndex: 'objName', key: 'objName' },
+    { title: '抽屉', dataIndex: 'drawer', key: 'drawer' },
+    { title: '杂散', dataIndex: 'stray', key: 'stray' },
+    { title: '操作', key: 'operation', render: () => <span><a>编辑</a>&nbsp;&nbsp;<a>删除</a></span> },
+  ];
+
+  const data = [{
+    key: 1,
+    rommLocation: '35KV开关柜',
+    objName: '2号变压器',
+    drawer: '-',
+    stray: '-'
+  }];
+
 const PatrolPlan = props => {
   const [edit, setEdit] = useState({
     basicEdit: false,
@@ -25,11 +50,13 @@ const PatrolPlan = props => {
   const { getFieldDecorator } = props.form;
   const [selectedItems, setItems] = useState([]);
   const [visible, setVisible] = useState({
-    showAddObj: false
+    showAddObj: false,
+    showAddPatrolItem: false
   });
   const handleCancel = () => {
     setVisible({
-      showAddObj: false
+      showAddObj: false,
+      showAddPatrolItem: false
     });
   }
   const filteredOptions = weekOption.filter(o => !selectedItems.includes(o));
@@ -37,6 +64,63 @@ const PatrolPlan = props => {
     setItems( selectedItems )
   };
 
+  const expandedRowRender = () => {
+    const columns = [
+      { title: '属性', dataIndex: 'attribute', key: 'attribute',
+        render: (text) => (
+          <span>
+            <Badge status="success" />
+            {text}
+          </span>
+        )
+      },
+      { title: '监测点类型', dataIndex: 'monitorType', key: 'monitorType' },
+      { title: '报警上限', dataIndex: 'alarmTop', key: 'alarmTop' },
+      { title: '报警下限', dataIndex: 'alarmLower', key: 'alarmLower' },
+      { title: '正常值', dataIndex: 'normalVal', key: 'normalVal' },
+      { title: '正常值描述', dataIndex: 'normalDescr', key: 'normalDescr' },
+      {
+        title: '操作',
+        dataIndex: 'operation',
+        key: 'operation',
+        render: () => <span><a>编辑</a>&nbsp;&nbsp;<a>删除</a></span>
+      },
+    ];
+
+    //嵌套表格
+    const data = [{
+      key: 1,
+      attribute: "开关",
+      monitorType: "遥视模拟量",
+      alarmTop: 111,
+      alarmLower: 11,
+      normalVal: 100,
+      normalDescr: "描述描述……"
+    }, {
+      key: 2,
+      attribute: "电源指示",
+      monitorType: "遥视模拟量",
+      alarmTop: 111,
+      alarmLower: 11,
+      normalVal: 100,
+      normalDescr: "描述描述……"
+    }, {
+      key: 3,
+      attribute: "开关",
+      monitorType: "遥视模拟量",
+      alarmTop: 121,
+      alarmLower: 11,
+      normalVal: 100,
+      normalDescr: "描述描述……"
+    }];
+
+    return (
+      <div>
+        <Row type="flex" justify="end"><Button onClick={()=>{setVisible({...visible, showAddPatrolItem:true})}}>新增巡检项</Button></Row>
+        <Table columns={columns} dataSource={data} pagination={false} />
+      </div>
+    )
+  };
   return (
     <div>
       <Tabs tabPosition="left" defaultActiveKey="1">
@@ -204,11 +288,18 @@ const PatrolPlan = props => {
           <Col span={24}>
             <label style={{fontSize:18, marginRight:20}}>设备信息</label>
             <Button type="primary" ghost onClick={ ()=>{setVisible({...visible, showAddObj:true})} } >新增</Button>
+            <Table
+              columns={columns}
+              expandedRowRender={expandedRowRender}
+              dataSource={data}
+              pagination={false}
+              defaultExpandAllRows = {true}
+            />
           </Col>
-
         </TabPane>
       </Tabs>
       <AddObjModal visible={visible.showAddObj} {...{handleCancel}}/>
+      <AddPatrolItemModal visible={visible.showAddPatrolItem} {...{handleCancel}}/>
     </div>
   )
 }
