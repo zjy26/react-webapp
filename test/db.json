@@ -175,6 +175,7 @@
   ],
   "patrolConfigList": [
     {
+      "id": 1,
       "key": 1,
       "line": "17号线",
       "site": "虹桥火车站",
@@ -183,6 +184,7 @@
       "videoUrl": "-"
     },
     {
+      "id": 2,
       "key": 2,
       "line": "17号线",
       "site": "诸光路",
@@ -197,24 +199,97 @@
       "name":"虹桥火车站定巡检",
       "line": "17号线",
       "site": "虹桥火车站",
-      "leader": "张三",
+      "patrolPeople": "张三",
       "patrolTime": "2020-2-18",
       "status": "待巡检",
       "result": "-",
       "handleConfirm":"-",
-      "CancelReason": "-"
+      "CancelReason": "-",
+      "object": "111",
+      "room": "111",
+      "patrolName": "111"
     },
     {
       "key": 2,
       "name":"虹桥火车站定巡检",
       "line": "17号线",
       "site": "虹桥火车站",
-      "leader": "李四",
+      "patrolPeople": "李四",
       "patrolTime": "2020-01-07",
       "status": "巡检中",
       "result": "异常",
       "handleConfirm":"-",
       "CancelReason": "-"
+    }
+  ],
+  "abnormalList": [
+    {
+      "key": 1,
+      "locationCode": "35KV开关柜1",
+      "objName": "2号变压器",
+      "attribute": "开关",
+      "data": "11",
+      "presetValue": "7-10",
+      "cios": "11",
+      "result": "异常"
+    },
+    {
+      "key": 2,
+      "locationCode": "35KV开关柜2",
+      "objName": "2号变压器",
+      "attribute": "开关",
+      "data": "11",
+      "presetValue": "7-10",
+      "cios": "11",
+      "conclusion": "异常"
+    }, 
+    {
+      "key": 3,
+      "locationCode": "35KV开关柜3",
+      "objName": "2号变压器",
+      "attribute": "开关",
+      "data": "11",
+      "presetValue": "7-10",
+      "cios": "11",
+      "conclusion": "异常"
+    }
+  ],
+  "patrolContentList": [
+    {
+      "key": 1,
+      "object": "1号变压器",
+      "totalNum": "10",
+      "normalNum": 0,
+      "abnormalNum": 1,
+      "normalRate": 0,
+      "abnormalRate": "10%"
+    },
+    {
+      "key": 2,
+      "object": "2号变压器",
+      "totalNum": "10",
+      "normalNum": 0,
+      "abnormalNum": 1,
+      "normalRate": 0,
+      "abnormalRate": "10%"
+    }
+  ],
+  "patrolDetailList": [
+    {
+      "project": "开关",
+      "standard": "正常",
+      "value": "-",
+      "cios": "-",
+      "result":"正常",
+      "time": "2020-01-11 10:00:00"
+    },
+    {
+      "project": "开关2",
+      "standard": "正常",
+      "value": "-",
+      "cios": "-",
+      "result":"正常",
+      "time": "2020-01-11 10:00:00"
     }
   ]
 }

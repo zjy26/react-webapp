@@ -9,6 +9,8 @@ import PatrolSheet from '../patrolSheet/index';
 import PatrolConfig from '../patrolConfig/index';
 import DataStatistics from '../dataStatistics/index';
 import PatrolPlanDetail from '../patrolPlan/patrolPlan';
+import NewPatrolSheet from '../patrolSheet/newPatrolSheet';
+import PatrolSheetDetail from '../patrolSheet/patrolSheetDetail';
 import Setting from './setting';
 import View from './view';
 import EditPassword from './editPassword';
@@ -86,6 +88,8 @@ const Index =(props)=> {
             <Route path="/patrolConfig" component= {PatrolConfig}></Route>
             <Route path="/dataStatistics" component= {DataStatistics}></Route>
             <Route path="/patrolPlanDetail" component= {PatrolPlanDetail}></Route>
+            <Route path="/newPatrolSheet" component= {NewPatrolSheet}></Route>
+            <Route path="/patrolSheetDetail" component= {PatrolSheetDetail}></Route>
             <Redirect to='/home' />
           </Switch>
         </Content>

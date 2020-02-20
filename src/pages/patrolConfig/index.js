@@ -1,25 +1,46 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Axios from 'axios';
 import { Row, Col, Button, Cascader, Table } from 'antd';
 import ConfigModal from './configModal';
 
 const PatrolConfig = props => {
   const [lineSite, setLineSite] =  useState([]);  //线路站点
-  const [data, setData] = useState([]);  //列表数据
+  const [data, setData] = useState([]);  //
+  const [itemValues, setItemValues] = useState([]);  //列表数据
   const [loading, setLoading] = useState(true);
   const [visible, setVisible] = useState(false);
   const [modalTitle, setModalTitle] = useState("新增配置");
+
+  const childRef = useRef();
 
   const newModal = ()=> {
     setModalTitle("新增配置");
     setVisible(true);
   }
-  const editModal = ()=> {
-    setModalTitle("编辑配置");
-    setVisible(true);
-  }
+
   const handleCancel = () => {
     setVisible(false);
+  }
+
+  //删除
+  const deleteItem = (id)=>{
+    Axios.delete('/api/patrolConfigList/'+id)
+    .then((res) =>{
+      setLoading(true);
+    })
+  }
+
+  //编辑
+  const editItem = (id)=>{
+    Axios.get('/api/patrolConfigList/'+id)
+    .then((res) =>{
+      if(res.status === 200){
+        setItemValues(res.data);
+        setModalTitle("编辑配置");
+        setVisible(true);
+        console.log("%%%%%", childRef)
+      }
+    })
   }
 
   //列表条目
@@ -47,9 +68,9 @@ const PatrolConfig = props => {
     {
       title: '操作',
       dataIndex: 'option',
-      render: () => {
+      render: (text, record) => {
         return (
-          <span><a onClick={editModal}>编辑</a>&nbsp;&nbsp;<a>删除</a></span>
+          <span><a onClick={()=>{editItem(record.id)}}>编辑</a>&nbsp;&nbsp;<a onClick={()=>{deleteItem(record.id)}}>删除</a></span>
         )
       }
     }
@@ -80,7 +101,7 @@ const PatrolConfig = props => {
 
   return (
     <div>
-      <Row>
+      <Row style={{margin:30}}>
         <Col span={12}>
           <Cascader options={lineSite} placeholder="请选择线路/站点" />,
           <Button type="danger">搜索</Button>
@@ -90,7 +111,7 @@ const PatrolConfig = props => {
         </Col>
       </Row>
       <Table columns={columns} dataSource={data} style={{marginTop:30}}/>
-      <ConfigModal visible={visible} title={modalTitle} {...{handleCancel}}/>
+      <ConfigModal visible={visible} title={modalTitle} {...{handleCancel, itemValues}} ref={childRef}/>
     </div>
   )
 }

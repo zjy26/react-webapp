@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Axios from 'axios';
 import { Row, Col, Form, Input, Select, Button, Cascader, DatePicker, Table, Tag, Menu, Dropdown, Icon } from 'antd';
 import CancelModal from './cancelModal';
+import AbnormalModal from './abnormalModal';
 
 const { Option } = Select;
 const brands = [];
@@ -24,14 +25,16 @@ const PatrolSheet = props => {
     close: true
   });
   const [visible, setVisible] = useState({  //弹窗
-    showCancel: false
+    showCancel: false,
+    showAbnormal: false
   });
   const [loading, setLoading] = useState(true);
 
   //关闭弹窗
   const handleCancel = () => {
     setVisible({
-      showCancel: false
+      showCancel: false,
+      showAbnormal: false
     });
   }
 
@@ -65,7 +68,7 @@ const columns = [
   },
   {
     title: '负责人',
-    dataIndex: 'leader',
+    dataIndex: 'patrolPeople',
   },
   {
     title: '巡检时间',
@@ -80,7 +83,7 @@ const columns = [
     dataIndex: 'result',
     render: (text, record) => {
       return (
-       <a>{text}</a>
+       text==="异常" ? <a onClick={ ()=>{setVisible({...visible, showAbnormal:true})} }>{text}</a> : <span>{text}</span>
       )
     }
   },
@@ -143,7 +146,7 @@ const columns = [
           </Col>
           <Col span={4}>
             <Form.Item>
-              {getFieldDecorator('leader')(
+              {getFieldDecorator('patrolPeople')(
                 <Input placeholder="请输入负责人姓名" />
               )}
             </Form.Item>
@@ -191,7 +194,7 @@ const columns = [
             <CheckableTag checked={tagChecked.close} onChange={(checked)=>{setTagChecked({...tagChecked, all: false, close: checked})}}>已关闭</CheckableTag>
           </Col>
           <Col span={2}>
-            <Button type="danger" onClick={ () => {setVisible({showAdd: true})} }>新建</Button>
+            <Button type="danger"><Link to="/newPatrolSheet">新建</Link></Button>
             </Col>
             <Col span={3}>
             <Dropdown overlay={menu}>
@@ -204,6 +207,7 @@ const columns = [
       <Table columns={columns} dataSource={data} scroll={{ x: 1600 }} pagination={false}/>
 
       <CancelModal visible={visible.showCancel} {...{handleCancel}}/>
+      <AbnormalModal visible={visible.showAbnormal} {...{handleCancel}}/>
     </div>
   )
 }

@@ -36,8 +36,8 @@ const ObjectModule = props => {
     fault: true,
     stop: true
   });
-  const [time, setTime] = useState("3");  //维护时间间隔
-  const [mile, setMile] = useState("3");  //维护里程间隔
+  const [time, setTime] = useState(null);  //维护时间间隔
+  const [mile, setMile] = useState(null);  //维护里程间隔
   const [visible, setVisible] = useState({  //弹窗
     showAdd: false,
     showImport: false,
@@ -253,7 +253,7 @@ const columns = [
             </Form.Item>
             <Form.Item>
               {getFieldDecorator('mileNum')(
-                mile ==="3" ? <InputNumber /> : <span><InputNumber />~<InputNumber /></span>,
+                mile === "3" ? <span><InputNumber />~<InputNumber /></span> : <InputNumber />,
               )}
             </Form.Item>
           </Col>
@@ -271,7 +271,7 @@ const columns = [
             </Form.Item>
             <Form.Item>
               {getFieldDecorator('timeNum')(
-                time ==="3" ? <InputNumber /> : <span><InputNumber />~<InputNumber /></span>,
+                time ==="3" ? <span><InputNumber />~<InputNumber /></span> : <InputNumber />,
               )}
             </Form.Item>
           </Col>
