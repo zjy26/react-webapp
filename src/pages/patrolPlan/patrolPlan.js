@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import Axios from 'axios';
-import { Form, Button, Input, Select, Row, Col, Tabs, DatePicker, InputNumber, Table, Menu, Badge, Dropdown, Icon } from 'antd';
+import { Form, Button, Input, Select, Row, Col, Tabs, DatePicker, InputNumber, Table, Menu, Badge} from 'antd';
 import AddObjModal from './addObjModal';
 import AddPatrolItemModal from './addPatrolItemModal';
 
@@ -17,14 +16,6 @@ const formItemLayout = {
   },
 };
 const weekOption = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-
-//设备信息表格
-const menu = (
-  <Menu>
-    <Menu.Item>Action 1</Menu.Item>
-    <Menu.Item>Action 2</Menu.Item>
-  </Menu>
-);
 
   const columns = [
     { title: '房间位置', dataIndex: 'rommLocation', key: 'rommLocation' },

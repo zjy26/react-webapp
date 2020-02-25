@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import Axios from 'axios';
-import { Row, Col, Form, Tabs, Card, Button, DatePicker, Table } from 'antd';
+import { Row, Col, Form, Tabs, Card, Button, DatePicker, Select, Table } from 'antd';
 import ObjDetailModal from './objDetailModal';
 import PatrolDetailModal from './patrolDetailModal';
+import ImplementationPie from './charts/implementationPie';
+import SiteFaultRate from './charts/siteFaultRate';
+import ObjPipe from './charts/objPipe';
+import FaultReason from './charts/faultReason';
+import FaultStatistical from './charts/faultStatistical';
+import MaintenanceData from './charts/maintenanceData';
+import ObjDurationStatistical from './charts/objDurationStatistical';
 
 const objColumns = [
   {
@@ -263,6 +270,9 @@ const DataStatistics = props => {
           <div style={{ background: '#ECECEC', padding: '30px' }}>
             <Row gutter={16}>
               <Col span={4}>
+                <ImplementationPie array={[11,12,1,2,2]}/>
+              </Col>
+              <Col span={4}>
                 <Card title="正在运行" bordered={false}>
                   11
                 </Card>
@@ -286,6 +296,78 @@ const DataStatistics = props => {
                 <Card title="停机修复" bordered={false}>
                   2
                 </Card>
+              </Col>
+            </Row>
+            <Row>
+              <Col span={12}>
+                <Form layout="inline" style={{margin: 30}}>
+                  <Form.Item>
+                    {getFieldDecorator('line', {
+                      rules: [],
+                    })(
+                      <Select placeholder="请选择线路" style={{width:"160px"}}/>
+                    )}
+                  </Form.Item>
+                  <Form.Item>
+                    {getFieldDecorator('date', {
+                      rules: [],
+                    })(
+                      <DatePicker placeholder="请选择日期" />
+                    )}
+                  </Form.Item>
+                  <Form.Item>
+                    <Button type="primary" htmlType="submit">搜索</Button>
+                  </Form.Item>
+                </Form>
+                <SiteFaultRate />
+              </Col>
+              <Col span={12}>
+                <ObjPipe />
+                <FaultReason />
+              </Col>
+            </Row>
+            <Row>
+              <Col span={12}>
+                <Form layout="inline" style={{margin: 30}}>
+                  <Form.Item>
+                    {getFieldDecorator('date', {
+                      rules: [],
+                    })(
+                      <DatePicker placeholder="请选择日期" />
+                    )}
+                  </Form.Item>
+                  <Form.Item>
+                    <Button type="primary" htmlType="submit">搜索</Button>
+                  </Form.Item>
+                </Form>
+                <FaultStatistical />
+              </Col>
+              <Col span={12} style={{marginTop:"100px"}}>
+                <MaintenanceData/>
+              </Col>
+            </Row>
+            <Row>
+              <Col span={12}>
+                <Form layout="inline" style={{margin: 30}}>
+                  <Form.Item>
+                    {getFieldDecorator('line', {
+                      rules: [],
+                    })(
+                      <Select placeholder="请选择线路" style={{width:"160px"}}/>
+                    )}
+                  </Form.Item>
+                  <Form.Item>
+                    {getFieldDecorator('date', {
+                      rules: [],
+                    })(
+                      <DatePicker placeholder="请选择日期" />
+                    )}
+                  </Form.Item>
+                  <Form.Item>
+                    <Button type="primary" htmlType="submit">搜索</Button>
+                  </Form.Item>
+                </Form>
+                <ObjDurationStatistical />
               </Col>
             </Row>
           </div>
