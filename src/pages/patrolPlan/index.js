@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Axios from 'axios';
-import { Row, Col, Form, Input, Select, Button, Cascader, Switch, DatePicker, InputNumber, Table, Checkbox, Tag, Menu, Dropdown, Icon, Pagination } from 'antd';
+import { Row, Col, Form, Input, Select, Button, Cascader, Switch, Table, Menu, Dropdown, Icon, Pagination } from 'antd';
 import CycleModal from './cycleModal';
 
 const {Option} = Select;

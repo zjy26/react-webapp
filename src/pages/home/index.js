@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { Layout, Menu, Icon, Dropdown,Form } from 'antd';
 import { Route, NavLink, Switch, Redirect } from 'react-router-dom';
+import ObjectEvaluation from '../objectEvaluation';
 import Application from '../application/index';
 import ObjectModule from '../object/index';
 import Detail from '../object/detail';
@@ -65,6 +66,7 @@ const Index =(props)=> {
             <Menu.Item key="patrolSheet"><NavLink to="/patrolSheet">巡检单</NavLink></Menu.Item>
             <Menu.Item key="patrolConfig"><NavLink to="/patrolConfig">巡检配置</NavLink></Menu.Item>
             <Menu.Item key="dataStatistics"><NavLink to="/dataStatistics">数据统计</NavLink></Menu.Item>
+            <Menu.Item key="objectEvaluation"><NavLink to="/objectEvaluation">设备评价</NavLink></Menu.Item>
             <Menu.Item key="demo"><NavLink to="/demo">Demo</NavLink></Menu.Item>
             <Menu.Item key="user" style={{float: 'right'}}>
               <Dropdown overlay={menu} trigger={['click']}>
@@ -90,6 +92,7 @@ const Index =(props)=> {
             <Route path="/patrolPlanDetail" component= {PatrolPlanDetail}></Route>
             <Route path="/newPatrolSheet" component= {NewPatrolSheet}></Route>
             <Route path="/patrolSheetDetail" component= {PatrolSheetDetail}></Route>
+            <Route path="/objectEvaluation" component= {ObjectEvaluation}></Route>
             <Redirect to='/home' />
           </Switch>
         </Content>

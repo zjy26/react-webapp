@@ -291,5 +291,268 @@
       "result":"正常",
       "time": "2020-01-11 10:00:00"
     }
+  ],
+  "objStatisticsTable": {
+    "data": [
+      {
+        "key": 1,
+        "line": "17号线",
+        "site": "",
+        "objNum": 111,
+        "faultNum": 111,
+        "stopNum": 111,
+        "faultRate": "10%",
+        "stopLength": "8.2h",
+        "runningMileage": 12,
+        "brandName": "西门子，航天电源",
+        "children": [
+          {
+            "key": 11,
+            "line": "",
+            "site": "虹桥火车站",
+            "objNum": 100,
+            "faultNum": 100,
+            "stopNum": 100,
+            "faultRate": "10%",
+            "stopLength": "4.2h",
+            "runningMileage": 12,
+            "brandName": "西门子"
+          },
+          {
+            "key": 12,
+            "line": "",
+            "site": "控制中心",
+            "objNum": 11,
+            "faultNum": 11,
+            "stopNum": 11,
+            "faultRate": "10%",
+            "stopLength": "4h",
+            "runningMileage": 12,
+            "brandName": "航天电源"
+          }
+        ]
+      },
+      {
+        "key": 2,
+        "line": "11号线",
+        "site": "",
+        "objNum": "",
+        "faultNum": "",
+        "stopNum": "",
+        "faultRate": "",
+        "stopLength": "",
+        "runningMileage": "",
+        "brandName": "",
+        "children": []
+      }
+    ],
+    "objData": [
+      {
+        "key": 1,
+        "rank": 1,
+        "objName": "1号UPS电池屏",
+        "historyFaultNum": 11,
+        "solveFaultNum": 11,
+        "faultHandlingRate": "10%",
+        "runningMileage": 11,
+        "lastMaintenanceTime": "2020-01-01"
+      },
+      {
+        "key": 2,
+        "rank": 2,
+        "objName": "2号UPS电池屏",
+        "historyFaultNum": 21,
+        "solveFaultNum": 12,
+        "faultHandlingRate": "20%",
+        "runningMileage": 22,
+        "lastMaintenanceTime": "2020-02-01"
+      },
+      {
+        "key": 3,
+        "rank": 3,
+        "objName": "3号UPS电池屏",
+        "historyFaultNum": 33,
+        "solveFaultNum": 23,
+        "faultHandlingRate": "30%",
+        "runningMileage": 32,
+        "lastMaintenanceTime": "2020-03-01"
+      }
+    ],
+    "brandData": [
+      {
+        "key": 1,
+        "rank": 1,
+        "brandName": "西门子",
+        "historyFaultNum": 33,
+        "solveFaultNum": 23,
+        "unresolvedFaultNum": 20,
+        "faultRate": "10%",
+        "runningMileage": 32
+      },
+      {
+        "key": 2,
+        "rank": 2,
+        "brandName": "航天电源",
+        "historyFaultNum": 11,
+        "solveFaultNum": 21,
+        "unresolvedFaultNum": 10,
+        "faultRate": "10%",
+        "runningMileage": 11
+      },
+      {
+        "key": 3,
+        "rank": 3,
+        "brandName": "西门子",
+        "historyFaultNum": 33,
+        "solveFaultNum": 23,
+        "unresolvedFaultNum": 20,
+        "faultRate": "10%",
+        "runningMileage": 32
+      }
+    ]
+  },
+  "objStatisticsDetail": {
+    "brandDetailData": [
+      {
+        "key": 1,
+        "brandName": "西门子",
+        "objNum": 111,
+        "faultNum": 22,
+        "stopNum": 33,
+        "stopLength": "8h",
+        "faultRate": "20%"
+      },
+      {
+        "key": 2,
+        "brandName": "航天电源",
+        "objNum": 111,
+        "faultNum": 22,
+        "stopNum": 33,
+        "stopLength": "8h",
+        "faultRate": "20%"
+      }
+    ],
+    "mileageDetailData": [
+      {
+        "key": 1,
+        "objName": "1号UPS蓄电池屏",
+        "type": "机器人",
+        "runningMileage": 22,
+        "faultNum": 33,
+        "stopMaintenanceTime": "8h"
+      },
+      {
+        "key": 2,
+        "objName": "1号UPS蓄电池屏",
+        "type": "摄像头",
+        "runningMileage": 22,
+        "faultNum": 33,
+        "stopMaintenanceTime": "8h"
+      }
+    ]
+  },
+  "patrolStatisticsDetail": {
+    "unnormalData": [
+      {
+        "key": 1,
+        "room": "400V开关柜室",
+        "patrolObject": "400V分段柜",
+        "patrolItem": "就地投入",
+        "patrolStandard": "正常",
+        "patrolValue": "-",
+        "cios": "-",
+        "result": "正常",
+        "collectionTime": "2020-02-02 02:00:00",
+        "problemDescr": "问题描述……",
+        "problemReason": "原因描述……",
+        "solution": "更换开关"
+      },
+      {
+        "key": 2,
+        "room": "400V开关柜室",
+        "patrolObject": "A相负荷率(100%)",
+        "patrolItem": "就地投入",
+        "patrolStandard": "正常",
+        "patrolValue": "-",
+        "cios": "-",
+        "result": "正常",
+        "collectionTime": "2020-02-02 02:00:00",
+        "problemDescr": "问题描述……",
+        "problemReason": "原因描述……",
+        "solution": "更换开关"
+      },
+      {
+        "key": 3,
+        "room": "400V开关柜室",
+        "patrolObject": "400V分段柜",
+        "patrolItem": "就地投入",
+        "patrolStandard": "异常",
+        "patrolValue": "-",
+        "cios": "-",
+        "result": "正常",
+        "collectionTime": "2020-02-02 02:00:00",
+        "problemDescr": "问题描述……",
+        "problemReason": "原因描述……",
+        "solution": "更换开关"
+      }
+    ],
+    "normalData": [
+      {
+        "key": 1,
+        "room": "400V开关柜室",
+        "patrolObject": "400V分段柜",
+        "patrolItem": "就地投入",
+        "patrolStandard": "正常",
+        "patrolValue": "-",
+        "cios": "-",
+        "result": "正常",
+        "collectionTime": "2020-02-02 02:00:00",
+        "problemDescr": "问题描述……",
+        "problemReason": "原因描述……",
+        "solution": "更换开关"
+      }
+    ],
+    "notCheckData": [
+      {
+        "key": 1,
+        "room": "400V开关柜室",
+        "patrolObject": "400V分段柜",
+        "patrolItem": "就地投入",
+        "patrolStandard": "-",
+        "patrolValue": "-",
+        "cios": "-",
+        "result": "-",
+        "collectionTime": "2020-02-02 02:00:00",
+        "problemDescr": "问题描述……",
+        "problemReason": "原因描述……",
+        "solution": "更换开关"
+      },
+      {
+        "key": 2,
+        "room": "400V开关柜室",
+        "patrolObject": "400VⅡ段进线",
+        "patrolItem": "就地投入",
+        "patrolStandard": "异常",
+        "patrolValue": "-",
+        "cios": "-",
+        "result": "正常",
+        "collectionTime": "2020-02-02 02:00:00",
+        "problemDescr": "问题描述……",
+        "problemReason": "原因描述……",
+        "solution": "更换开关"
+      }
+    ]
+  },
+  "objectEvaluation": [
+    {
+      "rank": 1,
+      "professional": "变电",
+      "line": "17号线"
+    },
+    {
+      "rank": 2,
+      "professional": "变电",
+      "line": "17号线"
+    }
   ]
 }

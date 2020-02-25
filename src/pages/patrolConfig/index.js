@@ -14,12 +14,18 @@ const PatrolConfig = props => {
   const childRef = useRef();
 
   const newModal = ()=> {
+    console.log(childRef)
+    childRef.current.resetForm(); //重置表单
     setModalTitle("新增配置");
     setVisible(true);
   }
 
   const handleCancel = () => {
     setVisible(false);
+  }
+
+  const load = () => {
+    setLoading(true);
   }
 
   //删除
@@ -38,7 +44,7 @@ const PatrolConfig = props => {
         setItemValues(res.data);
         setModalTitle("编辑配置");
         setVisible(true);
-        console.log("%%%%%", childRef)
+        childRef.current.editModal();
       }
     })
   }
@@ -111,7 +117,7 @@ const PatrolConfig = props => {
         </Col>
       </Row>
       <Table columns={columns} dataSource={data} style={{marginTop:30}}/>
-      <ConfigModal visible={visible} title={modalTitle} {...{handleCancel, itemValues}} ref={childRef}/>
+      <ConfigModal visible={visible} title={modalTitle} {...{handleCancel, itemValues, load}} wrappedComponentRef={childRef}/>
     </div>
   )
 }
