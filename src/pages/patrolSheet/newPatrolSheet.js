@@ -21,7 +21,9 @@ const columns = [
   { title: '设备名称', dataIndex: 'objName', key: 'objName' },
   { title: '抽屉', dataIndex: 'drawer', key: 'drawer' },
   { title: '杂散', dataIndex: 'stray', key: 'stray' },
-  { title: '操作', key: 'operation', render: () => <span><a>编辑</a>&nbsp;&nbsp;<a>删除</a></span> },
+  { title: '操作', key: 'operation', 
+    render: () => <span><Button type="link" size={'small'}>编辑</Button>&nbsp;&nbsp;<Button type="link" size={'small'}>删除</Button></span>
+  },
 ];
 
 const data = [{
@@ -64,7 +66,7 @@ const NewPartolSheet = props => {
         title: '操作',
         dataIndex: 'operation',
         key: 'operation',
-        render: () => <span><a>编辑</a>&nbsp;&nbsp;<a>删除</a></span>
+        render: () => <span><Button type="link" size={'small'}>编辑</Button>&nbsp;&nbsp;<Button type="link" size={'small'}>删除</Button></span>
       },
     ];
 

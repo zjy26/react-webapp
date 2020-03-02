@@ -94,7 +94,9 @@ const columns = [
     dataIndex: 'objName',
     render: (text, record) => {
       return (
-        record.status ==="维护中" ? <span><label style={{color:"#ff0000"}}>维护</label>&nbsp;&nbsp;<a><Link to="/detail">{text}</Link></a></span> : <a>{text}</a>
+        record.status ==="维护中" ? 
+        <span><label style={{color:"#ff0000"}}>维护</label>&nbsp;&nbsp;<Button type="link" size={'small'}><Link to="/detail">{text}</Link></Button></span> : 
+        <Button type="link" size={'small'}>{text}</Button>
       )
     }
   },
@@ -152,7 +154,7 @@ const columns = [
     render: () => {
       return (
         <span>
-          <a>查看视频</a>
+          <Button type="link" size={'small'}>查看视频</Button>
           <Dropdown overlay={recordOption}>
             <Button>
               <Icon type="down" />

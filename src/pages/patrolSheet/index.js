@@ -54,7 +54,7 @@ const columns = [
     dataIndex: 'name',
     render: (text, record) => {
       return (
-       <a><Link to="/patrolSheetDetail">{text}</Link></a>
+        <Button type="link" size={'small'}><Link to="/patrolSheetDetail">{text}</Link></Button>
       )
     }
   },
@@ -83,7 +83,9 @@ const columns = [
     dataIndex: 'result',
     render: (text, record) => {
       return (
-       text==="异常" ? <a onClick={ ()=>{setVisible({...visible, showAbnormal:true})} }>{text}</a> : <span>{text}</span>
+       text==="异常" ?
+       <Button type="link" size={'small'} onClick={()=>{setVisible({...visible, showAbnormal:true})}}>{text}</Button>:
+       <span>{text}</span>
       )
     }
   },
@@ -101,8 +103,8 @@ const columns = [
     render: () => {
       return (
         <span>
-          <a onClick={ ()=>{setVisible({...visible, showCancel:true})} }>取消巡检</a>&nbsp;&nbsp;
-          <a>编辑巡检</a>
+          <Button type="link" size={'small'} onClick={()=>{setVisible({...visible, showCancel:true})}}>取消巡检</Button>&nbsp;&nbsp;
+          <Button type="link" size={'small'}>编辑巡检</Button>
         </span>
       )
     }

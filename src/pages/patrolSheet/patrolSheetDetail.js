@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Form, Button, Input, Row, Col, Table, Collapse } from 'antd';
+import styles from './PatrolSheet.module.scss';
 
 const formItemLayout = {
   labelCol: {
@@ -42,7 +43,7 @@ const PatrolSheetDetail = props => {
     detailData: []
   });
   const [loading, setLoading] = useState(true);
-  
+
   //获取巡检内容列表数据
   useEffect(() => {
     Axios.get('/api/patrolContentList').then(res =>{
@@ -54,6 +55,7 @@ const PatrolSheetDetail = props => {
         setLoading(true);
         console.log("列表数据加载失败")
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
 
   //获取巡检明细列表数据
@@ -67,18 +69,19 @@ const PatrolSheetDetail = props => {
         setLoading(true);
         console.log("列表数据加载失败")
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+    Axios.get('/api/patrolSheetList').then(res =>{
+      if(res.status === 200){
+        props.form.setFieldsValue(res.data[0]);
+      }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
 
-  Axios.get('/api/patrolSheetList').then(res =>{
-    if(res.status === 200){
-      props.form.setFieldsValue(res.data[0]);
-    }
-  });
-  
   return (
-    <div>
+    <div>s
       <h2 style={{textAlign: 'center', marginTop:30}}>虹桥火车站巡检单</h2>
-      <Form {...formItemLayout} type="flex" justify="space-between"  style={{width:"80%", marginLeft:"5%"}}>
+      <Form {...formItemLayout} type="flex" justify="space-between" className={styles.detailForm}>
         <Row gutter={24}>
           <Col span={12}>
             <Form.Item label="巡检单号">

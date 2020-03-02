@@ -20,7 +20,9 @@ const ImportModal = props => {
           </Upload>
         </Col>
         <Col span={6}>
-          <a style={{marginLeft:30}}>下载模板</a>
+          <Button type="link" size={'small'} style={{marginLeft:30}}>
+            下载模板
+          </Button>
         </Col>
       </Row>
     </Modal>

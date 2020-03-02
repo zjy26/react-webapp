@@ -76,7 +76,10 @@ const PatrolConfig = props => {
       dataIndex: 'option',
       render: (text, record) => {
         return (
-          <span><a onClick={()=>{editItem(record.id)}}>编辑</a>&nbsp;&nbsp;<a onClick={()=>{deleteItem(record.id)}}>删除</a></span>
+          <span>
+            <Button type="link" size={'small'} onClick={()=>{editItem(record.id)}}>编辑</Button>&nbsp;&nbsp;
+            <Button type="link" size={'small'} onClick={()=>{deleteItem(record.id)}}>删除</Button>
+          </span>
         )
       }
     }
@@ -110,7 +113,7 @@ const PatrolConfig = props => {
       <Row style={{margin:30}}>
         <Col span={12}>
           <Cascader options={lineSite} placeholder="请选择线路/站点" />,
-          <Button type="danger">搜索</Button>
+          <Button type="primary">搜索</Button>
         </Col>
         <Col span={12} style={{textAlign: "right"}}>
           <Button type="danger" onClick={newModal}>新建</Button>

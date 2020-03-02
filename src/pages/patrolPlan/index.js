@@ -34,7 +34,7 @@ const PatrolPlan = props => {
       dataIndex: 'patrolName',
       render: (text, record) => {
         return (
-          <a><Link to="/patrolPlanDetail">{text}</Link></a>
+          <Button type="link" size={'small'}><Link to="/patrolPlanDetail">{text}</Link></Button>
         )
       }
     },
@@ -77,7 +77,7 @@ const PatrolPlan = props => {
       render: (text, record) => {
         return (
           <span>
-            {record.cycle === "手动" ? <a>手动启动</a> : <span style={{color:"#cfcfcf"}}>手动启动</span>}
+            {record.cycle === "手动" ? <Button type="link" size={'small'}>手动启动</Button> : <span style={{color:"#cfcfcf"}}>手动启动</span>}
             <Dropdown overlay={recordOption}>
               <Button>
                 <Icon type="down" />

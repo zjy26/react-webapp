@@ -47,8 +47,8 @@ const AbnormalModal = props => {
       render: () => {
         return (
           <span>
-            <a>异常</a>&nbsp;&nbsp;
-            <a>正常</a>
+            <Button type="link" size={'small'}>异常</Button>&nbsp;&nbsp;
+            <Button type="link" size={'small'}>正常</Button>
           </span>
         )
       }

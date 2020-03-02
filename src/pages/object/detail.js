@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Form, Button, Input, Select, Row, Col, Tabs, Card, Table } from 'antd';
 import Axios from 'axios';
-import { Form, Button, Input, Select, Row, Col, Tabs } from 'antd';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -23,13 +23,79 @@ const Detail = props => {
     originalEdit: false
   });
   const { getFieldDecorator } = props.form;
-  const checkDetail = values => {
-    Axios.get('/api/objectList').then(res =>{
+  const [data, setData] = useState({
+    wait: [],
+    already: []
+  });
+
+  const columns = [
+    {
+      title: '编号',
+      dataIndex: 'code',
+      key: 'code'
+    },
+    {
+      title: '线路',
+      dataIndex: 'line',
+      key: 'line',
+    },
+    {
+      title: '站点',
+      dataIndex: 'site',
+      key: 'site',
+    },
+    {
+      title: '开始时间',
+      key: 'startTime',
+      dataIndex: 'startTime'
+    },
+    {
+      title: '完成时间',
+      key: 'completeTime',
+      dataIndex: 'completeTime'
+    },
+    {
+      title: '停机时长',
+      key: 'outageTime',
+      dataIndex: 'outageTime'
+    },
+    {
+      title: '处理人员',
+      key: 'dealPeople',
+      dataIndex: 'dealPeople'
+    },
+    {
+      title: '维护描述',
+      key: 'maintenanceDescr',
+      dataIndex: 'maintenanceDescr'
+    },
+    {
+      title: '处理方案',
+      key: 'dealPlan',
+      dataIndex: 'dealPlan'
+    }
+  ];
+
+  const waitCols = [];
+  waitCols.push(...columns, {
+    title: '操作',
+    key: 'option',
+    render: () => <span>
+      <Button type="link" size={'small'}>维护完成</Button>&nbsp;&nbsp;
+      <Button type="link" size={'small'}>编辑</Button>
+    </span>
+  })
+
+  useEffect(() => {
+    Axios.get('/api/maintenance').then(res =>{
       if(res.status === 200){
-        props.form.setFieldsValue(res.data[0]);
+        setData(res.data);
       }
+    }).catch((err) =>{
+        console.log("列表数据加载失败")
     });
-  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Tabs tabPosition="left" defaultActiveKey="1">
@@ -291,11 +357,55 @@ const Detail = props => {
       </TabPane>
       <TabPane tab="Tab2" key="2">
         <Tabs type="card">
-          <TabPane tab="待维护1" key="1">
-            待维护记录
+          <TabPane tab={`待维护`+ data.wait.length} key="wait">
+            {
+              data.wait.map((item, i)=>{
+                return (
+                  <Card key={item.code}>
+                    <Table rowKey="code" columns={waitCols} dataSource={data.wait[i]} pagination={false}/>
+                    <Row type="flex" justify="end">
+                      <Col span={3}>
+                        <label>负责人：</label>
+                        <label>{item[0].responsibility}</label>
+                      </Col>
+                      <Col span={5}>
+                        <label>创建时间：</label>
+                        <label>{item[0].createTime}</label>
+                      </Col>
+                      <Col span={5}>
+                        <label>更新时间：</label>
+                        <label>{item[0].updateTime}</label>
+                      </Col>
+                    </Row>
+                  </Card>
+                )
+              })
+            }
           </TabPane>
-          <TabPane tab="已维护1" key="2">
-            已维护记录
+          <TabPane tab={`已维护`+ data.already.length} key="already">
+            {
+              data.already.map((item, i)=>{
+                return (
+                  <Card key={item.code}>
+                    <Table rowKey="code" columns={columns} dataSource={data.already[i]} pagination={false} />
+                    <Row type="flex" justify="end">
+                      <Col span={3}>
+                        <label>负责人：</label>
+                        <label>{item[0].responsibility}</label>
+                      </Col>
+                      <Col span={5}>
+                        <label>创建时间：</label>
+                        <label>{item[0].createTime}</label>
+                      </Col>
+                      <Col span={5}>
+                        <label>更新时间：</label>
+                        <label>{item[0].updateTime}</label>
+                      </Col>
+                    </Row>
+                  </Card>
+                )
+              })
+            }
           </TabPane>
         </Tabs>
       </TabPane>

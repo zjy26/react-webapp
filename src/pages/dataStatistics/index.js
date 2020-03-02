@@ -154,7 +154,9 @@ const DataStatistics = props => {
       key: 'action',
       render: () => {
         return (
-          <a onClick={ ()=>{setVisible({...visible, showObj:true})} }>查看详情</a>
+          <Button type="link" size={'small'}  onClick={()=>{setVisible({...visible, showObj:true})}}>
+            查看详情
+          </Button>
         )
       }
     }
@@ -212,7 +214,9 @@ const DataStatistics = props => {
       key: 'action',
       render: () => {
         return (
-          <a onClick={ ()=>{setVisible({...visible, showPatrol:true})} }>查看详情</a>
+          <Button type="link" size={'small'}  onClick={()=>{setVisible({...visible, showPatrol:true})}}>
+            查看详情
+          </Button>
         )
       }
     }

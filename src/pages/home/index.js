@@ -1,21 +1,8 @@
 import React, { useRef } from 'react';
 import { Layout, Menu, Icon, Dropdown,Form } from 'antd';
 import { Route, NavLink, Switch, Redirect } from 'react-router-dom';
-import ObjectEvaluation from '../objectEvaluation';
-import Application from '../application/index';
-import ObjectModule from '../object/index';
-import Detail from '../object/detail';
-import PatrolPlan from '../patrolPlan/index';
-import PatrolSheet from '../patrolSheet/index';
-import PatrolConfig from '../patrolConfig/index';
-import DataStatistics from '../dataStatistics/index';
-import PatrolPlanDetail from '../patrolPlan/patrolPlan';
-import NewPatrolSheet from '../patrolSheet/newPatrolSheet';
-import PatrolSheetDetail from '../patrolSheet/patrolSheetDetail';
-import Setting from './setting';
-import View from './view';
+import MenuRoutes from '../../routes/index';
 import EditPassword from './editPassword';
-import Demo from '../demo/index';
 import '../../styles/header.css';
 import {connect} from 'react-redux';
 
@@ -66,8 +53,6 @@ const Index =(props)=> {
             <Menu.Item key="patrolSheet"><NavLink to="/patrolSheet">巡检单</NavLink></Menu.Item>
             <Menu.Item key="patrolConfig"><NavLink to="/patrolConfig">巡检配置</NavLink></Menu.Item>
             <Menu.Item key="dataStatistics"><NavLink to="/dataStatistics">数据统计</NavLink></Menu.Item>
-            <Menu.Item key="objectEvaluation"><NavLink to="/objectEvaluation">设备评价</NavLink></Menu.Item>
-            <Menu.Item key="demo"><NavLink to="/demo">Demo</NavLink></Menu.Item>
             <Menu.Item key="user" style={{float: 'right'}}>
               <Dropdown overlay={menu} trigger={['click']}>
                <span>
@@ -79,20 +64,18 @@ const Index =(props)=> {
         </Header>
         <Content>
           <Switch>
-            <Route path="/home" exact component= {View}></Route>
-            <Route path="/applications" component= {Application}></Route>
-            <Route path="/demo" component= {Demo}></Route>
-            <Route path="/objects" component= {ObjectModule}></Route>
-            <Route path="/setting" component= {Setting}></Route>
-            <Route path="/detail" component= {Detail}></Route>
-            <Route path="/patrolPlan" component= {PatrolPlan}></Route>
-            <Route path="/patrolSheet" component= {PatrolSheet}></Route>
-            <Route path="/patrolConfig" component= {PatrolConfig}></Route>
-            <Route path="/dataStatistics" component= {DataStatistics}></Route>
-            <Route path="/patrolPlanDetail" component= {PatrolPlanDetail}></Route>
-            <Route path="/newPatrolSheet" component= {NewPatrolSheet}></Route>
-            <Route path="/patrolSheetDetail" component= {PatrolSheetDetail}></Route>
-            <Route path="/objectEvaluation" component= {ObjectEvaluation}></Route>
+            {
+              MenuRoutes.map((item)=> {
+                return (
+                  <Route
+                    key={item.path}
+                    path={item.path}
+                    exact={item.exact}
+                    component={item.component}
+                  />
+                )
+              })
+            }
             <Redirect to='/home' />
           </Switch>
         </Content>
