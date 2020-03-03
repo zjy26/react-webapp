@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Axios from 'axios';
-import { Row, Col, Button, Cascader, Table } from 'antd';
+import { Row, Col, Button, Cascader, Table, Modal } from 'antd';
 import ConfigModal from './configModal';
 
 const PatrolConfig = props => {
@@ -14,7 +14,6 @@ const PatrolConfig = props => {
   const childRef = useRef();
 
   const newModal = ()=> {
-    console.log(childRef)
     childRef.current.resetForm(); //重置表单
     setModalTitle("新增配置");
     setVisible(true);
@@ -30,10 +29,21 @@ const PatrolConfig = props => {
 
   //删除
   const deleteItem = (id)=>{
-    Axios.delete('/api/patrolConfigList/'+id)
-    .then((res) =>{
-      setLoading(true);
-    })
+    Modal.confirm({
+      title: '确认提示',
+      content: '是否确认修改？',
+      okText: '确认',
+      okType: 'danger',
+      cancelText: '取消',
+      onOk: ()=> {
+        Axios.delete('/api/patrolConfigList/'+id)
+        .then((res) =>{
+          setLoading(true);
+        })
+      },
+      onCancel() {
+      },
+    });
   }
 
   //编辑
@@ -119,7 +129,7 @@ const PatrolConfig = props => {
           <Button type="danger" onClick={newModal}>新建</Button>
         </Col>
       </Row>
-      <Table columns={columns} dataSource={data} style={{marginTop:30}}/>
+      <Table rowKey="id" columns={columns} dataSource={data} style={{marginTop:30}}/>
       <ConfigModal visible={visible} title={modalTitle} {...{handleCancel, itemValues, load}} wrappedComponentRef={childRef}/>
     </div>
   )

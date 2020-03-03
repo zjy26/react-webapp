@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
 import Axios from 'axios';
 import { Row, Col, Form, Input, Select, Button, Cascader, DatePicker, Table, Tag, Menu, Dropdown, Icon } from 'antd';
+import DetailModal from './detailModal';
+import AddModal from './addModal';
 import CancelModal from './cancelModal';
 import AbnormalModal from './abnormalModal';
+import ImportModal from '../common/importModal';
+import AuditModal from '../common/auditModal';
 
 const { Option } = Select;
 const brands = [];
@@ -16,6 +19,7 @@ const PatrolSheet = props => {
   const { getFieldDecorator } = props.form;
   const [lineSite, setLineSite] =  useState([]);  //线路站点
   const [data, setData] = useState([]);  //列表数据
+  const [itemValues, setItemValues] = useState([]);  //详情数据
   const [tagChecked, setTagChecked] = useState({  //筛选标签选择状态
     all: true,
     wait: true,
@@ -25,91 +29,117 @@ const PatrolSheet = props => {
     close: true
   });
   const [visible, setVisible] = useState({  //弹窗
+    showDetail: false,
+    showAdd: false,
     showCancel: false,
-    showAbnormal: false
+    showAbnormal: false,
+    showImport: false,
+    showAudit: false
   });
   const [loading, setLoading] = useState(true);
+  const childRef = useRef();
 
   //关闭弹窗
   const handleCancel = () => {
     setVisible({
+      showDetail: false,
+      showAdd: false,
       showCancel: false,
-      showAbnormal: false
+      showAbnormal: false,
+      showImport: false,
+      showAudit: false
     });
+  }
+
+  //查看详情
+  const checkDetail = (id)=>{
+    Axios.get('/api/patrolSheetList/'+id)
+    .then((res) =>{
+      if(res.status === 200){
+        setItemValues(res.data);
+        setVisible({...visible, showDetail:true});
+        childRef.current.check();
+      }
+    })
+  }
+
+  //新建
+  const newModal = () => {
+    setVisible({...visible, showAdd: true});
   }
 
   //更多功能按钮
   const menu = (
     <Menu>
-      <Menu.Item key="import">信息导入</Menu.Item>
+      <Menu.Item key="import" onClick={ ()=>{setVisible({...visible, showImport:true})} }>信息导入</Menu.Item>
       <Menu.Item key="download">下载</Menu.Item>
-      <Menu.Item key="audit">审计</Menu.Item>
+      <Menu.Item key="audit" onClick={ ()=>{setVisible({...visible, showAudit:true})} }>审计</Menu.Item>
     </Menu>
   );
 
   //列表条目
-const columns = [
-  {
-    title: '名称',
-    dataIndex: 'name',
-    render: (text, record) => {
-      return (
-        <Button type="link" size={'small'}><Link to="/patrolSheetDetail">{text}</Link></Button>
-      )
+  const columns = [
+    {
+      title: '名称',
+      dataIndex: 'name',
+      render: (text, record) => {
+        return (
+          <Button type="link" size={'small'} onClick={()=>{checkDetail(record.id)}}>{text}</Button>
+        )
+      }
+    },
+    {
+      title: '线路',
+      dataIndex: 'line',
+    },
+    {
+      title: '站点',
+      dataIndex: 'site',
+    },
+    {
+      title: '负责人',
+      dataIndex: 'patrolPeople',
+    },
+    {
+      title: '巡检时间',
+      dataIndex: 'patrolTime',
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+    },
+    {
+      title: '巡检结果',
+      dataIndex: 'result',
+      render: (text, record) => {
+        return (
+        text==="异常" ?
+        <Button type="link" size={'small'} onClick={()=>{setVisible({...visible, showAbnormal:true})}}>{text}</Button>:
+        <span>{text}</span>
+        )
+      }
+    },
+    {
+      title: '人工确定',
+      dataIndex: 'handleConfirm',
+    },
+    {
+      title: '取消原因',
+      dataIndex: 'CancelReason',
+    },
+    {
+      title: '操作',
+      dataIndex: 'option',
+      render: () => {
+        return (
+          <span>
+            <Button type="link" size={'small'} onClick={()=>{setVisible({...visible, showCancel:true})}}>取消巡检</Button>&nbsp;&nbsp;
+            <Button type="link" size={'small'}>编辑巡检</Button>
+          </span>
+        )
+      }
     }
-  },
-  {
-    title: '线路',
-    dataIndex: 'line',
-  },
-  {
-    title: '站点',
-    dataIndex: 'site',
-  },
-  {
-    title: '负责人',
-    dataIndex: 'patrolPeople',
-  },
-  {
-    title: '巡检时间',
-    dataIndex: 'patrolTime',
-  },
-  {
-    title: '状态',
-    dataIndex: 'status',
-  },
-  {
-    title: '巡检结果',
-    dataIndex: 'result',
-    render: (text, record) => {
-      return (
-       text==="异常" ?
-       <Button type="link" size={'small'} onClick={()=>{setVisible({...visible, showAbnormal:true})}}>{text}</Button>:
-       <span>{text}</span>
-      )
-    }
-  },
-  {
-    title: '人工确定',
-    dataIndex: 'handleConfirm',
-  },
-  {
-    title: '取消原因',
-    dataIndex: 'CancelReason',
-  },
-  {
-    title: '操作',
-    dataIndex: 'option',
-    render: () => {
-      return (
-        <span>
-          <Button type="link" size={'small'} onClick={()=>{setVisible({...visible, showCancel:true})}}>取消巡检</Button>&nbsp;&nbsp;
-          <Button type="link" size={'small'}>编辑巡检</Button>
-        </span>
-      )
-    }
-  }
-];
+  ];
 
   //获取线路站点
   useEffect(() => {
@@ -196,7 +226,7 @@ const columns = [
             <CheckableTag checked={tagChecked.close} onChange={(checked)=>{setTagChecked({...tagChecked, all: false, close: checked})}}>已关闭</CheckableTag>
           </Col>
           <Col span={2}>
-            <Button type="danger"><Link to="/newPatrolSheet">新建</Link></Button>
+            <Button type="danger" onClick={newModal}>新建</Button>
             </Col>
             <Col span={3}>
             <Dropdown overlay={menu}>
@@ -207,9 +237,13 @@ const columns = [
       </div>
 
       <Table columns={columns} dataSource={data} scroll={{ x: 1600 }} pagination={false}/>
-
+      
+      <DetailModal visible={visible.showDetail} {...{itemValues, handleCancel}} wrappedComponentRef={childRef}/>
+      <AddModal visible={visible.showAdd} {...{handleCancel}} />
       <CancelModal visible={visible.showCancel} {...{handleCancel}}/>
       <AbnormalModal visible={visible.showAbnormal} {...{handleCancel}}/>
+      <ImportModal visible={visible.showImport} {...{handleCancel}}/>
+      <AuditModal visible={visible.showAudit} {...{handleCancel}}/>
     </div>
   )
 }

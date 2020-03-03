@@ -38,6 +38,7 @@
   ],
   "objectList": [
     {
+      "id": 1,
       "key": 1,
       "objName": "UPS配电柜1",
       "number": "1752000",
@@ -68,6 +69,7 @@
       "createTime": "2020-01-01",
       "updateTime": "2020-01-01"
     }, {
+      "id": 2,
       "key": 2,
       "objName": "UPS配电柜2",
       "number": "1752002",
@@ -84,6 +86,7 @@
       "status":"空闲中",
       "opton":"查看视频"
     }, {
+      "id": 3,
       "key": 3,
       "objName": "UPS配电柜3",
       "number": "1752003",
@@ -134,6 +137,7 @@
   ],
   "patrolPlanList": [
     {
+      "id": 1,
       "key": 1,
       "patrolName": "虹桥火车站每日巡检1",
       "line": "17号线",
@@ -147,6 +151,7 @@
       "opton":"查看视频"
     },
     {
+      "id": 2,
       "key": 2,
       "patrolName": "虹桥火车站每日巡检2",
       "line": "17号线",
@@ -160,6 +165,7 @@
       "opton":"查看视频"
     },
     {
+      "id": 3,
       "key": 3,
       "patrolName": "虹桥火车站每日巡检3",
       "line": "17号线",
@@ -195,6 +201,7 @@
   ],
   "patrolSheetList": [
     {
+      "id": 1,
       "key": 1,
       "name":"虹桥火车站定巡检",
       "line": "17号线",
@@ -210,6 +217,7 @@
       "patrolName": "111"
     },
     {
+      "id": 2,
       "key": 2,
       "name":"虹桥火车站定巡检",
       "line": "17号线",
@@ -254,44 +262,53 @@
       "conclusion": "异常"
     }
   ],
-  "patrolContentList": [
-    {
-      "key": 1,
-      "object": "1号变压器",
-      "totalNum": "10",
-      "normalNum": 0,
-      "abnormalNum": 1,
-      "normalRate": 0,
-      "abnormalRate": "10%"
-    },
-    {
-      "key": 2,
-      "object": "2号变压器",
-      "totalNum": "10",
-      "normalNum": 0,
-      "abnormalNum": 1,
-      "normalRate": 0,
-      "abnormalRate": "10%"
-    }
-  ],
-  "patrolDetailList": [
-    {
-      "project": "开关",
-      "standard": "正常",
-      "value": "-",
-      "cios": "-",
-      "result":"正常",
-      "time": "2020-01-11 10:00:00"
-    },
-    {
-      "project": "开关2",
-      "standard": "正常",
-      "value": "-",
-      "cios": "-",
-      "result":"正常",
-      "time": "2020-01-11 10:00:00"
-    }
-  ],
+  "patrolDetailList": {
+    "detail": [
+      {
+        "code": 1,
+        "key": 1,
+        "project": "开关",
+        "standard": "正常",
+        "value": "-",
+        "cios": "-",
+        "result":"正常",
+        "time": "2020-01-11 10:00:00"
+      },
+      {
+        "code": 2,
+        "key": 2,
+        "project": "开关2",
+        "standard": "正常",
+        "value": "-",
+        "cios": "-",
+        "result":"正常",
+        "time": "2020-01-11 10:00:00"
+      }
+    ],
+    "content": [
+      {
+        "code": 1,
+        "key": 1,
+        "object": "1号变压器",
+        "totalNum": "10",
+        "normalNum": 0,
+        "abnormalNum": 1,
+        "normalRate": 0,
+        "abnormalRate": "10%"
+      },
+      {
+        "code": 2,
+        "key": 2,
+        "object": "2号变压器",
+        "totalNum": "10",
+        "normalNum": 0,
+        "abnormalNum": 1,
+        "normalRate": 0,
+        "abnormalRate": "10%"
+      }
+    ]
+  },
+
   "objStatisticsTable": {
     "data": [
       {
@@ -545,14 +562,92 @@
   },
   "objectEvaluation": [
     {
-      "rank": 1,
+      "code": 1,
       "professional": "变电",
       "line": "17号线"
     },
     {
-      "rank": 2,
+      "code": 2,
       "professional": "变电",
       "line": "17号线"
     }
-  ]
+  ],
+  "maintenance": {
+    "wait": [
+      [{
+        "key": 1,
+        "code": 10,
+        "line": "17号线",
+        "site": "虹桥火车站",
+        "startTime": "2019-11-12 9:00",
+        "completeTime": "2020-01-12 9:00",
+        "outageTime": "24h",
+        "dealPeople": "张三",
+        "maintenanceDescr": "维护描述……",
+        "dealPlan": "处理方案……",
+        "responsibility": "张三",
+        "createTime": "2019-02-02 12:00",
+        "updateTime": "2020-02-02 10:00"
+      }], [{
+        "key": 2,
+        "code": 11,
+        "line": "17号线",
+        "site": "虹桥火车站",
+        "startTime": "2019-11-12 9:00",
+        "completeTime": "2020-01-12 9:00",
+        "outageTime": "24h",
+        "dealPeople": "张三",
+        "maintenanceDescr": "维护描述……",
+        "dealPlan": "处理方案……",
+        "responsibility": "张三",
+        "createTime": "2019-02-02 12:00",
+        "updateTime": "2020-02-02 10:00"
+      }], [{
+        "key": 3,
+        "code": 12,
+        "line": "17号线",
+        "site": "虹桥火车站",
+        "startTime": "2019-11-12 9:00",
+        "completeTime": "2020-01-12 9:00",
+        "outageTime": "24h",
+        "dealPeople": "张三",
+        "maintenanceDescr": "维护描述……",
+        "dealPlan": "处理方案……",
+        "responsibility": "张三",
+        "createTime": "2019-02-02 12:00",
+        "updateTime": "2020-02-02 10:00"
+      }]
+    ],
+    "already": [
+      [{
+        "key": 1,
+        "code": 12321,
+        "line": "11号线",
+        "site": "虹桥火车站",
+        "startTime": "2019-11-12 9:00",
+        "completeTime": "2020-01-12 9:00",
+        "outageTime": "24h",
+        "dealPeople": "张三",
+        "maintenanceDescr": "维护描述……",
+        "dealPlan": "处理方案……",
+        "responsibility": "张三",
+        "createTime": "2019-02-02 12:00",
+        "updateTime": "2020-02-02 10:00"
+      }], [{
+        "key": 2,
+        "code": 12322,
+        "line": "17号线",
+        "site": "控制中心",
+        "startTime": "2019-11-12 9:00",
+        "completeTime": "2020-01-12 9:00",
+        "outageTime": "24h",
+        "dealPeople": "张三",
+        "maintenanceDescr": "维护描述……",
+        "dealPlan": "处理方案……",
+        "responsibility": "张三",
+        "createTime": "2019-02-02 12:00",
+        "updateTime": "2020-02-02 10:00"
+      }]
+    ]
+  }
 }

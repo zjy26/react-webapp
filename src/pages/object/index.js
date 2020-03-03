@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
 import Axios from 'axios';
 import { Row, Col, Form, Input, Select, Button, Cascader, DatePicker, InputNumber, Table, Checkbox, Tag, Menu, Dropdown, Icon, Pagination } from 'antd';
+import DetailModal from './detailModal';
 import AddModal from './addModal';
-import ImportModal from './importModal';
-import AuditModal from './auditModal';
+import ImportModal from '../common/importModal';
+import AuditModal from '../common/auditModal';
 import AddRecordModal from './addRecordModal';
 import ChangeStatusModal from './changeStatusModal';
 import EditModal from './editModal'
@@ -27,6 +27,7 @@ const ObjectModule = props => {
   const { getFieldDecorator } = props.form;
   const [lineSite, setLineSite] =  useState([]);  //线路站点
   const [data, setData] = useState([]);  //列表数据
+  const [itemValues, setItemValues] = useState([]);  //详情数据
   const [tagChecked, setTagChecked] = useState({  //筛选标签选择状态
     all: true,
     free: true,
@@ -39,6 +40,7 @@ const ObjectModule = props => {
   const [time, setTime] = useState(null);  //维护时间间隔
   const [mile, setMile] = useState(null);  //维护里程间隔
   const [visible, setVisible] = useState({  //弹窗
+    showDetail: false,
     showAdd: false,
     showImport: false,
     showAudit: false,
@@ -47,10 +49,12 @@ const ObjectModule = props => {
     showEdit: false
   });
   const [loading, setLoading] = useState(true);
+  const childRef = useRef();
 
   //关闭弹窗
   const handleCancel = () => {
     setVisible({
+      showDetail: false,
       showAdd: false,
       showImport: false,
       showAudit: false,
@@ -69,6 +73,24 @@ const ObjectModule = props => {
     });
   }
 
+  //查看详情
+  const checkDetail = (id)=>{
+    Axios.get('/api/objectList/'+id)
+    .then((res) =>{
+      if(res.status === 200){
+        setItemValues(res.data);
+        setVisible({...visible, showDetail:true});
+        childRef.current.check();
+      }
+    })
+  }
+
+  //新建
+  const newModal = () => {
+    childRef.current.resetForm();
+    setVisible({...visible, showAdd: true});
+  }
+
   //更多功能按钮
   const menu = (
     <Menu>
@@ -78,93 +100,92 @@ const ObjectModule = props => {
     </Menu>
   );
 
-  //表格内单行记录操作按钮
-  const recordOption = (
-    <Menu>
-      <Menu.Item key="1" onClick={ ()=>{setVisible({...visible, showChangeStatus:true})} }>变更状态</Menu.Item>
-      <Menu.Item key="2"><Link to="/detail">查看详情</Link></Menu.Item>
-      <Menu.Item key="3" onClick={ ()=>{setVisible({...visible, showAddRecord:true})} }>添加维护记录</Menu.Item>
-    </Menu>
-  );
-
   //列表条目
-const columns = [
-  {
-    title: '设备名称',
-    dataIndex: 'objName',
-    render: (text, record) => {
-      return (
-        record.status ==="维护中" ? 
-        <span><label style={{color:"#ff0000"}}>维护</label>&nbsp;&nbsp;<Button type="link" size={'small'}><Link to="/detail">{text}</Link></Button></span> : 
-        <Button type="link" size={'small'}>{text}</Button>
-      )
+  const columns = [
+    {
+      title: '设备名称',
+      dataIndex: 'objName',
+      render: (text, record) => {
+        return (
+          record.status ==="维护中" ? 
+          <span><label style={{color:"#ff0000"}}>维护</label>&nbsp;&nbsp;<Button type="link" size={'small'} onClick={()=>{checkDetail(record.id)}}>{text}</Button></span> : 
+          <Button type="link" size={'small'} onClick={()=>{checkDetail(record.id)}}>{text}</Button>
+        )
+      }
+    },
+    {
+      title: '编号',
+      dataIndex: 'number',
+    },
+    {
+      title: '线路',
+      dataIndex: 'line',
+    },
+    {
+      title: '站点',
+      dataIndex: 'site',
+    },
+    {
+      title: '类型',
+      dataIndex: 'type',
+    },
+    {
+      title: '型号',
+      dataIndex: 'model',
+    },
+    {
+      title: '品牌',
+      dataIndex: 'brand',
+    },
+    {
+      title: '维护/故障数',
+      dataIndex: 'fault',
+    },
+    {
+      title: '启用日期',
+      dataIndex: 'startTime',
+    },
+    {
+      title: '停用日期',
+      dataIndex: 'endTime',
+    },
+    {
+      title: '维护时间间隔',
+      dataIndex: 'timeRange',
+    },
+    {
+      title: '维护里程间隔',
+      dataIndex: 'milesRange',
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+    },
+    {
+      title: '操作',
+      dataIndex: 'option',
+      render: (text, record) => {
+        return (
+          <span>
+            <Button type="link" size={'small'}>查看视频</Button>
+            <Dropdown 
+              overlay={
+                <Menu>
+                  <Menu.Item key="1" onClick={()=>{setVisible({...visible, showChangeStatus:true})}}>变更状态</Menu.Item>
+                  <Menu.Item key="2" onClick={()=> {checkDetail(record.id)}}>查看详情</Menu.Item>
+                  <Menu.Item key="3" onClick={()=>{setVisible({...visible, showAddRecord:true})}}>添加维护记录</Menu.Item>
+                </Menu>
+              }
+            >
+              <Button>
+                <Icon type="down" />
+              </Button>
+            </Dropdown>
+          </span>
+        )
+      }
     }
-  },
-  {
-    title: '编号',
-    dataIndex: 'number',
-  },
-  {
-    title: '线路',
-    dataIndex: 'line',
-  },
-  {
-    title: '站点',
-    dataIndex: 'site',
-  },
-  {
-    title: '类型',
-    dataIndex: 'type',
-  },
-  {
-    title: '型号',
-    dataIndex: 'model',
-  },
-  {
-    title: '品牌',
-    dataIndex: 'brand',
-  },
-  {
-    title: '维护/故障数',
-    dataIndex: 'fault',
-  },
-  {
-    title: '启用日期',
-    dataIndex: 'startTime',
-  },
-  {
-    title: '停用日期',
-    dataIndex: 'endTime',
-  },
-  {
-    title: '维护时间间隔',
-    dataIndex: 'timeRange',
-  },
-  {
-    title: '维护里程间隔',
-    dataIndex: 'milesRange',
-  },
-  {
-    title: '状态',
-    dataIndex: 'status',
-  },
-  {
-    title: '操作',
-    dataIndex: 'option',
-    render: () => {
-      return (
-        <span>
-          <Button type="link" size={'small'}>查看视频</Button>
-          <Dropdown overlay={recordOption}>
-            <Button>
-              <Icon type="down" />
-            </Button>
-          </Dropdown>
-        </span>
-      )
-    }
-  }
-];
+  ];
 
   //获取线路站点
   useEffect(() => {
@@ -296,7 +317,7 @@ const columns = [
             <CheckableTag checked={tagChecked.stop} onChange={(checked)=>{setTagChecked({...tagChecked, all: false, stop: checked})}}>已停用</CheckableTag>
           </Col>
           <Col span={2}>
-            <Button type="danger" onClick={ () => {setVisible({showAdd: true})} }>新建</Button>
+            <Button type="danger" onClick={newModal}>新建</Button>
             </Col>
             <Col span={3}>
             <Dropdown overlay={menu}>
@@ -318,6 +339,7 @@ const columns = [
         <Col><Pagination total={20} showSizeChanger showQuickJumper /></Col>
       </Row>
 
+      <DetailModal visible={visible.showDetail} {...{itemValues, handleCancel}} wrappedComponentRef={childRef}/>
       <AddModal visible={visible.showAdd} {...{handleOk, handleCancel}} />
       <ImportModal visible={visible.showImport} {...{handleCancel}}/>
       <AuditModal visible={visible.showAudit} {...{handleCancel}}/>

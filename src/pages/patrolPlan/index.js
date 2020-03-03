@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
 import Axios from 'axios';
 import { Row, Col, Form, Input, Select, Button, Cascader, Switch, Table, Menu, Dropdown, Icon, Pagination } from 'antd';
 import CycleModal from './cycleModal';
+import DetailModal from './detailModal';
+import ImportModal from '../common/importModal';
+import AuditModal from '../common/auditModal';
 
 const {Option} = Select;
 const PatrolPlan = props => {
@@ -10,23 +12,34 @@ const PatrolPlan = props => {
   const [lineSite, setLineSite] =  useState([]);  //线路站点
   const [data, setData] = useState([]);  //列表数据
   const [loading, setLoading] = useState(true);
+  const [itemValues, setItemValues] = useState([]);  //详情数据
   const [visible, setVisible] = useState({  //弹窗
-    showCycle: false
+    showCycle: false,
+    showDetail: false,
+    showImport: false,
+    showAudit: false
   });
+  const childRef = useRef();
+  const [modalStatus, setModalStatus] = useState("check");  //弹窗状态（查看/新建）
 
   const handleCancel = () => {
     setVisible({
-      showCycle: false
+      showCycle: false,
+      showDetail: false,
+      showImport: false,
+      showAudit: false
     });
   }
 
-  //表格内单行记录操作按钮
-  const recordOption = (
+  //更多功能按钮
+  const menu = (
     <Menu>
-      <Menu.Item key="1"><Link to="/detail">查看详情</Link></Menu.Item>
-      <Menu.Item key="2" onClick={ ()=>{setVisible({showCycle:true})} }>编辑周期</Menu.Item>
+      <Menu.Item key="import" onClick={ ()=>{setVisible({...visible, showImport:true})} }>信息导入</Menu.Item>
+      <Menu.Item key="download">下载</Menu.Item>
+      <Menu.Item key="audit" onClick={ ()=>{setVisible({...visible, showAudit:true})} }>审计</Menu.Item>
     </Menu>
   );
+
   //列表条目
   const columns = [
     {
@@ -34,7 +47,7 @@ const PatrolPlan = props => {
       dataIndex: 'patrolName',
       render: (text, record) => {
         return (
-          <Button type="link" size={'small'}><Link to="/patrolPlanDetail">{text}</Link></Button>
+          <Button type="link" size={'small'} onClick={()=>{checkDetail(record.id)}}>{text}</Button>
         )
       }
     },
@@ -77,8 +90,15 @@ const PatrolPlan = props => {
       render: (text, record) => {
         return (
           <span>
-            {record.cycle === "手动" ? <Button type="link" size={'small'}>手动启动</Button> : <span style={{color:"#cfcfcf"}}>手动启动</span>}
-            <Dropdown overlay={recordOption}>
+            <Dropdown 
+              overlay={
+                <Menu>
+                  <Menu.Item key="1" onClick={()=>{checkDetail(record.id)}}>查看详情</Menu.Item>
+                  <Menu.Item key="2" onClick={()=>{setVisible({showCycle:true})}}>编辑周期</Menu.Item>
+                  <Menu.Item key="3">手动启动</Menu.Item>
+                </Menu>
+              }
+            >
               <Button>
                 <Icon type="down" />
               </Button>
@@ -100,19 +120,39 @@ const PatrolPlan = props => {
     });
   }, []);
 
-    //获取列表数据
-    useEffect(() => {
-      Axios.get('/api/patrolPlanList').then(res =>{
-        if(res.status === 200){
-          setData(res.data);
-          setLoading(false);
-        }
-      }).catch((err) =>{
-          setLoading(true);
-          console.log("列表数据加载失败")
-      });
-    }, [loading]);
-  
+  //获取列表数据
+  useEffect(() => {
+    Axios.get('/api/patrolPlanList').then(res =>{
+      if(res.status === 200){
+        setData(res.data);
+        setLoading(false);
+      }
+    }).catch((err) =>{
+        setLoading(true);
+        console.log("列表数据加载失败")
+    });
+  }, [loading]);
+
+  //查看详情
+  const checkDetail = (id)=>{
+    setModalStatus("check");
+    Axios.get('/api/patrolPlanList/'+id)
+    .then((res) =>{
+      if(res.status === 200){
+        setItemValues(res.data);
+        setVisible({...visible, showDetail:true});
+        childRef.current.check();
+      }
+    })
+  }
+
+  //新建巡检单
+  const newPatrolPlan = ()=> {
+    setModalStatus("add");
+    childRef.current.resetForm();
+    setVisible({...visible, showDetail:true});
+  }
+
   return (
     <div>
       <Form layout="inline" style={{margin: 30}}>
@@ -158,10 +198,10 @@ const PatrolPlan = props => {
 
       <Row type="flex" justify="end">
         <Col span={2}>
-          <Button type="danger">新建</Button>
+          <Button type="danger" onClick={newPatrolPlan}>新建</Button>
           </Col>
           <Col span={3}>
-          <Dropdown>
+          <Dropdown overlay={menu}>
             <Button type="danger">更多功能<Icon type="down" /></Button>
           </Dropdown>
         </Col>
@@ -170,7 +210,10 @@ const PatrolPlan = props => {
       <Table columns={columns} dataSource={data} scroll={{ x: 1600 }} pagination={false}/>
       <Row type="flex" justify="end"><Pagination total={20} showSizeChanger showQuickJumper style={{margin:30}}/></Row>
 
+      <DetailModal visible={visible.showDetail} {...{itemValues, modalStatus, handleCancel}} wrappedComponentRef={childRef}/>
       <CycleModal visible={visible.showCycle} {...{handleCancel}}/>
+      <ImportModal visible={visible.showImport} {...{handleCancel}}/>
+      <AuditModal visible={visible.showAudit} {...{handleCancel}}/>
     </div>
   )
 }

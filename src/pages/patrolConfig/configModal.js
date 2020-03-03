@@ -66,7 +66,7 @@ const ConfigModal = (props, ref) => {
           props.handleCancel()
         }
       } else {//添加
-        Axios.post('/api/patrolConfigList',{...values, key: values.length+1}
+        Axios.post('/api/patrolConfigList',{...values, key:values.id}
         ).then((res)=>{
           props.handleCancel()
           props.load()
