@@ -45,7 +45,7 @@ const DetailModal = (props, ref) => {
   const [loading, setLoading] = useState(true);
   const [obj, setObj] = useState({});
   const modalRef = useRef();
-  
+
   useImperativeHandle(ref, () => {
     //暴露给父组件的方法
     return {
@@ -75,7 +75,7 @@ const DetailModal = (props, ref) => {
     <Modal
       closable={false}
       footer={null}
-      width={document.body.clientWidth-100}
+      width="800px"
       visible={props.visible}
       onCancel={props.handleCancel}
       itemValues = {props.itemValues}
@@ -194,8 +194,8 @@ const DetailModal = (props, ref) => {
           </Panel>
         </Collapse>
         <Row style={{margin:30}}>
-          <Col span={2} offset={10}><Button type="danger" ghost onClick={props.handleCancel}>返回</Button></Col>
-          <Col span={2}><Button type="danger" ghost>下载</Button></Col>
+          <Col span={3} offset={10}><Button type="danger" ghost onClick={props.handleCancel}>返回</Button></Col>
+          <Col span={3}><Button type="danger" ghost>下载</Button></Col>
         </Row>
       </div>
     </Modal>

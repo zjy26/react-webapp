@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useImperativeHandle, forwardRef } from 'react';
 import { Modal, Form, Button, Input, Select, Row, Col, Tabs, DatePicker, Table, Badge } from 'antd';
+import moment from "moment";
 import AddObjModal from '../common/addObjModal';
 import AddPatrolItemModal from '../common/addPatrolItemModal';
 
@@ -37,12 +38,14 @@ const data = [{
   stray: '-'
 }];
 
-const AddModal = (props) => {
+const AddModal = (props, ref) => {
   const { getFieldDecorator } = props.form;
   const [visible, setVisible] = useState({
     showAddObj: false,
     showAddPatrolItem: false
   });
+  const [obj, setObj] = useState({});
+  const modalRef = useRef();
   const handleCancel = () => {
     setVisible({
       showAddObj: false,
@@ -50,6 +53,16 @@ const AddModal = (props) => {
     });
   }
   const [activeKey, setActiveKey] = useState("1");  //设置显示tab
+
+  useImperativeHandle(ref, () => {
+    //暴露给父组件的方法
+    return {
+      edit() {
+        console.log(props.itemValues.site)
+        setObj({...props.itemValues, patrolTime:moment(props.itemValues.patrolTime, "YYYY-MM-DD")});
+      }
+    }
+  });
 
   const expandedRowRender = () => {
     const columns = [
@@ -115,6 +128,7 @@ const AddModal = (props) => {
       width={document.body.clientWidth-100}
       visible={props.visible}
       onCancel={props.handleCancel}
+      ref= {modalRef}
     >
       <div>
         <Tabs tabPosition="left"  activeKey={activeKey} onChange={(key)=>{setActiveKey(key)}}>
@@ -127,6 +141,7 @@ const AddModal = (props) => {
                 <Col span={12}>
                   <Form.Item label="巡检名称">
                     {getFieldDecorator("patrolName", {
+                      initialValue: obj.patrolName,
                       rules: [{required: true}],
                     })(<Input placeholder="请输入巡检名称" />)}
                   </Form.Item>
@@ -134,6 +149,7 @@ const AddModal = (props) => {
                 <Col span={12}>
                   <Form.Item label="站点">
                     {getFieldDecorator("site", {
+                      initialValue: obj.site,
                       rules: [{required: true}],
                     })(
                       <Select placeholder="请选择站点" >
@@ -146,6 +162,7 @@ const AddModal = (props) => {
                 <Col span={12}>
                   <Form.Item label="负责人">
                     {getFieldDecorator("patrolPeople", {
+                      initialValue: obj.patrolPeople,
                       rules: [{required: true}],
                     })(
                       <Input placeholder="请输入负责人姓名" />
@@ -155,6 +172,7 @@ const AddModal = (props) => {
                 <Col span={12}>
                   <Form.Item label="巡检时间">
                     {getFieldDecorator('patrolTime', {
+                      initialValue: obj.patrolTime,
                       rules: [{required: true}],
                     })(
                       <DatePicker />
@@ -207,4 +225,4 @@ const AddModal = (props) => {
   )
 }
 
-export default Form.create()(AddModal);
+export default Form.create()(forwardRef(AddModal));

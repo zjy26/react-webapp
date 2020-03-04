@@ -38,6 +38,7 @@ const PatrolSheet = props => {
   });
   const [loading, setLoading] = useState(true);
   const childRef = useRef();
+  const editRef = useRef();
 
   //关闭弹窗
   const handleCancel = () => {
@@ -66,6 +67,18 @@ const PatrolSheet = props => {
   //新建
   const newModal = () => {
     setVisible({...visible, showAdd: true});
+  }
+
+  //编辑巡检
+  const edit = (id)=> {
+    Axios.get('/api/patrolSheetList/'+id)
+    .then((res) =>{
+      if(res.status === 200){
+        setItemValues(res.data);
+        setVisible({...visible, showAdd: true});
+        editRef.current.edit();
+      }
+    })
   }
 
   //更多功能按钮
@@ -130,11 +143,11 @@ const PatrolSheet = props => {
     {
       title: '操作',
       dataIndex: 'option',
-      render: () => {
+      render: (text, record) => {
         return (
           <span>
             <Button type="link" size={'small'} onClick={()=>{setVisible({...visible, showCancel:true})}}>取消巡检</Button>&nbsp;&nbsp;
-            <Button type="link" size={'small'}>编辑巡检</Button>
+            <Button type="link" size={'small'} onClick={()=>{edit(record.id)}}>编辑巡检</Button>
           </span>
         )
       }
@@ -239,7 +252,7 @@ const PatrolSheet = props => {
       <Table columns={columns} dataSource={data} scroll={{ x: 1600 }} pagination={false}/>
       
       <DetailModal visible={visible.showDetail} {...{itemValues, handleCancel}} wrappedComponentRef={childRef}/>
-      <AddModal visible={visible.showAdd} {...{handleCancel}} />
+      <AddModal visible={visible.showAdd} {...{itemValues, handleCancel}} wrappedComponentRef={editRef}/>
       <CancelModal visible={visible.showCancel} {...{handleCancel}}/>
       <AbnormalModal visible={visible.showAbnormal} {...{handleCancel}}/>
       <ImportModal visible={visible.showImport} {...{handleCancel}}/>
