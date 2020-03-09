@@ -1,4 +1,4 @@
-import React, {useState, useRef, useImperativeHandle,forwardRef} from 'react';
+import React, { useState, useEffect} from 'react';
 import { Modal,Form, Input, Select } from 'antd';
 import Axios from 'axios';
 
@@ -13,25 +13,20 @@ const formItemLayout = {
   },
 };
 
-const ConfigModal = (props, ref) => {
+const ConfigModal = (props) => {
   const { getFieldDecorator, resetFields } = props.form;
   const [obj, setObj] = useState({});
-  const modalRef = useRef();
-
-  useImperativeHandle(ref, () => {
-    //暴露给父组件的方法
-    return {
-      editModal() {
-        resetFields();
-        setObj(props.itemValues);
-      },
-
-      resetForm() {
-        setObj({});
-        resetFields();
+console.log(obj)
+  if(props.visible===true) {
+    resetFields();
+    Axios.get('/api/patrolConfigList/'+props.currentId)
+    .then((res) =>{
+      if(res.status === 200){
+        setObj(res.data);
       }
-    }
-  });
+    })
+  }
+
 
   const handleSubmit = e => {
     //e.preventDefault();
@@ -43,7 +38,6 @@ const ConfigModal = (props, ref) => {
       if(errors) {
         return;
       }
-
       if(values.id) {//编辑
         if(isFieldsTouched() === true) {  //判断是否有修改
           Modal.confirm({
@@ -56,7 +50,7 @@ const ConfigModal = (props, ref) => {
               Axios.put('/api/patrolConfigList/'+values.id, {...values}
               ).then((res)=>{
                 props.handleCancel()
-                props.load()
+                props.setDirty(dirty=>dirty+1)
               })
             },
             onCancel() {
@@ -69,7 +63,7 @@ const ConfigModal = (props, ref) => {
         Axios.post('/api/patrolConfigList',{...values, key:values.id}
         ).then((res)=>{
           props.handleCancel()
-          props.load()
+          props.setDirty(dirty=>dirty+1)
         });
       }
 
@@ -80,12 +74,11 @@ const ConfigModal = (props, ref) => {
       title={props.title}
       okText="确认"
       cancelText="取消"
-      itemValues={props.itemValues}
       visible={props.visible}
       onCancel={props.handleCancel}
       onOk={handleSubmit}
-      load = {props.load}
-      ref = { modalRef }
+      currentId = {props.currentId}
+      setDirty = { props.setDirty }
     >
       <Form {...formItemLayout}>
         <Form.Item label="id" style={{display: 'none'}}>
@@ -136,4 +129,4 @@ const ConfigModal = (props, ref) => {
   )
 }
 
-export default Form.create()(forwardRef(ConfigModal));
+export default Form.create()(ConfigModal);

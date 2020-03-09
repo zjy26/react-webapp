@@ -1,21 +1,20 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect} from 'react';
 import Axios from 'axios';
 import { Row, Col, Button, Cascader, Table, Modal } from 'antd';
 import ConfigModal from './configModal';
 
 const PatrolConfig = props => {
   const [lineSite, setLineSite] =  useState([]);  //线路站点
-  const [data, setData] = useState([]);  //
-  const [itemValues, setItemValues] = useState([]);  //列表数据
+  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [visible, setVisible] = useState(false);
   const [modalTitle, setModalTitle] = useState("新增配置");
-
-  const childRef = useRef();
+  const [currentId, setCurrentId] = useState(0);
+  const [dirty, setDirty] = useState(0);
 
   const newModal = ()=> {
-    childRef.current.resetForm(); //重置表单
     setModalTitle("新增配置");
+    setCurrentId(0);
     setVisible(true);
   }
 
@@ -38,7 +37,7 @@ const PatrolConfig = props => {
       onOk: ()=> {
         Axios.delete('/api/patrolConfigList/'+id)
         .then((res) =>{
-          setLoading(true);
+          setDirty(dirty=>dirty+1);
         })
       },
       onCancel() {
@@ -48,15 +47,20 @@ const PatrolConfig = props => {
 
   //编辑
   const editItem = (id)=>{
-    Axios.get('/api/patrolConfigList/'+id)
-    .then((res) =>{
-      if(res.status === 200){
-        setItemValues(res.data);
-        setModalTitle("编辑配置");
-        setVisible(true);
-        childRef.current.editModal();
-      }
-    })
+    setCurrentId(()=>id);
+    console.log(currentId)
+    setModalTitle("编辑配置");
+    setVisible(true);
+
+    // Axios.get('/api/patrolConfigList/'+id)
+    // .then((res) =>{
+    //   if(res.status === 200){
+    //     setItemValues(res.data);
+    //     setModalTitle("编辑配置");
+    //     setVisible(true);
+    //     childRef.current.editModal();
+    //   }
+    // })
   }
 
   //列表条目
@@ -107,16 +111,16 @@ const PatrolConfig = props => {
 
   //获取列表数据
   useEffect(() => {
+    setLoading(true);
     Axios.get('/api/patrolConfigList').then(res =>{
       if(res.status === 200){
-        setData(res.data);
         setLoading(false);
+        setData(res.data);
       }
     }).catch((err) =>{
-        setLoading(true);
         console.log("列表数据加载失败")
     });
-  }, [loading]);
+  }, [dirty]);
 
   return (
     <div>
@@ -126,11 +130,11 @@ const PatrolConfig = props => {
           <Button type="primary">搜索</Button>
         </Col>
         <Col span={12} style={{textAlign: "right"}}>
-          <Button type="danger" onClick={newModal}>新建</Button>
+          <Button type="danger" onClick={()=>{newModal()}}>新建</Button>
         </Col>
       </Row>
-      <Table rowKey="id" columns={columns} dataSource={data} style={{marginTop:30}}/>
-      <ConfigModal visible={visible} title={modalTitle} {...{handleCancel, itemValues, load}} wrappedComponentRef={childRef}/>
+      <Table rowKey="id" loading={loading} columns={columns} dataSource={data} style={{marginTop:30}}/>
+      <ConfigModal visible={visible} title={modalTitle} {...{handleCancel, currentId, setDirty}}/>
     </div>
   )
 }
