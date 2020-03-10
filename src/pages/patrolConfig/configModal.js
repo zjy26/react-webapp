@@ -14,22 +14,24 @@ const formItemLayout = {
 };
 
 const ConfigModal = (props) => {
-  const { getFieldDecorator, resetFields } = props.form;
+  const { getFieldDecorator } = props.form;
   const [obj, setObj] = useState({});
-console.log(obj)
-  if(props.visible===true) {
-    resetFields();
-    Axios.get('/api/patrolConfigList/'+props.currentId)
-    .then((res) =>{
-      if(res.status === 200){
-        setObj(res.data);
-      }
-    })
-  }
 
+  useEffect(() => {
+    if(props.visible===true && props.currentId !== 0) {
+      Axios.get('/api/patrolConfigList/'+props.currentId)
+      .then((res) =>{
+        if(res.status === 200){
+          setObj(res.data);
+        }
+      })
+    } else {
+      setObj({});
+    }
+  }, [props.visible, props.currentId]);
 
   const handleSubmit = e => {
-    //e.preventDefault();
+    e.preventDefault();
     const {
       form: { validateFields, isFieldsTouched},
     } = props;
@@ -79,6 +81,7 @@ console.log(obj)
       onOk={handleSubmit}
       currentId = {props.currentId}
       setDirty = { props.setDirty }
+      location = {props.location}
     >
       <Form {...formItemLayout}>
         <Form.Item label="id" style={{display: 'none'}}>
@@ -92,8 +95,11 @@ console.log(obj)
             rules: [{required: true}],
           })(
           <Select placeholder="请选择线路">
-            <Select.Option value="1117">17号线</Select.Option>
-            <Select.Option value="1111">11号线</Select.Option>
+          {
+            props.location.line && props.location.line.map( item =>
+              <Select.Option key={item.value} value={item.value}>{item.label}</Select.Option>
+            )
+          }
           </Select>)}
         </Form.Item>
         <Form.Item label="站点">
@@ -102,8 +108,11 @@ console.log(obj)
             rules: [{required: true}],
           })(
           <Select placeholder="请选择站点">
-            <Select.Option value="虹桥火车站">虹桥火车站</Select.Option>
-            <Select.Option value="诸光路">诸光路</Select.Option>
+            {
+              props.location.site && props.location.site.map( item =>
+                <Select.Option key={item.value} value={item.value}>{item.label}</Select.Option>
+              )
+            }
           </Select>)}
         </Form.Item>
         <Form.Item label="服务器IP">

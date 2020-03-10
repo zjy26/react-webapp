@@ -2,9 +2,9 @@ import React, { useState, useEffect} from 'react';
 import Axios from 'axios';
 import { Row, Col, Button, Cascader, Table, Modal } from 'antd';
 import ConfigModal from './configModal';
+import location from '../common/location';
 
 const PatrolConfig = props => {
-  const [lineSite, setLineSite] =  useState([]);  //线路站点
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [visible, setVisible] = useState(false);
@@ -20,10 +20,6 @@ const PatrolConfig = props => {
 
   const handleCancel = () => {
     setVisible(false);
-  }
-
-  const load = () => {
-    setLoading(true);
   }
 
   //删除
@@ -48,19 +44,8 @@ const PatrolConfig = props => {
   //编辑
   const editItem = (id)=>{
     setCurrentId(()=>id);
-    console.log(currentId)
     setModalTitle("编辑配置");
     setVisible(true);
-
-    // Axios.get('/api/patrolConfigList/'+id)
-    // .then((res) =>{
-    //   if(res.status === 200){
-    //     setItemValues(res.data);
-    //     setModalTitle("编辑配置");
-    //     setVisible(true);
-    //     childRef.current.editModal();
-    //   }
-    // })
   }
 
   //列表条目
@@ -98,16 +83,6 @@ const PatrolConfig = props => {
       }
     }
   ];
-  //获取线路站点
-  useEffect(() => {
-    Axios.get('/api/lineSite').then(res =>{
-      if(res.status === 200){
-        setLineSite(res.data);
-      }
-    }).catch((err) =>{
-        console.log("线路站点数据加载失败")
-    });
-  }, []);
 
   //获取列表数据
   useEffect(() => {
@@ -126,7 +101,7 @@ const PatrolConfig = props => {
     <div>
       <Row style={{margin:30}}>
         <Col span={12}>
-          <Cascader options={lineSite} placeholder="请选择线路/站点" />,
+          <Cascader options={location.lineSite} placeholder="请选择线路/站点" />,
           <Button type="primary">搜索</Button>
         </Col>
         <Col span={12} style={{textAlign: "right"}}>
@@ -134,7 +109,7 @@ const PatrolConfig = props => {
         </Col>
       </Row>
       <Table rowKey="id" loading={loading} columns={columns} dataSource={data} style={{marginTop:30}}/>
-      <ConfigModal visible={visible} title={modalTitle} {...{handleCancel, currentId, setDirty}}/>
+      <ConfigModal visible={visible} title={modalTitle} {...{handleCancel, currentId, location, setDirty}}/>
     </div>
   )
 }
