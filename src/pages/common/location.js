@@ -6,12 +6,12 @@ Axios.get('/api/lineSite').then(res =>{
   if(res.status === 200){
     let siteArr = [];
     let lineArr = [];
-    for(let i in res.data){
+    for(var item of res.data){
       let lineObj = {};
-      lineObj["label"] = res.data[i].label;
-      lineObj["value"] = res.data[i].value;
+      lineObj["label"] = item.label;
+      lineObj["value"] = item.value;
       lineArr.push(lineObj);
-      siteArr.push(...res.data[i].children);
+      siteArr.push(...item.children);
     }
     location["lineSite"] = res.data
     location["line"] = lineArr

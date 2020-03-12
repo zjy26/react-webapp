@@ -7,11 +7,14 @@ import PatrolSheet from '../pages/patrolSheet/index';
 import PatrolConfig from '../pages/patrolConfig/index';
 import DataStatistics from '../pages/dataStatistics/index';
 
+import ShowObjDetail from '../pages/object/showObjDetail';
+
 const menuRoutes = [
   {path: "/home", exact: true, component: View},
-  {path: "/setting", exact: true, component: Setting},
+  {path: "/setting", exact: false, component: Setting},
   {path:"/applications", exact: false, component: Application},
-  {path:"/objects", exact: true, component: ObjectModule},
+  {path:"/objects", exact: false, component: ObjectModule},
+  {path:"/object-detail/:id", exact: false, component: ShowObjDetail},
   {path:"/patrolPlan", exact: false, component: PatrolPlan},
   {path:"/patrolSheet", exact: false, component: PatrolSheet},
   {path:"/PatrolConfig", exact: false, component: PatrolConfig},
