@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Axios from 'axios';
+import { Link } from 'react-router-dom';
 import { Row, Col, Form, Input, Select, Button, Cascader, DatePicker, InputNumber, Table, Checkbox, Tag, Menu, Dropdown, Icon, Pagination } from 'antd';
 import DetailModal from './detailModal';
 import AddModal from './addModal';
@@ -108,8 +109,8 @@ const ObjectModule = props => {
       render: (text, record) => {
         return (
           record.status ==="维护中" ? 
-          <span><label style={{color:"#ff0000"}}>维护</label>&nbsp;&nbsp;<Button type="link" size={'small'} onClick={()=>{checkDetail(record.id)}}>{text}</Button></span> : 
-          <Button type="link" size={'small'} onClick={()=>{checkDetail(record.id)}}>{text}</Button>
+          <Link to={"/object-detail/" + record.id}>维护{text}</Link> : 
+          <Link to={"/object-detail/" + record.id}>{text}</Link>
         )
       }
     },

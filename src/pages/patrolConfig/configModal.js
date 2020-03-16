@@ -1,4 +1,4 @@
-import React, {useState, useRef, useImperativeHandle,forwardRef} from 'react';
+import React, { useState, useEffect} from 'react';
 import { Modal,Form, Input, Select } from 'antd';
 import Axios from 'axios';
 
@@ -13,28 +13,25 @@ const formItemLayout = {
   },
 };
 
-const ConfigModal = (props, ref) => {
-  const { getFieldDecorator, resetFields } = props.form;
+const ConfigModal = (props) => {
+  const { getFieldDecorator } = props.form;
   const [obj, setObj] = useState({});
-  const modalRef = useRef();
 
-  useImperativeHandle(ref, () => {
-    //暴露给父组件的方法
-    return {
-      editModal() {
-        resetFields();
-        setObj(props.itemValues);
-      },
-
-      resetForm() {
-        setObj({});
-        resetFields();
-      }
+  useEffect(() => {
+    if(props.visible===true && props.currentId !== 0) {
+      Axios.get('/api/patrolConfigList/'+props.currentId)
+      .then((res) =>{
+        if(res.status === 200){
+          setObj(res.data);
+        }
+      })
+    } else {
+      setObj({});
     }
-  });
+  }, [props.visible, props.currentId]);
 
   const handleSubmit = e => {
-    //e.preventDefault();
+    e.preventDefault();
     const {
       form: { validateFields, isFieldsTouched},
     } = props;
@@ -43,7 +40,6 @@ const ConfigModal = (props, ref) => {
       if(errors) {
         return;
       }
-
       if(values.id) {//编辑
         if(isFieldsTouched() === true) {  //判断是否有修改
           Modal.confirm({
@@ -56,7 +52,7 @@ const ConfigModal = (props, ref) => {
               Axios.put('/api/patrolConfigList/'+values.id, {...values}
               ).then((res)=>{
                 props.handleCancel()
-                props.load()
+                props.setDirty(dirty=>dirty+1)
               })
             },
             onCancel() {
@@ -69,7 +65,7 @@ const ConfigModal = (props, ref) => {
         Axios.post('/api/patrolConfigList',{...values, key:values.id}
         ).then((res)=>{
           props.handleCancel()
-          props.load()
+          props.setDirty(dirty=>dirty+1)
         });
       }
 
@@ -80,12 +76,12 @@ const ConfigModal = (props, ref) => {
       title={props.title}
       okText="确认"
       cancelText="取消"
-      itemValues={props.itemValues}
       visible={props.visible}
       onCancel={props.handleCancel}
       onOk={handleSubmit}
-      load = {props.load}
-      ref = { modalRef }
+      currentId = {props.currentId}
+      setDirty = { props.setDirty }
+      location = {props.location}
     >
       <Form {...formItemLayout}>
         <Form.Item label="id" style={{display: 'none'}}>
@@ -99,8 +95,11 @@ const ConfigModal = (props, ref) => {
             rules: [{required: true}],
           })(
           <Select placeholder="请选择线路">
-            <Select.Option value="1117">17号线</Select.Option>
-            <Select.Option value="1111">11号线</Select.Option>
+          {
+            props.location.line && props.location.line.map( item =>
+              <Select.Option key={item.value} value={item.value}>{item.label}</Select.Option>
+            )
+          }
           </Select>)}
         </Form.Item>
         <Form.Item label="站点">
@@ -109,8 +108,11 @@ const ConfigModal = (props, ref) => {
             rules: [{required: true}],
           })(
           <Select placeholder="请选择站点">
-            <Select.Option value="虹桥火车站">虹桥火车站</Select.Option>
-            <Select.Option value="诸光路">诸光路</Select.Option>
+            {
+              props.location.site && props.location.site.map( item =>
+                <Select.Option key={item.value} value={item.value}>{item.label}</Select.Option>
+              )
+            }
           </Select>)}
         </Form.Item>
         <Form.Item label="服务器IP">
@@ -136,4 +138,4 @@ const ConfigModal = (props, ref) => {
   )
 }
 
-export default Form.create()(forwardRef(ConfigModal));
+export default Form.create()(ConfigModal);
