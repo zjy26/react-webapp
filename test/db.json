@@ -104,6 +104,295 @@
       "opton":"查看视频"
     }
   ],
+  
+  "ROBOT_OBJECT_STATUS": {
+    "l10n": true,
+    "start": 0,
+    "limit": null,
+    "fields": null,
+    "filter": null,
+    "whereClause": null,
+    "sort": null,
+    "total": 6,
+    "aggregate": {
+        "count": 6
+    },
+    "models": [
+        {
+            "descr": null,
+            "code": "01",
+            "created": 1528179373000,
+            "_displayName": {
+                "id": "空闲中",
+                "entity": "智能巡检设备状态"
+            },
+            "name": "空闲中",
+            "disabled": false,
+            "comment": null,
+            "id": 6473,
+            "priority": 1,
+            "updated": 1528179373000,
+            "entity": "ROBOT_OBJECT_STATUS"
+        },
+        {
+            "descr": null,
+            "code": "02",
+            "created": 1528179373000,
+            "_displayName": {
+                "id": "巡检中",
+                "entity": "智能巡检设备状态"
+            },
+            "name": "巡检中",
+            "disabled": false,
+            "comment": null,
+            "id": 6474,
+            "priority": 2,
+            "updated": 1528179373000,
+            "entity": "ROBOT_OBJECT_STATUS"
+        },
+        {
+            "descr": null,
+            "code": "03",
+            "created": 1528179373000,
+            "_displayName": {
+                "id": "控制中",
+                "entity": "智能巡检设备状态"
+            },
+            "name": "控制中",
+            "disabled": false,
+            "comment": null,
+            "id": 6475,
+            "priority": 3,
+            "updated": 1528179373000,
+            "entity": "ROBOT_OBJECT_STATUS"
+        },
+        {
+            "descr": null,
+            "code": "04",
+            "created": 1528179373000,
+            "_displayName": {
+                "id": "维护中",
+                "entity": "智能巡检设备状态"
+            },
+            "name": "维护中",
+            "disabled": false,
+            "comment": null,
+            "id": 6476,
+            "priority": 4,
+            "updated": 1528179373000,
+            "entity": "ROBOT_OBJECT_STATUS"
+        },
+        {
+            "descr": null,
+            "code": "05",
+            "created": 1528179373000,
+            "_displayName": {
+                "id": "故障中",
+                "entity": "智能巡检设备状态"
+            },
+            "name": "故障中",
+            "disabled": false,
+            "comment": null,
+            "id": 6477,
+            "priority": 5,
+            "updated": 1528179373000,
+            "entity": "ROBOT_OBJECT_STATUS"
+        },
+        {
+            "descr": null,
+            "code": "06",
+            "created": 1528179373000,
+            "_displayName": {
+                "id": "已停用",
+                "entity": "智能巡检设备状态"
+            },
+            "name": "已停用",
+            "disabled": false,
+            "comment": null,
+            "id": 6478,
+            "priority": 6,
+            "updated": 1528179373000,
+            "entity": "ROBOT_OBJECT_STATUS"
+        }
+    ]
+  },
+
+  "VIDEO_STREAM": {
+    "l10n": true,
+    "start": 0,
+    "limit": null,
+    "fields": null,
+    "filter": null,
+    "whereClause": null,
+    "sort": null,
+    "total": 2,
+    "aggregate": {
+        "count": 2
+    },
+    "models": [
+        {
+            "descr": null,
+            "code": "hls",
+            "created": 1528179373000,
+            "_displayName": {
+                "id": "HLS",
+                "entity": "Video Stream"
+            },
+            "name": "HLS",
+            "disabled": false,
+            "comment": null,
+            "id": 6468,
+            "priority": 1,
+            "updated": 1528179373000,
+            "entity": "VIDEO_STREAM"
+        },
+        {
+            "descr": null,
+            "code": "rtsp",
+            "created": 1528179373000,
+            "_displayName": {
+                "id": "RTSP",
+                "entity": "Video Stream"
+            },
+            "name": "RTSP",
+            "disabled": false,
+            "comment": null,
+            "id": 6469,
+            "priority": 2,
+            "updated": 1528179373000,
+            "entity": "VIDEO_STREAM"
+        }
+    ]
+  },
+
+  "ROBOT_OBJECT_TYPE": {
+    "l10n": true,
+    "start": 0,
+    "limit": null,
+    "fields": null,
+    "filter": null,
+    "whereClause": null,
+    "sort": null,
+    "total": 3,
+    "aggregate": {
+        "count": 3
+    },
+    "models": [
+        {
+            "descr": null,
+            "code": "Camera1",
+            "created": 1528179373000,
+            "_displayName": {
+                "id": "摄像机（不可识别）",
+                "entity": "智能巡检设备类型"
+            },
+            "name": "摄像机（不可识别）",
+            "disabled": false,
+            "comment": null,
+            "id": 6471,
+            "priority": 2,
+            "updated": 1528179373000,
+            "entity": "ROBOT_OBJECT_TYPE"
+        },
+        {
+            "descr": null,
+            "code": "Camera2",
+            "created": 1528179373000,
+            "_displayName": {
+                "id": "摄像机（可识别）",
+                "entity": "智能巡检设备类型"
+            },
+            "name": "摄像机（可识别）",
+            "disabled": false,
+            "comment": null,
+            "id": 6472,
+            "priority": 3,
+            "updated": 1528179373000,
+            "entity": "ROBOT_OBJECT_TYPE"
+        },
+        {
+            "descr": null,
+            "code": "Robot",
+            "created": 1528179373000,
+            "_displayName": {
+                "id": "机器人",
+                "entity": "智能巡检设备类型"
+            },
+            "name": "机器人",
+            "disabled": false,
+            "comment": null,
+            "id": 6470,
+            "priority": 1,
+            "updated": 1528179373000,
+            "entity": "ROBOT_OBJECT_TYPE"
+        }
+    ]
+  },
+
+  "brands": {
+    "l10n": true,
+    "start": 0,
+    "limit": null,
+    "fields": null,
+    "filter": null,
+    "whereClause": null,
+    "sort": null,
+    "total": 228,
+    "aggregate": {
+        "count": 228
+    },
+    "models": [
+      {
+      "descr": "3E",
+      "site": "*",
+      "code": "1000",
+      "updatedbyFullname": "申通管理员",
+      "org": "11",
+      "createdbyFullname": "申通管理员",
+      "created": 1544718747000,
+      "_displayName": {
+          "id": "3E传感器"
+      },
+      "name": "3E传感器",
+      "id": 487,
+      "demo": null,
+        "updated": 1544718747000
+      },
+      {
+        "descr": "A&T",
+        "site": "*",
+        "code": "1001",
+        "updatedbyFullname": "申通管理员",
+        "org": "11",
+        "createdbyFullname": "申通管理员",
+        "created": 1544718747000,
+        "_displayName": {
+            "id": "A&T"
+        },
+        "name": "A&T",
+        "id": 488,
+        "demo": null,
+        "updated": 1544718747000
+      },
+      {
+        "descr": "ABB",
+        "site": "*",
+        "code": "1002",
+        "updatedbyFullname": "申通管理员",
+        "org": "11",
+        "createdbyFullname": "申通管理员",
+        "created": 1544718747000,
+        "_displayName": {
+            "id": "ABB"
+        },
+        "name": "ABB",
+        "id": 489,
+        "demo": null,
+        "updated": 1544718747000
+      }
+    ]
+  },
+  
   "lineSite": [
     {
       "value": "1117",

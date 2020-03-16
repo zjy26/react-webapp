@@ -1,9 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Form, Button, Input, Select, Row, Col, Tabs, Card, Table } from 'antd';
-import Axios from 'axios';
+import React, { useState, useEffect } from 'react'
+import {Breadcrumb, Form, Button, Input, Select, Row, Col, Tabs, Card, Table, message } from 'antd'
+import { Link } from 'react-router-dom'
+import { robotObject, robotMaintain } from '../../api'
+import moment from "moment"
+import getLocation from '../common/location'
+import getEntity from '../common/entity'
+import store from '../../store'
+import AddRecordModal from './addRecordModal'
 
-const { Option } = Select;
-const { TabPane } = Tabs;
+const { TabPane } = Tabs
 const formItemLayout = {
   labelCol: {
     xs: { span: 24 },
@@ -13,20 +18,29 @@ const formItemLayout = {
     xs: { span: 24 },
     sm: { span: 16 },
   },
-};
+}
 
-const Detail = props => {
+const ObjectDetail = (props) => {
+  const [location, setLocation] = useState({})  //线路站点
+  const [entity, setEntity] = useState({})  //实体数据
   const [edit, setEdit] = useState({
     basicEdit: false,
     attributeEdit: false,
     paramEdit: false,
     originalEdit: false
-  });
-  const { getFieldDecorator } = props.form;
-  const [data, setData] = useState({
-    wait: [],
-    already: []
-  });
+  })
+  const { getFieldDecorator, validateFields, resetFields } = props.form
+  const [robotMaintainList, setRobotMaintainList] = useState({
+    isCompleteFalse: [],
+    isCompleteTrue: []
+  })
+  const [obj, setObj] = useState({})
+  const [addSingle, setAddSingle] = useState(false)
+  const [currentId, setCurrentId] = useState(0)
+
+  const [visible, setVisible] = useState({
+    showAddRecord: false
+  })
 
   const columns = [
     {
@@ -36,47 +50,49 @@ const Detail = props => {
     },
     {
       title: '线路',
-      dataIndex: 'line',
-      key: 'line',
+      dataIndex: 'siteLine',
+      key: 'siteLine',
     },
     {
       title: '站点',
-      dataIndex: 'site',
-      key: 'site',
+      dataIndex: 'siteStation',
+      key: 'siteStation',
     },
     {
       title: '开始时间',
-      key: 'startTime',
-      dataIndex: 'startTime'
+      key: 'startDate',
+      dataIndex: 'startDate',
+      render: (text, record) => moment(record.startDate).format('YYYY-MM-DD')
     },
     {
       title: '完成时间',
-      key: 'completeTime',
-      dataIndex: 'completeTime'
+      key: 'endDate',
+      dataIndex: 'endDate',
+      render: (text, record) => moment(record.endDate).format('YYYY-MM-DD')
     },
     {
       title: '停机时长',
-      key: 'outageTime',
-      dataIndex: 'outageTime'
+      key: 'stopTIme',
+      dataIndex: 'stopTIme'
     },
     {
       title: '处理人员',
-      key: 'dealPeople',
-      dataIndex: 'dealPeople'
+      key: 'executor',
+      dataIndex: 'executor'
     },
     {
       title: '维护描述',
-      key: 'maintenanceDescr',
-      dataIndex: 'maintenanceDescr'
+      key: 'maintenance',
+      dataIndex: 'maintenance'
     },
     {
       title: '处理方案',
-      key: 'dealPlan',
-      dataIndex: 'dealPlan'
+      key: 'dispose',
+      dataIndex: 'dispose'
     }
-  ];
+  ]
 
-  const waitCols = [];
+  const waitCols = []
   waitCols.push(...columns, {
     title: '操作',
     key: 'option',
@@ -86,331 +102,450 @@ const Detail = props => {
     </span>
   })
 
-  useEffect(() => {
-    Axios.get('/api/maintenance').then(res =>{
-      if(res.status === 200){
-        setData(res.data);
-      }
-    }).catch((err) =>{
-        console.log("列表数据加载失败")
+  //关闭弹窗
+  const handleCancel = () => {
+    setVisible({
+      showAddRecord: false
     });
+  }
+
+  useEffect(() => {
+
+    getLocation.then(result =>{
+      setLocation(result)
+    })
+
+    getEntity.then(result =>{
+      setEntity(result)
+    })
+
+    //查看详情
+    robotObject.robotObjectDetail(props.match.params.id).then((res) =>{
+      if(res){
+        setObj({
+          ...res,
+          brand: res.brand.id,
+          siteLine: res.site.slice(0, 4)
+        })
+      }
+    })
+
+
+    //待维护记录
+    robotMaintain.robotMaintainList("false", props.match.params.id)
+    .then((res)=>{
+      setRobotMaintainList({
+        ...robotMaintainList,
+        isCompleteFalse: res.models
+      })
+    }).catch((err) =>{
+        console.log("待维护记录获取失败")
+    })
+
+    //已维护记录
+    robotMaintain.robotMaintainList("true", props.match.params.id)
+    .then((res)=>{
+      setRobotMaintainList({
+        ...robotMaintainList,
+        isCompleteTrue: res.models
+      })
+    }).catch((err) =>{
+        console.log("已维护记录获取失败")
+    })
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [props.match.params.id]);
+
+  //基本信息编辑保存
+  const save = ()=> {
+    validateFields((err, values) => {
+      if (!err) {
+        let {siteLine, ...data} = values
+        let params = {
+          ...data,
+          ...obj,
+          volume:values.volume.substring(0, values.volume.length - 2),
+          weight:values.weight.substring(0, values.weight.length - 2),
+          runningTime:values.runningTime.substring(0, values.runningTime.length - 2),
+          runningMileage:values.runningMileage.substring(0, values.runningMileage.length - 2),
+        }
+        robotObject.robotObjectEdit(props.match.params.id, params)
+        .then((res)=>{
+          message.success("保存成功")
+          setEdit({...edit, basicEdit:false})
+        }).catch((err) =>{
+          message.error("保存失败")
+        })
+      }
+    })
+  }
+
+  //取消编辑
+  const cancel = () => {
+    setEdit({...edit, basicEdit:false})
+    resetFields()
+  }
+
+  const addMaintain = ()=>{
+    setAddSingle(true)
+    setVisible({...visible, showAddRecord:true})
+  }
 
   return (
-    <Tabs tabPosition="left" defaultActiveKey="1">
-      <TabPane tab="Tab1" key="1">
-        <Form {...formItemLayout} >
-          <Row gutter={24}>
-            <Col span={24}>
-              <label style={{fontSize:18, marginRight:20}}>基本信息</label>
+    <div>
+      <Breadcrumb style={{margin: 30, fontSize: 20}}>
+        <Breadcrumb.Item><Link to="/patrol-object">设备管理</Link></Breadcrumb.Item>
+        <Breadcrumb.Item>查看详情</Breadcrumb.Item>
+      </Breadcrumb>
+      <Tabs tabPosition="left" defaultActiveKey="bascInfo" tabBarExtraContent={<Button onClick={addMaintain}>新增</Button>}>
+        <TabPane tab="基本信息" key="bascInfo">
+          <Form {...formItemLayout} >
+            <Row gutter={24}>
+              <Col span={24}>
+                <label style={{fontSize:18, marginRight:20}}>基本信息</label>
+                {
+                  edit.basicEdit === false ?
+                  <Button type="primary" ghost onClick={()=>{ setEdit({...edit, basicEdit:true}) }}>编辑</Button> :
+                  <span>
+                    <Button type="primary" ghost onClick={save}>保存</Button>
+                    <Button type="primary" ghost onClick={cancel}>取消</Button>
+                  </span>
+                }
+              </Col>
+              <Col span={12}>
+                <Form.Item label="设备名称">
+                  {getFieldDecorator("name", {
+                    initialValue: obj.name,
+                    rules: [{required: true}],
+                  })(<Input placeholder="请输入设备名称" />)}
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label="线路">
+                  {getFieldDecorator("siteLine", {
+                    initialValue: obj.siteLine,
+                    rules: [{required: true}],
+                  })(
+                    <Select placeholder="请选择线路">
+                      {location.line && location.line.map(item => (
+                        <Select.Option key={item.value} value={item.value}>
+                          {item.label}
+                        </Select.Option>
+                      ))}
+                  </Select>)}
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label="站点">
+                  {getFieldDecorator("site", {
+                    initialValue: obj.site,
+                    rules: [{required: true}],
+                  })(
+                    <Select placeholder="请选择站点">
+                      {location.site && location.site.map(item => (
+                        <Select.Option key={item.value} value={item.value}>
+                          {item.label}
+                        </Select.Option>
+                      ))}
+                    </Select>)}
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label="物理位置">
+                  {getFieldDecorator("robotPatrolLoc", {
+                    initialValue: obj.robotPatrolLoc,
+                    rules: [{required: true}],
+                  })(
+                    <Input placeholder="请输入物理位置" />
+                  )}
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label="类型">
+                  {getFieldDecorator("type", {
+                    initialValue: obj.type,
+                    rules: [{required: true}],
+                  })(
+                    <Select placeholder="请选择类型">
+                      {entity.ROBOT_OBJECT_TYPE && entity.ROBOT_OBJECT_TYPE.map(item => (
+                        <Select.Option key={item.code} value={item.code}>
+                          {item.name}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  )}
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label="品牌">
+                  {getFieldDecorator("brand", {
+                    initialValue: obj.brand,
+                    rules: [{required: true}],
+                  })(
+                    <Select placeholder="请选择品牌">
+                      {store.getState().brands && store.getState().brands.map(item => (
+                        <Select.Option key={item.id} value={item.id}>
+                          {item.name}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  )}
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label="供应商">
+                  {getFieldDecorator("supplier", {
+                    initialValue: obj.supplier,
+                  })(
+                    <Input placeholder="请输入供应商" />
+                  )}
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label="制造商">
+                  {getFieldDecorator("manufacturer", {
+                    initialValue: obj.manufacturer,
+                  })(
+                    <Input placeholder="请输入制造商" />
+                  )}
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label="型号">
+                  {getFieldDecorator("modelNumber", {
+                    initialValue: obj.modelNumber,
+                  })(
+                    <Input placeholder="请输入型号" />
+                  )}
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label="设备描述">
+                  {getFieldDecorator("desc", {
+                    initialValue: obj.desc,
+                  })(
+                    <Input.TextArea placeholder="请输入设备描述" />
+                  )}
+                </Form.Item>
+              </Col>
               {
                 edit.basicEdit === false ?
-                <Button type="primary" ghost onClick={()=>{ setEdit({...edit, basicEdit:true}) }}>编辑</Button> :
-                <span>
-                  <Button type="primary" ghost>保存</Button>
-                  <Button type="primary" ghost onClick={()=>{ setEdit({...edit, basicEdit:false}) }}>取消</Button>
-                </span>
+                <div>
+                  <Col span={12}>
+                    <Form.Item label="故障描述">
+                      {getFieldDecorator("faultDesc", {
+                        initialValue: obj.faultDesc,
+                      })(
+                        <Input.TextArea placeholder="请输入故障描述" />
+                      )}
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item label="启用时间">
+                      {getFieldDecorator("startDate", {
+                        initialValue: moment(obj.startDate).format('YYYY-MM-DD'),
+                      })(
+                        <Input placeholder="请输入启用时间" />
+                      )}
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item label="停用时间">
+                      {getFieldDecorator("endDate", {
+                        initialValue: moment(obj.endDate).format('YYYY-MM-DD'),
+                      })(
+                        <Input placeholder="请输入停用时间" />
+                      )}
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item label="创建时间">
+                      {getFieldDecorator("created", {
+                        initialValue: moment(obj.created).format('YYYY-MM-DD'),
+                      })(
+                        <Input placeholder="请输入启用时间" />
+                      )}
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item label="更新时间">
+                      {getFieldDecorator("updated", {
+                        initialValue: moment(obj.updated).format('YYYY-MM-DD'),
+                      })(
+                        <Input placeholder="请输入停用时间" />
+                      )}
+                    </Form.Item>
+                  </Col>
+                </div> : null
               }
-            </Col>
-            <Col span={12}>
-              <Form.Item label="设备名称">
-                {getFieldDecorator("objName", {
-                  rules: [{required: true}],
-                })(<Input placeholder="请输入设备名称" />)}
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label="线路">
-                {getFieldDecorator("line", {
-                  rules: [{required: true}],
-                })(
-                  <Select placeholder="请选择线路" >
-                    <Option value="1117">17号线</Option>
-                    <Option value="1111">11号线</Option>
-                  </Select>
-                )}
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label="站点">
-                {getFieldDecorator("site", {
-                  rules: [{required: true}],
-                })(
-                  <Select placeholder="请选择站点" >
-                    <Option value="1">诸光路</Option>
-                    <Option value="2">控制中心</Option>
-                  </Select>
-                )}
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label="物理位置">
-                {getFieldDecorator("location", {
-                  rules: [{required: true}],
-                })(
-                  <Select placeholder="请选择物理位置" >
-                    <Option value="1">35kv开关柜</Option>
-                  </Select>
-                )}
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label="类型">
-                {getFieldDecorator("type", {
-                  rules: [{required: true}],
-                })(
-                  <Select placeholder="请选择类型" >
-                    <Option value="1">机器人</Option>
-                    <Option value="2">摄像机(可识别)</Option>
-                    <Option value="3">摄像机(不可识别)</Option>
-                  </Select>
-                )}
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label="品牌">
-                {getFieldDecorator("brand", {
-                  rules: [{required: true}],
-                })(
-                  <Select placeholder="请选择品牌" >
-                    <Option value="1">西门子</Option>
-                  </Select>
-                )}
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label="供应商">
-                {getFieldDecorator("supplier")(
-                  <Input placeholder="请输入供应商" />
-                )}
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label="制造商">
-                {getFieldDecorator("manufacturers")(
-                  <Input placeholder="请输入制造商" />
-                )}
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label="型号">
-                {getFieldDecorator("model")(
-                  <Input placeholder="请输入型号" />
-                )}
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label="设备描述">
-                {getFieldDecorator("objDescr")(
-                  <Input.TextArea placeholder="请输入设备描述" />
-                )}
-              </Form.Item>
-            </Col>
-            {
-              edit.basicEdit === false ?
-              <div>
-                <Col span={12}>
-                  <Form.Item label="故障描述">
-                    {getFieldDecorator("faultDescr")(
-                      <Input.TextArea placeholder="请输入故障描述" />
-                    )}
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item label="启用时间">
-                    {getFieldDecorator("startTime")(
-                      <Input placeholder="请输入启用时间" />
-                    )}
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item label="停用时间">
-                    {getFieldDecorator("endTime")(
-                      <Input placeholder="请输入停用时间" />
-                    )}
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item label="创建时间">
-                    {getFieldDecorator("createTime")(
-                      <Input placeholder="请输入启用时间" />
-                    )}
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item label="更新时间">
-                    {getFieldDecorator("updateTime")(
-                      <Input placeholder="请输入停用时间" />
-                    )}
-                  </Form.Item>
-                </Col>
-              </div> : null
-            }
 
-            <Col span={24}>
-              <label style={{fontSize:18, marginRight:20}}>参数信息</label>
-              {
-                edit.paramEdit === false ?
-                <Button type="primary" ghost onClick={()=>{ setEdit({...edit, paramEdit:true}) }}>编辑</Button> :
-                <span>
-                  <Button type="primary" ghost>保存</Button>
-                  <Button type="primary" ghost onClick={()=>{ setEdit({...edit, paramEdit:false}) }}>取消</Button>
-                </span>
-              }
-            </Col>
-            <Col span={12}>
-              <Form.Item label="体积(宽*深*高)">
-                {getFieldDecorator("volume")(
-                  <Row>
-                    <Col span={20}><Input placeholder="请输入尺寸" /></Col>
-                    <Col span={4}>mm</Col>
-                  </Row>
-                )}
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label="总重">
-                {getFieldDecorator("weight")(
-                  <Row>
-                    <Col span={20}><Input placeholder="请输入总重" /></Col>
-                    <Col span={4}>kg</Col>
-                  </Row>
-                )}
-              </Form.Item>
-            </Col>
+              <Col span={24}>
+                <label style={{fontSize:18, marginRight:20}}>参数信息</label>
+                {
+                  edit.paramEdit === false ?
+                  <Button type="primary" ghost onClick={()=>{ setEdit({...edit, paramEdit:true}) }}>编辑</Button> :
+                  <span>
+                    <Button type="primary" ghost onClick={save}>保存</Button>
+                    <Button type="primary" ghost onClick={cancel}>取消</Button>
+                  </span>
+                }
+              </Col>
+              <Col span={12}>
+                <Form.Item label="体积(宽*深*高)">
+                  {getFieldDecorator("volume", {
+                    initialValue: `${obj.volume}mm`,
+                  })(
+                    <Input placeholder="请输入尺寸" />
+                  )}
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label="总重">
+                  {getFieldDecorator("weight", {
+                    initialValue: `${obj.weight}kg`,
+                  })(
+                    <Input placeholder="请输入总重" />
+                  )}
+                </Form.Item>
+              </Col>
 
-            <Col span={24}>
-              <label style={{fontSize:18, marginRight:20}}>属性信息</label>
-              {
-                edit.attributeEdit === false ?
-                <Button type="primary" ghost onClick={()=>{ setEdit({...edit, attributeEdit:true}) }}>编辑</Button> :
-                <span>
-                  <Button type="primary" ghost>保存</Button>
-                  <Button type="primary" ghost onClick={()=>{ setEdit({...edit, attributeEdit:false}) }}>取消</Button>
-                </span>
-              }
-            </Col>
-            <Col span={12}>
-              <Form.Item label="属性名称">
-                {getFieldDecorator("attributeName")(
-                  <Input placeholder="请输入属性名称" />
-                )}
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label="总运行时长">
-                {getFieldDecorator("runningTime")(
-                  <Row>
-                    <Col span={20}><Input placeholder="请输入总运行时长" /></Col>
-                    <Col span={4}>小时</Col>
-                  </Row>
-                )}
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label="总运行里程">
-                {getFieldDecorator("runningMiles")(
-                  <Row>
-                    <Col span={20}><Input placeholder="请输入总运行里程" /></Col>
-                    <Col span={4}>米</Col>
-                  </Row>
-                )}
-              </Form.Item>
-            </Col>
+              <Col span={24}>
+                <label style={{fontSize:18, marginRight:20}}>属性信息</label>
+                {
+                  edit.attributeEdit === false ?
+                  <Button type="primary" ghost onClick={()=>{ setEdit({...edit, attributeEdit:true}) }}>编辑</Button> :
+                  <span>
+                    <Button type="primary" ghost onClick={save}>保存</Button>
+                    <Button type="primary" ghost onClick={cancel}>取消</Button>
+                  </span>
+                }
+              </Col>
+              <Col span={12}>
+                <Form.Item label="属性名称">
+                  {getFieldDecorator("propertyName", {
+                    initialValue: obj.propertyName,
+                  })(
+                    <Input placeholder="请输入属性名称" />
+                  )}
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label="总运行时长">
+                  {getFieldDecorator("runningTime", {
+                    initialValue: `${obj.runningTime} 小时`,
+                  })(
+                    <Input placeholder="请输入总运行时长" />
+                  )}
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label="总运行里程">
+                  {getFieldDecorator("runningMileage", {
+                    initialValue: `${obj.runningMileage} 千米`,
+                  })(
+                    <Input placeholder="请输入总运行里程" />
+                  )}
+                </Form.Item>
+              </Col>
 
-            <Col span={24}>
-              <label style={{fontSize:18, marginRight:20}}>固定信息</label>
+              <Col span={24}>
+                <label style={{fontSize:18, marginRight:20}}>固定信息</label>
+                {
+                  edit.originalEdit === false ?
+                  <Button type="primary" ghost onClick={()=>{ setEdit({...edit, originalEdit:true}) }}>编辑</Button> :
+                  <span>
+                    <Button type="primary" ghost onClick={save}>保存</Button>
+                    <Button type="primary" ghost onClick={cancel}>取消</Button>
+                  </span>
+                }
+              </Col>
+              <Col span={12}>
+                <Form.Item label="通信标识">
+                  {getFieldDecorator("communication", {
+                    initialValue: obj.communication,
+                    rules: [{required: true}],
+                  })(
+                    <Input placeholder="请输入通信标识" />
+                  )}
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label="视频流程协议">
+                  {getFieldDecorator("videoStream", {
+                    initialValue: obj.videoStream,
+                    rules: [{required: true}],
+                  })(
+                    <Select placeholder="请选择视频流程协议">
+                      {entity.VIDEO_STREAM && entity.VIDEO_STREAM.map(item => (
+                        <Select.Option key={item.code} value={item.code}>
+                          {item.name}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  )}
+                </Form.Item>
+              </Col>
+            </Row>
+          </Form>
+        </TabPane>
+        <TabPane tab="维护信息" key="maintainInfo">
+          <Tabs type="card">
+            <TabPane tab={`待维护`+ robotMaintainList.isCompleteFalse.length} key="isCompleteFalse">
               {
-                edit.originalEdit === false ?
-                <Button type="primary" ghost onClick={()=>{ setEdit({...edit, originalEdit:true}) }}>编辑</Button> :
-                <span>
-                  <Button type="primary" ghost>保存</Button>
-                  <Button type="primary" ghost onClick={()=>{ setEdit({...edit, originalEdit:false}) }}>取消</Button>
-                </span>
+                robotMaintainList.isCompleteFalse.map((item, i) => {
+                  return (
+                    <Card key={i}>
+                      <Table rowKey="id" columns={waitCols} dataSource={[item]} pagination={false}/>
+                      <Row type="flex" justify="end">
+                        <Col span={3}>
+                          <label>负责人：</label>
+                          <label>{item.principal}</label>
+                        </Col>
+                        <Col span={5}>
+                          <label>创建时间：</label>
+                          <label>{moment(item.created).format('YYYY-MM-DD')}</label>
+                        </Col>
+                        <Col span={5}>
+                          <label>更新时间：</label>
+                          <label>{moment(item.updated).format('YYYY-MM-DD')}</label>
+                        </Col>
+                      </Row>
+                    </Card>
+                  )
+                })
               }
-            </Col>
-            <Col span={12}>
-              <Form.Item label="通信标识">
-                {getFieldDecorator("connectLogo", {
-                  rules: [{required: true}],
-                })(
-                  <Input placeholder="请输入通信标识" />
-                )}
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label="视频流程协议">
-                {getFieldDecorator("video", {
-                  initialValue: "1",
-                  rules: [{required: true}],
-                })(
-                  <Select>
-                    <Option value="HLS">HLS</Option>
-                    <Option value="RTSP">RTSP</Option>
-                  </Select>
-                )}
-              </Form.Item>
-            </Col>
-          </Row>
-        </Form>
-      </TabPane>
-      <TabPane tab="Tab2" key="2">
-        <Tabs type="card">
-          <TabPane tab={`待维护`+ data.wait.length} key="wait">
-            {
-              data.wait.map((item, i)=>{
-                return (
-                  <Card key={item.code}>
-                    <Table rowKey="code" columns={waitCols} dataSource={data.wait[i]} pagination={false}/>
-                    <Row type="flex" justify="end">
-                      <Col span={3}>
-                        <label>负责人：</label>
-                        <label>{item[0].responsibility}</label>
-                      </Col>
-                      <Col span={5}>
-                        <label>创建时间：</label>
-                        <label>{item[0].createTime}</label>
-                      </Col>
-                      <Col span={5}>
-                        <label>更新时间：</label>
-                        <label>{item[0].updateTime}</label>
-                      </Col>
-                    </Row>
-                  </Card>
-                )
-              })
-            }
-          </TabPane>
-          <TabPane tab={`已维护`+ data.already.length} key="already">
-            {
-              data.already.map((item, i)=>{
-                return (
-                  <Card key={item.code}>
-                    <Table rowKey="code" columns={columns} dataSource={data.already[i]} pagination={false} />
-                    <Row type="flex" justify="end">
-                      <Col span={3}>
-                        <label>负责人：</label>
-                        <label>{item[0].responsibility}</label>
-                      </Col>
-                      <Col span={5}>
-                        <label>创建时间：</label>
-                        <label>{item[0].createTime}</label>
-                      </Col>
-                      <Col span={5}>
-                        <label>更新时间：</label>
-                        <label>{item[0].updateTime}</label>
-                      </Col>
-                    </Row>
-                  </Card>
-                )
-              })
-            }
-          </TabPane>
-        </Tabs>
-      </TabPane>
-    </Tabs>
+            </TabPane>
+            <TabPane tab={`已维护`+ robotMaintainList.isCompleteTrue.length} key="isCompleteTrue">
+              {
+                robotMaintainList.isCompleteTrue.map((item, i) => {
+                  return (
+                    <Card key={i}>
+                      <Table rowKey="id" columns={waitCols} dataSource={[item]} pagination={false}/>
+                      <Row type="flex" justify="end">
+                        <Col span={3}>
+                          <label>负责人：</label>
+                          <label>{item.principal}</label>
+                        </Col>
+                        <Col span={5}>
+                          <label>创建时间：</label>
+                          <label>{moment(item.created).format('YYYY-MM-DD')}</label>
+                        </Col>
+                        <Col span={5}>
+                          <label>更新时间：</label>
+                          <label>{moment(item.updated).format('YYYY-MM-DD')}</label>
+                        </Col>
+                      </Row>
+                    </Card>
+                  )
+                })
+              }
+            </TabPane>
+          </Tabs>
+        </TabPane>
+      </Tabs>
+      <AddRecordModal visible={visible.showAddRecord} {...{currentId, addSingle, handleCancel}}/>
+    </div>
   )
 }
 
-export default Form.create()(Detail);
+export default Form.create()(ObjectDetail);
