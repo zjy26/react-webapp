@@ -1,9 +1,11 @@
 import { Location_Tree, Brands, ROBOT_OBJECT_TYPE, ROBOT_OBJECT_STATUS, VIDEO_STREAM } from './actionTypes'
-
-export const locationTreeAction = (data) => ({
-  type: Location_Tree,
-  data
-})
+export const locationTreeAction = (dispatch,data)=> {
+  console.log(data)
+  dispatch({
+    type: Location_Tree,
+    data
+  })
+}
 
 export const brandsAction = (data) => ({
     type: Brands,
