@@ -36,75 +36,7 @@
      "username": "admin"
     }
   ],
-  "objectList": [
-    {
-      "id": 1,
-      "key": 1,
-      "objName": "UPS配电柜1",
-      "number": "1752000",
-      "line": "17号线",
-      "site": "控制中心",
-      "type": "机器人",
-      "model": "CTXD—D",
-      "brand": "西门子",
-      "fault": "11",
-      "startTime": "2019-11-12",
-      "endTime": "-",
-      "timeRange":"111",
-      "milesRange":"111",
-      "status":"维护中",
-      "opton":"查看视频",
-      "location": "备控UPS室",
-      "supplier": "上海航天技术有限公司",
-      "manufacturers": "上海航天技术有限公司",
-      "objDescr": "设备描述……",
-      "faultDescr": "故障描述……",
-      "volume": "600*500*100",
-      "weight": "357",
-      "attributeName": "35KV开关柜",
-      "runningTime": 1111,
-      "runningMiles": 2222,
-      "connectLogo": "1233",
-      "video": "HLS",
-      "createTime": "2020-01-01",
-      "updateTime": "2020-01-01"
-    }, {
-      "id": 2,
-      "key": 2,
-      "objName": "UPS配电柜2",
-      "number": "1752002",
-      "line": "17号线",
-      "site": "虹桥火车站",
-      "type": "摄像头",
-      "model": "CTXD—D",
-      "brand": "西门子",
-      "fault": "11",
-      "startTime": "2019-11-12",
-      "endTime": "-",
-      "timeRange":"123",
-      "milesRange":"141",
-      "status":"空闲中",
-      "opton":"查看视频"
-    }, {
-      "id": 3,
-      "key": 3,
-      "objName": "UPS配电柜3",
-      "number": "1752003",
-      "line": "17号线",
-      "site": "控制中心",
-      "type": "机器人",
-      "model": "CTXD—D",
-      "brand": "西门子",
-      "fault": "11",
-      "startTime": "2019-11-12",
-      "endTime": "-",
-      "timeRange":"111",
-      "milesRange":"111",
-      "status":"空闲中",
-      "opton":"查看视频"
-    }
-  ],
-  
+
   "ROBOT_OBJECT_STATUS": {
     "l10n": true,
     "start": 0,
@@ -392,38 +324,209 @@
       }
     ]
   },
-  
-  "lineSite": [
+
+  "locationTree": {
+    "lineSite": [
+      {
+        "value": "1117",
+        "label": "17号线",
+        "children": [
+          {
+            "label": "控制中心",
+            "value": "11170600"
+          },
+          {
+            "label": "虹桥火车站",
+            "value": "11170601"
+          },
+          {
+            "label": "诸光路",
+            "value": "11170602"
+          },
+          {
+            "label": "蟠龙路",
+            "value": "11170603"
+          },
+          {
+            "label": "徐盈路",
+            "value": "11170604"
+          },
+          {
+            "label": "徐泾北城",
+            "value": "11170605"
+          },
+          {
+            "label": "嘉松中路",
+            "value": "11170606"
+          },
+          {
+            "label": "赵巷",
+            "value": "11170607"
+          },
+          {
+            "label": "汇金路",
+            "value": "11170608"
+          },
+          {
+            "label": "青浦新城",
+            "value": "11170609"
+          },
+          {
+            "label": "漕盈路",
+            "value": "11170610"
+          },
+          {
+            "label": "淀山湖大道",
+            "value": "11170611"
+          },
+          {
+            "label": "朱家角",
+            "value": "11170612"
+          },
+          {
+            "label": "东方绿舟",
+            "value": "11170613"
+          },
+          {
+            "label": "沪青平区间",
+            "value": "11170650"
+          },
+          {
+            "label": "青漕区间",
+            "value": "11170651"
+          },
+          {
+            "label": "青汇区间",
+            "value": "11170652"
+          },
+          {
+            "label": "徐泾车辆段检修库",
+            "value": "11170653"
+          },
+          {
+            "label": "徐泾车辆段运用库",
+            "value": "11170654"
+          },
+          {
+            "label": "诸光路跟随所",
+            "value": "11170655"
+          },
+          {
+            "label": "蟠龙路跟随所",
+            "value": "11170656"
+          },
+          {
+            "label": "漕盈路跟随",
+            "value": "11170657"
+          },
+          {
+            "label": "淀山湖大道跟随",
+            "value": "11170658"
+          },
+          {
+            "label": "全线",
+            "value": "11170677"
+          },
+          {
+            "label": "徐泾主变",
+            "value": "11170680"
+          },
+          {
+            "label": "漕盈主变",
+            "value": "11170681"
+          },
+          {
+            "label": "徐泾停车场",
+            "value": "11170696"
+          },
+          {
+            "label": "朱家角停车场",
+            "value": "11170697"
+          }
+        ]
+      }
+    ]
+  },
+
+  "robotObject": [
     {
-      "value": "1117",
-      "label": "17号线",
-      "children": [
-        {
-          "value": "111701",
-          "label": "控制中心"
-        }, {
-          "value": "111702",
-          "label": "虹桥火车站"
-        }, {
-          "value": "111703",
-          "label": "诸光路"
-        }
-      ]
+      "code": "1000",
+      "endDate": 1584028800000,
+      "type": "Robot",
+      "manufacturer": "宝胜科技创新股份有限公司",
+      "supplier": "奥地利KRAUS&NAIMER",
+      "id": 2,
+      "communication": "12",
+      "brand": "3E传感器",
+      "siteLine": "17号线",
+      "org": "11",
+      "runningMileage": 13,
+      "weight": "11.1",
+      "runningTime": 21,
+      "robotId": "123",
+      "robotPatrolLoc": "OCC控制中心",
+      "volume": "1*1",
+      "site": "11170697",
+      "videoStream": "hls",
+      "siteStation": "朱家角停车场",
+      "propertyName": "aaa",
+      "robotStatus": "02",
+      "_displayName": {
+        "videoStream": "HLS",
+        "robotStatus": "巡检中",
+        "id": "2",
+        "type": "机器人"
+      },
+      "name": "测试设备1",
+      "modelNumber": "0712",
+      "startDate": 1583856000000,
+      "desc": "测试",
+      "countMaintain":1,
+      "strandardMileage":100.000000000000,
+      "actualMileage":22.000000000000,
+      "strandardMaintain":1000.000000000000,
+      "maintainTime":194.883
     },
     {
-      "value": "1111",
-      "label": "11号线",
-      "children": [
-        {
-          "value": "110201",
-          "label": "迪士尼"
-        }, {
-          "value": "110202",
-          "label": "徐家汇"
-        }
-      ]
+      "code": "1001",
+      "endDate": 1583337600000,
+      "type": "Robot",
+      "manufacturer": "宝胜科技创新股份有限公司",
+      "supplier": "宝胜科技创新股份有限公司",
+      "id": 3,
+      "communication": "12",
+      "brand": "ABB",
+      "siteLine": "17号线",
+      "org": "11",
+      "runningMileage": 13,
+      "weight": "11.1",
+      "runningTime": 21,
+      "robotId": "123",
+      "robotPatrolLoc": "OCC控制中心",
+      "volume": "1*1",
+      "site": "11170697",
+      "videoStream": "hls",
+      "siteStation": "朱家角停车场",
+      "propertyName":"环境温度上限℃",
+      "robotStatus": "02",
+      "_displayName": {
+        "videoStream": "HLS",
+        "robotStatus": "巡检中",
+        "id": "3",
+        "type": "机器人"
+      },
+      "name": "测试设备1",
+      "modelNumber": "0712",
+      "startDate": 1583078400000,
+      "desc": "测试",
+      "countMaintain":1,
+      "strandardMileage":100.000000000000,
+      "actualMileage":22.000000000000,
+      "strandardMaintain":1000.000000000000,
+      "maintainTime":194.883
     }
   ],
+
   "patrolPlanList": [
     {
       "id": 1,
@@ -468,26 +571,42 @@
       "opton":"查看视频"
     }
   ],
-  "patrolConfigList": [
+
+  "robotconfig": [
     {
+      "siteLine": "17号线",
+      "code": "1000",
+      "updatedbyFullname": "申通管理员",
+      "org": "11",
+      "createdbyFullname": "申通管理员",
+      "created": 1539840678000,
+      "ip": "17.17.100.103",
+      "site": "11170610",
+      "videoStream": null,
+      "siteStation": "漕盈路",
+      "port": 8764,
+      "cameraStreamUrl": "http://192.168.0.102:7000/hls",
       "id": 1,
-      "key": 1,
-      "line": "17号线",
-      "site": "虹桥火车站",
-      "serverIP": "192.168.10.11",
-      "serverPort": "22",
-      "videoUrl": "-"
+      "updated": 1576386987000
     },
     {
+      "siteLine": "17号线",
+      "code": "1002",
+      "updatedbyFullname": "申通管理员",
+      "org": "11",
+      "createdbyFullname": "申通管理员",
+      "created": 1547006292000,
+      "ip": "17.17.100.103",
+      "site": "11170602",
+      "videoStream": null,
+      "siteStation": "诸光路",
+      "port": 8764,
+      "cameraStreamUrl": "http://192.168.0.102:7000/hls",
       "id": 2,
-      "key": 2,
-      "line": "17号线",
-      "site": "诸光路",
-      "serverIP": "192.168.10.11",
-      "serverPort": "80",
-      "videoUrl": "-"
+      "updated": 1576377853000
     }
   ],
+
   "patrolSheetList": [
     {
       "id": 1,

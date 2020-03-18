@@ -3,8 +3,6 @@ import {Breadcrumb, Form, Button, Input, Select, Row, Col, Tabs, Card, Table, me
 import { Link } from 'react-router-dom'
 import { robotObject, robotMaintain } from '../../api'
 import moment from "moment"
-import getLocation from '../common/location'
-import getEntity from '../common/entity'
 import store from '../../store'
 import AddRecordModal from './addRecordModal'
 
@@ -21,8 +19,7 @@ const formItemLayout = {
 }
 
 const ObjectDetail = (props) => {
-  const [location, setLocation] = useState({})  //线路站点
-  const [entity, setEntity] = useState({})  //实体数据
+
   const [edit, setEdit] = useState({
     basicEdit: false,
     attributeEdit: false,
@@ -34,9 +31,13 @@ const ObjectDetail = (props) => {
     isCompleteFalse: [],
     isCompleteTrue: []
   })
+  const [maintainKey, setMaintainKey] = useState("isCompleteFalse")
+
   const [obj, setObj] = useState({})
   const [addSingle, setAddSingle] = useState(false)
   const [currentId, setCurrentId] = useState(0)
+  const [dirty, setDirty] = useState(0)
+  const [title, setTitle] = useState("新建维护记录")
 
   const [visible, setVisible] = useState({
     showAddRecord: false
@@ -96,9 +97,9 @@ const ObjectDetail = (props) => {
   waitCols.push(...columns, {
     title: '操作',
     key: 'option',
-    render: () => <span>
-      <Button type="link" size={'small'}>维护完成</Button>&nbsp;&nbsp;
-      <Button type="link" size={'small'}>编辑</Button>
+    render: (text, record) => <span>
+      <Button type="link" size={'small'} onClick={()=>{maintainCompleted(record.id)}}>维护完成</Button>&nbsp;&nbsp;
+      <Button type="link" size={'small'} onClick={()=>{editMaintain(record.id)}}>编辑</Button>
     </span>
   })
 
@@ -110,18 +111,12 @@ const ObjectDetail = (props) => {
   }
 
   useEffect(() => {
-
-    getLocation.then(result =>{
-      setLocation(result)
-    })
-
-    getEntity.then(result =>{
-      setEntity(result)
-    })
+    document.title = "查看详情"
 
     //查看详情
     robotObject.robotObjectDetail(props.match.params.id).then((res) =>{
       if(res){
+        setCurrentId(res.id)
         setObj({
           ...res,
           brand: res.brand.id,
@@ -129,7 +124,6 @@ const ObjectDetail = (props) => {
         })
       }
     })
-
 
     //待维护记录
     robotMaintain.robotMaintainList("false", props.match.params.id)
@@ -154,7 +148,7 @@ const ObjectDetail = (props) => {
     })
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.match.params.id]);
+  }, [props.match.params.id, dirty]);
 
   //基本信息编辑保存
   const save = ()=> {
@@ -186,18 +180,47 @@ const ObjectDetail = (props) => {
     resetFields()
   }
 
-  const addMaintain = ()=>{
+  //新增
+  const addMaintain = () => {
     setAddSingle(true)
+    setTitle("新建维护记录")
     setVisible({...visible, showAddRecord:true})
   }
 
+  //编辑维护记录
+  const editMaintain = (id)=> {
+    setCurrentId(id)
+    setAddSingle(true)
+    setTitle("编辑维护记录")
+    setVisible({...visible, showAddRecord:true})
+  }
+
+  //维护完成
+  const maintainCompleted = (id) => {
+    robotMaintain.robotMaintainComplete({id: id})
+    .then((res)=>{
+      message.success("维护完成")
+      setDirty((dirty)=>dirty+1)
+    })
+    .catch(()=>{
+      message.error("维护失败")
+    })
+  }
+
+  const tabChange = (key) => {
+    if(key === "isCompleteTrue") {
+      setMaintainKey("isCompleteTrue")
+    } else {
+      setMaintainKey("isCompleteFalse")
+    }
+  }
   return (
     <div>
       <Breadcrumb style={{margin: 30, fontSize: 20}}>
         <Breadcrumb.Item><Link to="/patrol-object">设备管理</Link></Breadcrumb.Item>
         <Breadcrumb.Item>查看详情</Breadcrumb.Item>
       </Breadcrumb>
-      <Tabs tabPosition="left" defaultActiveKey="bascInfo" tabBarExtraContent={<Button onClick={addMaintain}>新增</Button>}>
+      <Tabs tabPosition="left" defaultActiveKey="bascInfo">
         <TabPane tab="基本信息" key="bascInfo">
           <Form {...formItemLayout} >
             <Row gutter={24}>
@@ -227,7 +250,7 @@ const ObjectDetail = (props) => {
                     rules: [{required: true}],
                   })(
                     <Select placeholder="请选择线路">
-                      {location.line && location.line.map(item => (
+                      {store.getState().locationTree.line && store.getState().locationTree.line.map(item => (
                         <Select.Option key={item.value} value={item.value}>
                           {item.label}
                         </Select.Option>
@@ -242,7 +265,7 @@ const ObjectDetail = (props) => {
                     rules: [{required: true}],
                   })(
                     <Select placeholder="请选择站点">
-                      {location.site && location.site.map(item => (
+                      {store.getState().locationTree.site && store.getState().locationTree.site.map(item => (
                         <Select.Option key={item.value} value={item.value}>
                           {item.label}
                         </Select.Option>
@@ -267,7 +290,7 @@ const ObjectDetail = (props) => {
                     rules: [{required: true}],
                   })(
                     <Select placeholder="请选择类型">
-                      {entity.ROBOT_OBJECT_TYPE && entity.ROBOT_OBJECT_TYPE.map(item => (
+                      {store.getState().robotObjectType &&store.getState().robotObjectType.map(item => (
                         <Select.Option key={item.code} value={item.code}>
                           {item.name}
                         </Select.Option>
@@ -476,7 +499,7 @@ const ObjectDetail = (props) => {
                     rules: [{required: true}],
                   })(
                     <Select placeholder="请选择视频流程协议">
-                      {entity.VIDEO_STREAM && entity.VIDEO_STREAM.map(item => (
+                      {store.getState().videoStream && store.getState().videoStream.map(item => (
                         <Select.Option key={item.code} value={item.code}>
                           {item.name}
                         </Select.Option>
@@ -489,7 +512,7 @@ const ObjectDetail = (props) => {
           </Form>
         </TabPane>
         <TabPane tab="维护信息" key="maintainInfo">
-          <Tabs type="card">
+          <Tabs type="card" defaultActiveKey="isCompleteFalse"  onChange={tabChange} tabBarExtraContent={maintainKey==="isCompleteFalse" ? <Button onClick={addMaintain}>新增</Button> : ''}>
             <TabPane tab={`待维护`+ robotMaintainList.isCompleteFalse.length} key="isCompleteFalse">
               {
                 robotMaintainList.isCompleteFalse.map((item, i) => {
@@ -520,7 +543,7 @@ const ObjectDetail = (props) => {
                 robotMaintainList.isCompleteTrue.map((item, i) => {
                   return (
                     <Card key={i}>
-                      <Table rowKey="id" columns={waitCols} dataSource={[item]} pagination={false}/>
+                      <Table rowKey="id" columns={columns} dataSource={[item]} pagination={false}/>
                       <Row type="flex" justify="end">
                         <Col span={3}>
                           <label>负责人：</label>
@@ -543,7 +566,7 @@ const ObjectDetail = (props) => {
           </Tabs>
         </TabPane>
       </Tabs>
-      <AddRecordModal visible={visible.showAddRecord} {...{currentId, addSingle, handleCancel}}/>
+      <AddRecordModal visible={visible.showAddRecord} {...{currentId, title, addSingle, handleCancel, setDirty}}/>
     </div>
   )
 }

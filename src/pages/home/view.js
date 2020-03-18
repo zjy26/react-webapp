@@ -3,7 +3,6 @@ import {connect} from 'react-redux';
 import { Row, Col, Spin } from 'antd';
 import Axios from 'axios';
 import Error from '../error';
-import '../../styles/view.css';
 
 const View = (props) => {
   const [data, setData] = useState([]);

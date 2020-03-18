@@ -6,19 +6,18 @@ import PatrolPlan from '../pages/patrolPlan/index';
 import PatrolSheet from '../pages/patrolSheet/index';
 import PatrolConfig from '../pages/patrolConfig/index';
 import DataStatistics from '../pages/dataStatistics/index';
-
-import ShowObjDetail from '../pages/object/showObjDetail';
+import ObjectModuleDetail from '../pages/object/detail';
 
 const menuRoutes = [
   {path: "/home", exact: true, component: View},
   {path: "/setting", exact: false, component: Setting},
   {path:"/applications", exact: false, component: Application},
-  {path:"/objects", exact: false, component: ObjectModule},
-  {path:"/object-detail/:id", exact: false, component: ShowObjDetail},
-  {path:"/patrolPlan", exact: false, component: PatrolPlan},
-  {path:"/patrolSheet", exact: false, component: PatrolSheet},
-  {path:"/PatrolConfig", exact: false, component: PatrolConfig},
-  {path:"/dataStatistics", exact: false, component: DataStatistics}
+  {path:"/patrol-object", exact: true, component: ObjectModule},
+  {path:"/patrol-object-detail/:id", exact: false, component: ObjectModuleDetail},
+  {path:"/patrol-plan", exact: false, component: PatrolPlan},
+  {path:"/patrol-sheet", exact: false, component: PatrolSheet},
+  {path:"/patrol-config", exact: false, component: PatrolConfig},
+  {path:"/data-statistics", exact: false, component: DataStatistics}
 ]
 
 export default menuRoutes;

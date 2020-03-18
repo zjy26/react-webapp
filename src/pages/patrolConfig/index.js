@@ -1,21 +1,21 @@
-import React, { useState, useEffect} from 'react';
-import Axios from 'axios';
-import { Row, Col, Button, Cascader, Table, Modal } from 'antd';
-import ConfigModal from './configModal';
-import location from '../common/location';
+import React, { useState, useEffect } from 'react'
+import { Row, Col, Button, Cascader, Table, Modal, message } from 'antd'
+import ConfigModal from './configModal'
+import { robotConfig } from '../../api'
+import { connect } from "react-redux"
 
 const PatrolConfig = props => {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [visible, setVisible] = useState(false);
-  const [modalTitle, setModalTitle] = useState("新增配置");
-  const [currentId, setCurrentId] = useState(0);
-  const [dirty, setDirty] = useState(0);
+  const [data, setData] = useState([])  //列表数据
+  const [loading, setLoading] = useState(true)
+  const [visible, setVisible] = useState(false)
+  const [modalTitle, setModalTitle] = useState("新增配置")
+  const [dirty, setDirty] = useState(0)
+  const [currentId, setCurrentId] = useState(0)
 
   const newModal = ()=> {
-    setModalTitle("新增配置");
-    setCurrentId(0);
-    setVisible(true);
+    setModalTitle("新增配置")
+    setCurrentId(0)
+    setVisible(true)
   }
 
   const handleCancel = () => {
@@ -31,9 +31,10 @@ const PatrolConfig = props => {
       okType: 'danger',
       cancelText: '取消',
       onOk: ()=> {
-        Axios.delete('/api/patrolConfigList/'+id)
+        robotConfig.robotConfigDelete(id)
         .then((res) =>{
-          setDirty(dirty=>dirty+1);
+          message.success("删除成功")
+          setDirty((dirty)=> dirty+1)
         })
       },
       onCancel() {
@@ -43,32 +44,46 @@ const PatrolConfig = props => {
 
   //编辑
   const editItem = (id)=>{
-    setCurrentId(()=>id);
-    setModalTitle("编辑配置");
-    setVisible(true);
+    setCurrentId(id)
+    setModalTitle("编辑配置")
+    setVisible(true)
   }
 
   //列表条目
   const columns = [
     {
       title: '线路',
-      dataIndex: 'line',
+      dataIndex: 'siteLine',
+      render:(text, record) => {
+        for(var item of props.locationTree.line) {
+          if(record.site.slice(0,4) === item.value) {
+            return item.label
+          }
+        }
+      }
     },
     {
       title: '站点',
       dataIndex: 'site',
+      render:(text, record) => {
+        for(var item of props.locationTree.site) {
+          if(record.site === item.value) {
+            return item.label
+          }
+        }
+      }
     },
     {
       title: '服务器IP',
-      dataIndex: 'serverIP',
+      dataIndex: 'ip'
     },
     {
       title: '服务器端口',
-      dataIndex: 'serverPort',
+      dataIndex: 'port'
     },
     {
       title: '视频推流地址',
-      dataIndex: 'videoUrl',
+      dataIndex: 'cameraStreamUrl'
     },
     {
       title: '操作',
@@ -84,34 +99,42 @@ const PatrolConfig = props => {
     }
   ];
 
-  //获取列表数据
   useEffect(() => {
-    setLoading(true);
-    Axios.get('/api/patrolConfigList').then(res =>{
-      if(res.status === 200){
-        setLoading(false);
-        setData(res.data);
+    document.title = "巡检配置"
+
+    setLoading(true)
+    //列表数据
+    robotConfig.robotConfigList()
+    .then(res => {
+      if(res){
+        setData(res)
+        setLoading(false)
       }
-    }).catch((err) =>{
-        console.log("列表数据加载失败")
-    });
+    })
+    .catch(() => {
+      console.log("列表数据加载失败")
+    })
   }, [dirty]);
 
   return (
     <div>
       <Row style={{margin:30}}>
         <Col span={12}>
-          <Cascader options={location.lineSite} placeholder="请选择线路/站点" />,
+          <Cascader options={props.locationTree.lineSite} placeholder="请选择线路/站点" />,
           <Button type="primary">搜索</Button>
         </Col>
         <Col span={12} style={{textAlign: "right"}}>
-          <Button type="danger" onClick={()=>{newModal()}}>新建</Button>
+          <Button type="danger" onClick={newModal}>新建</Button>
         </Col>
       </Row>
-      <Table rowKey="id" loading={loading} columns={columns} dataSource={data} style={{marginTop:30}}/>
-      <ConfigModal visible={visible} title={modalTitle} {...{handleCancel, currentId, location, setDirty}}/>
+      <Table loading={loading} rowKey="id" columns={columns} dataSource={data} style={{marginTop:30}}/>
+      <ConfigModal visible={visible} title={modalTitle} locationTree={props.locationTree} {...{handleCancel, currentId, setDirty}} />
     </div>
   )
 }
 
-export default PatrolConfig;
+const stateToProp = state => ({
+  locationTree: state.locationTree
+})
+
+export default connect(stateToProp)(PatrolConfig)

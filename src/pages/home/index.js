@@ -1,44 +1,102 @@
-import React, { useRef } from 'react';
-import { Layout, Menu, Icon, Dropdown,Form } from 'antd';
-import { Route, NavLink, Switch, Redirect } from 'react-router-dom';
-import MenuRoutes from '../../routes/index';
-import EditPassword from './editPassword';
-import '../../styles/header.css';
-import {connect} from 'react-redux';
+import React from 'react'
+import { Layout, Menu, Icon, Dropdown,Form } from 'antd'
+import { Route, NavLink, Switch, Redirect } from 'react-router-dom'
+import MeunRoute from '../../routes'
+import EditPassword from './editPassword'
+import './Index.module.scss'
+import {locationTree, brands, ROBOT_OBJECT_TYPE, ROBOT_OBJECT_STATUS, VIDEO_STREAM } from '../../api'
+import store from '../../store'
+import {locationTreeAction, brandsAction, robotObjectTypeAction, robotObjectStatusAction, videoStreamAction} from '../../store/actionCreators'
+import {connect} from 'react-redux'
 
-const { Header, Content } = Layout;
+const { Header, Content } = Layout
 
 const Index =(props)=> {
-  const childRef = useRef()
-
   const showModal = () => {
-    props.showModal1()
-    console.log(childRef)
+    props.showPsdModal()
   }
-
   const handleOk = (values) => {
     console.log(values)
-    
   }
   const handleCancel = ()=> {
-    props.closeModal()
+    props.closePsdModal()
   }
- 
-    console.log(props)
- 
-    const pathname = props.history.location.pathname.split('/').slice(1);  //获取当前页面的路径
-    const menu = (
-      <Menu className="dropMenu">
-        <Menu.Item key="setting"><NavLink to="/setting">个人设置</NavLink></Menu.Item>
-        <Menu.Item key="editPassword" onClick={showModal}>修改密码</Menu.Item>
-        <Menu.Divider />
-        <Menu.Item key="logout"><NavLink to="/login">退出</NavLink></Menu.Item>
-      </Menu>
-    );
-    return (
-      <div>
+
+  //线路站点
+  locationTree()
+  .then(res =>{
+    const siteArr = []
+    const lineArr = []
+    if(res){
+      for(var item of res.lineSite) {
+        let lineObj={}
+        lineObj["value"] = item.value
+        lineObj["label"] = item.label
+        lineArr.push(lineObj)
+        siteArr.push(...item.children)
+      }
+      const location = {
+        lineSite: res.lineSite,
+        line: lineArr,
+        site: siteArr
+      }
+      const action = locationTreeAction(location)
+      store.dispatch(action)
+    }
+  }).catch((err) =>{
+    console.log("线路站点数据加载失败")
+  })
+
+  //品牌
+  brands()
+  .then(res =>{
+    if(res && res.models){
+      const action = brandsAction(res.models)
+      store.dispatch(action)
+    }
+  })
+
+  //设备类型
+  ROBOT_OBJECT_TYPE()
+  .then(res =>{
+    if(res && res.models){
+      const action = robotObjectTypeAction(res.models)
+      store.dispatch(action)
+    }
+  })
+
+  //设备状态
+  ROBOT_OBJECT_STATUS()
+  .then(res =>{
+    if(res && res.models){
+      const action = robotObjectStatusAction(res.models)
+      store.dispatch(action)
+    }
+  })
+
+  //视频流程协议
+  VIDEO_STREAM()
+  .then(res =>{
+    if(res && res.models){
+      const action = videoStreamAction(res.models)
+      store.dispatch(action)
+    }
+  })
+
+  const pathname = props.history.location.pathname.split('/').slice(1);  //获取当前页面的路径
+
+  const menu = (
+    <Menu className="dropMenu">
+      <Menu.Item key="setting"><NavLink to="/setting">个人设置</NavLink></Menu.Item>
+      <Menu.Item key="editPassword" onClick={showModal}>修改密码</Menu.Item>
+      <Menu.Divider />
+      <Menu.Item key="logout"><NavLink to="/login">退出</NavLink></Menu.Item>
+    </Menu>
+  );
+  return (
+    <div>
       <Layout>
-        <Header className="header">
+        <Header>
           <Menu
             theme="dark"
             mode="horizontal"
@@ -48,14 +106,14 @@ const Index =(props)=> {
           >
             <Menu.Item key="home"><NavLink to="/home">首页</NavLink></Menu.Item>
             <Menu.Item key="applications"><NavLink to="/applications">应用管理</NavLink></Menu.Item>
-            <Menu.Item key="objects"><NavLink to="/objects">设备管理</NavLink></Menu.Item>
-            <Menu.Item key="patrolPlan"><NavLink to="/patrolPlan">巡检计划</NavLink></Menu.Item>
-            <Menu.Item key="patrolSheet"><NavLink to="/patrolSheet">巡检单</NavLink></Menu.Item>
-            <Menu.Item key="patrolConfig"><NavLink to="/patrolConfig">巡检配置</NavLink></Menu.Item>
-            <Menu.Item key="dataStatistics"><NavLink to="/dataStatistics">数据统计</NavLink></Menu.Item>
+            <Menu.Item key="patrol-object"><NavLink to="/patrol-object">设备管理</NavLink></Menu.Item>
+            <Menu.Item key="patrol-plan"><NavLink to="/patrol-plan">巡检计划</NavLink></Menu.Item>
+            <Menu.Item key="patrol-sheet"><NavLink to="/patrol-sheet">巡检单</NavLink></Menu.Item>
+            <Menu.Item key="patrol-config"><NavLink to="/patrol-config">巡检配置</NavLink></Menu.Item>
+            <Menu.Item key="data-statistics"><NavLink to="/data-statistics">数据统计</NavLink></Menu.Item>
             <Menu.Item key="user" style={{float: 'right'}}>
               <Dropdown overlay={menu} trigger={['click']}>
-               <span>
+              <span>
                 <Icon type="user" />
               </span>
               </Dropdown>
@@ -65,7 +123,7 @@ const Index =(props)=> {
         <Content>
           <Switch>
             {
-              MenuRoutes.map((item)=> {
+              MeunRoute.map(item => {
                 return (
                   <Route
                     key={item.path}
@@ -76,36 +134,36 @@ const Index =(props)=> {
                 )
               })
             }
-            <Redirect to='/home' />
+            <Redirect to='/patrol-config' />
           </Switch>
         </Content>
       </Layout>
-      <EditPassword form={props.form} ref={childRef} visible={props.visible} {...{ handleOk, handleCancel}}/>
+      <EditPassword form={props.form} visible={props.visible} {...{ handleOk, handleCancel}}/>
     </div>
-    );
-  }
+  );
+}
 
+//修改密码弹窗
 const mapStateToProps = (state) => {
-  console.log(state)
   return {
-      visible: state.visible
+      visible: state.psdModalvisible
   }
 }
 const mapDispatchToProps = (dispatch) => {
   return {
-      showModal1(e) {
+      showPsdModal(e) {
           let action = {
-              type:'showModal'
+              type:'showPsdModal'
           }
           dispatch(action)
       },
-      closeModal() {
+      closePsdModal() {
         let action = {
-          type:'closeModal'
+          type:'closePsdModal'
         }
         dispatch(action)
       }
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(React.memo(Form.create()(Index)));
+export default connect(mapStateToProps, mapDispatchToProps)(React.memo(Form.create()(Index)))

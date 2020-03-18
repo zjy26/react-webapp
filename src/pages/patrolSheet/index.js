@@ -7,6 +7,7 @@ import CancelModal from './cancelModal';
 import AbnormalModal from './abnormalModal';
 import ImportModal from '../common/importModal';
 import AuditModal from '../common/auditModal';
+import { connect } from "react-redux";
 
 const { Option } = Select;
 const brands = [];
@@ -17,7 +18,6 @@ for (let i = 10; i < 36; i++) {
 const { CheckableTag } = Tag;
 const PatrolSheet = props => {
   const { getFieldDecorator } = props.form;
-  const [lineSite, setLineSite] =  useState([]);  //线路站点
   const [data, setData] = useState([]);  //列表数据
   const [itemValues, setItemValues] = useState([]);  //详情数据
   const [tagChecked, setTagChecked] = useState({  //筛选标签选择状态
@@ -154,17 +154,6 @@ const PatrolSheet = props => {
     }
   ];
 
-  //获取线路站点
-  useEffect(() => {
-    Axios.get('/api/lineSite').then(res =>{
-      if(res.status === 200){
-        setLineSite(res.data);
-      }
-    }).catch((err) =>{
-        console.log("线路站点数据加载失败")
-    });
-  }, []);
-
   //获取列表数据
   useEffect(() => {
     Axios.get('/api/patrolSheetList').then(res =>{
@@ -210,7 +199,7 @@ const PatrolSheet = props => {
           <Col span={5}>
             <Form.Item>
               {getFieldDecorator('lineSite')(
-                <Cascader options={lineSite} placeholder="请选择线路/站点" />,
+                <Cascader options={props.locationTree.lineSite} placeholder="请选择线路/站点" />
               )}
             </Form.Item>
           </Col>
@@ -261,4 +250,8 @@ const PatrolSheet = props => {
   )
 }
 
-export default Form.create()(PatrolSheet);
+const stateToProp = state => ({
+  locationTree: state.locationTree
+})
+
+export default connect(stateToProp)(Form.create()(PatrolSheet))

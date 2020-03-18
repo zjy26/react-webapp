@@ -1,34 +1,22 @@
-import React, { useState, useEffect, useRef } from 'react';
-import Axios from 'axios';
-import { Link } from 'react-router-dom';
-import { Row, Col, Form, Input, Select, Button, Cascader, DatePicker, InputNumber, Table, Checkbox, Tag, Menu, Dropdown, Icon, Pagination } from 'antd';
-import DetailModal from './detailModal';
-import AddModal from './addModal';
-import ImportModal from '../common/importModal';
-import AuditModal from '../common/auditModal';
-import AddRecordModal from './addRecordModal';
-import ChangeStatusModal from './changeStatusModal';
+import React, { useState, useEffect } from 'react'
+import moment from "moment"
+import { Link } from 'react-router-dom'
+import { Row, Col, Form, Input, Select, Button, Cascader, DatePicker, InputNumber, Table, Checkbox, Tag, Menu, Dropdown, Icon, Pagination, message } from 'antd'
+import { robotObject, robotMaintain } from '../../api'
+import AddModal from './addModal'
+import ImportModal from '../common/importModal'
+import AuditModal from '../common/auditModal'
+import AddRecordModal from './addRecordModal'
+import ChangeStatusModal from './changeStatusModal'
 import EditModal from './editModal'
-
-//列表逐条数据选择
-const rowSelection = {
-  onChange: (selectedRowKeys, selectedRows) => {
-    console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-  }
-};
-
-const { Option } = Select;
-const brands = [];
-for (let i = 10; i < 36; i++) {
-  brands.push(<Option key={i.toString(36) + i}>{i.toString(36) + i}</Option>);
-}
+import store from '../../store'
 
 const { CheckableTag } = Tag;
 const ObjectModule = props => {
   const { getFieldDecorator } = props.form;
-  const [lineSite, setLineSite] =  useState([]);  //线路站点
-  const [data, setData] = useState([]);  //列表数据
-  const [itemValues, setItemValues] = useState([]);  //详情数据
+  const [objectIds, setObjectIds] = useState([])
+  const [currentId, setCurrentId] = useState(0)
+  const [data, setData] = useState([])  //列表数据
   const [tagChecked, setTagChecked] = useState({  //筛选标签选择状态
     all: true,
     free: true,
@@ -37,25 +25,33 @@ const ObjectModule = props => {
     maintenance: true,
     fault: true,
     stop: true
-  });
+  })
   const [time, setTime] = useState(null);  //维护时间间隔
   const [mile, setMile] = useState(null);  //维护里程间隔
   const [visible, setVisible] = useState({  //弹窗
-    showDetail: false,
     showAdd: false,
     showImport: false,
     showAudit: false,
     showAddRecord: false,
     showChangeStatus: false,
     showEdit: false
-  });
-  const [loading, setLoading] = useState(true);
-  const childRef = useRef();
+  })
+  const [dirty, setDirty] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [addSingle, setAddSingle] = useState(false)
+
+  //列表逐条数据选择
+  const rowSelection = {
+    onChange: (selectedRowKeys) => {
+      let ids = new Set()
+      ids.add(selectedRowKeys)
+      setObjectIds(...ids)
+    }
+  }
 
   //关闭弹窗
   const handleCancel = () => {
     setVisible({
-      showDetail: false,
       showAdd: false,
       showImport: false,
       showAudit: false,
@@ -64,32 +60,43 @@ const ObjectModule = props => {
       showEdit: false
     });
   }
-  const handleOk = (values) => {
-    //新增数据
-    const newListValues = {...values, status:"空闲中", id:data.length+1, key: data.length+1};
-    Axios.post('/api/objectList', newListValues
-    ).then((res)=>{
-      setVisible({...visible, showAdd:false});
-      setLoading(true);
-    });
-  }
-
-  //查看详情
-  const checkDetail = (id)=>{
-    Axios.get('/api/objectList/'+id)
-    .then((res) =>{
-      if(res.status === 200){
-        setItemValues(res.data);
-        setVisible({...visible, showDetail:true});
-        childRef.current.check();
-      }
-    })
-  }
 
   //新建
   const newModal = () => {
-    childRef.current.resetForm();
+    setCurrentId(0)
     setVisible({...visible, showAdd: true});
+  }
+
+  //维护完成
+  const maintainCompleted = () => {
+    if(objectIds.length>0) {
+      robotMaintain.robotObjectMaintainComplete({id: objectIds.toString()})
+      .then((res)=>{
+        message.success("维护完成")
+      })
+      .catch(()=>{
+        message.error("维护失败")
+      })
+    } else {
+      message.warning("请选择维护设备")
+    }
+  }
+
+  //添加维护记录
+  const addMaintain = (id)=>{
+    setCurrentId(id)
+    setAddSingle(true)
+    setVisible({...visible, showAddRecord:true})
+  }
+
+  //批量添加维护记录
+  const addBatchMaintain = ()=>{
+    if(objectIds.length>0) {
+      setAddSingle(false)
+      setVisible({...visible, showAddRecord:true})
+    } else {
+      message.warning("请选择维护设备记录")
+    }
   }
 
   //更多功能按钮
@@ -105,62 +112,93 @@ const ObjectModule = props => {
   const columns = [
     {
       title: '设备名称',
-      dataIndex: 'objName',
+      dataIndex: 'name',
       render: (text, record) => {
         return (
-          record.status ==="维护中" ? 
-          <Link to={"/object-detail/" + record.id}>维护{text}</Link> : 
-          <Link to={"/object-detail/" + record.id}>{text}</Link>
+          record.robotStatus ==="维护中" ?
+          <Link to={"/patrol-object-detail/"+record.id}><label style={{color:"#ff0000"}}>维护</label>&nbsp;&nbsp;{text}</Link> :
+          <Link to={"/patrol-object-detail/"+record.id}>{text}</Link>
         )
       }
     },
     {
       title: '编号',
-      dataIndex: 'number',
+      dataIndex: 'code',
     },
     {
       title: '线路',
-      dataIndex: 'line',
+      dataIndex: 'siteLine',
+      render: (text, record) => {
+        const lineCode = record.site.slice(0,4)
+        for(var item of store.getState().locationTree.line) {
+          if(lineCode === item.value) {
+            return item.label
+          }
+        }
+      }
     },
     {
       title: '站点',
       dataIndex: 'site',
+      render: (text, record) => {
+        for(var item of store.getState().locationTree.site) {
+          if(record.site === item.value) {
+            return item.label
+          }
+        }
+      }
     },
     {
       title: '类型',
       dataIndex: 'type',
+      render: (text, record) => {
+        for(var item of store.getState().robotObjectType) {
+          if(record.type === item.code) {
+            return item.name
+          }
+        }
+      }
     },
     {
       title: '型号',
-      dataIndex: 'model',
+      dataIndex: 'modelNumber',
     },
     {
       title: '品牌',
-      dataIndex: 'brand',
+      dataIndex: 'brand'
     },
     {
       title: '维护/故障数',
-      dataIndex: 'fault',
+      dataIndex: 'countMaintain',
     },
     {
       title: '启用日期',
-      dataIndex: 'startTime',
+      dataIndex: 'startDate',
+      render: (text, record) => moment(record.startDate).format('YYYY-MM-DD')
     },
     {
       title: '停用日期',
-      dataIndex: 'endTime',
+      dataIndex: 'endDate',
+      render: (text, record) => moment(record.endDate).format('YYYY-MM-DD')
     },
     {
       title: '维护时间间隔',
-      dataIndex: 'timeRange',
+      dataIndex: 'maintainTime',
     },
     {
       title: '维护里程间隔',
-      dataIndex: 'milesRange',
+      dataIndex: 'actualMileage',
     },
     {
       title: '状态',
-      dataIndex: 'status',
+      dataIndex: 'robotStatus',
+      render: (text, record) => {
+        for(var item of store.getState().robotObjectStatus) {
+          if(record.robotStatus === item.code) {
+            return item.name
+          }
+        }
+      }
     },
     {
       title: '操作',
@@ -169,12 +207,12 @@ const ObjectModule = props => {
         return (
           <span>
             <Button type="link" size={'small'}>查看视频</Button>
-            <Dropdown 
+            <Dropdown
               overlay={
                 <Menu>
                   <Menu.Item key="1" onClick={()=>{setVisible({...visible, showChangeStatus:true})}}>变更状态</Menu.Item>
-                  <Menu.Item key="2" onClick={()=> {checkDetail(record.id)}}>查看详情</Menu.Item>
-                  <Menu.Item key="3" onClick={()=>{setVisible({...visible, showAddRecord:true})}}>添加维护记录</Menu.Item>
+                  <Menu.Item key="2"><Link to={"/patrol-object-detail/"+record.id}>查看详情</Link></Menu.Item>
+                  <Menu.Item key="3" onClick={()=>{addMaintain(record.id)}}>添加维护记录</Menu.Item>
                 </Menu>
               }
             >
@@ -188,37 +226,39 @@ const ObjectModule = props => {
     }
   ];
 
-  //获取线路站点
-  useEffect(() => {
-    Axios.get('/api/lineSite').then(res =>{
-      if(res.status === 200){
-        setLineSite(res.data);
-      }
-    }).catch((err) =>{
-        console.log("线路站点数据加载失败")
-    });
-  }, []);
-
   //获取列表数据
   useEffect(() => {
-    Axios.get('/api/objectList').then(res =>{
-      if(res.status === 200){
-        setData(res.data);
-        setLoading(false);
+    document.title = "设备管理"
+    setLoading(true)
+    //列表数据
+    robotObject.robotObjectList()
+    .then(res => {
+      if(res){
+        setData(res)
+        setLoading(false)
       }
-    }).catch((err) =>{
-        setLoading(true);
-        console.log("列表数据加载失败")
+    })
+    .catch(() => {
+      console.log("列表数据加载失败")
+    })
+  }, [dirty]);
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    props.form.validateFields((err, values) => {
+      if (!err) {
+        console.log('Received values of form: ', values);
+      }
     });
-  }, [loading]);
+  };
 
   return (
     <div>
-      <Form layout="inline" style={{margin: 30}}>
+      <Form layout="inline" style={{margin: 30}} onSubmit={handleSubmit}>
         <Row gutter={16}>
           <Col span={5}>
             <Form.Item>
-              {getFieldDecorator('objectName', {
+              {getFieldDecorator('name', {
                 rules: [],
               })(
                 <Input placeholder="请输入设备名称" />,
@@ -231,7 +271,11 @@ const ObjectModule = props => {
                 rules: [],
               })(
                 <Select placeholder="请输入设备品牌" style={{ width: 200 }} showSearch>
-                  {brands}
+                  {store.getState().brands && store.getState().brands.map(item => (
+                      <Select.Option key={item.id} value={item.id}>
+                        {item.name}
+                      </Select.Option>
+                    ))}
                 </Select>,
               )}
             </Form.Item>
@@ -241,7 +285,7 @@ const ObjectModule = props => {
               {getFieldDecorator('lineSite', {
                 rules: [],
               })(
-                <Cascader options={lineSite} placeholder="请选择线路/站点" />,
+                <Cascader options={store.getState().locationTree.lineSite} placeholder="请选择线路/站点" />,
               )}
             </Form.Item>
           </Col>
@@ -269,9 +313,9 @@ const ObjectModule = props => {
                 rules: [],
               })(
                 <Select placeholder="维护里程间隔" style={{ width: 160 }} onChange={(value)=>{setMile(value)}}>
-                  <Option value="1">维护里程间隔大于</Option>
-                  <Option value="2">维护里程间隔小于</Option>
-                  <Option value="3">维护里程间隔介于</Option>
+                  <Select.Option value="1">维护里程间隔大于</Select.Option>
+                  <Select.Option value="2">维护里程间隔小于</Select.Option>
+                  <Select.Option value="3">维护里程间隔介于</Select.Option>
                 </Select>,
               )}
             </Form.Item>
@@ -287,9 +331,9 @@ const ObjectModule = props => {
                 rules: [],
               })(
                 <Select placeholder="维护时间间隔" style={{ width: 160 }} onChange={(value)=>{setTime(value);}}>
-                  <Option value="1">维护时间间隔大于</Option>
-                  <Option value="2">维护时间间隔小于</Option>
-                  <Option value="3">维护时间间隔介于</Option>
+                  <Select.Option value="1">维护时间间隔大于</Select.Option>
+                  <Select.Option value="2">维护时间间隔小于</Select.Option>
+                  <Select.Option value="3">维护时间间隔介于</Select.Option>
                 </Select>,
               )}
             </Form.Item>
@@ -328,25 +372,24 @@ const ObjectModule = props => {
         </Row>
       </div>
 
-      <Table rowSelection={rowSelection} columns={columns} dataSource={data} scroll={{ x: 1600 }} pagination={false}/>
+      <Table loading={loading} rowKey="id" rowSelection={rowSelection} columns={columns} dataSource={data} scroll={{ x: 1600 }} pagination={false}/>
       <Row type="flex" justify="space-between" style={{margin:30}}>
         <Col>
           <Checkbox>全选</Checkbox>
           <Button type="danger" ghost onClick={ ()=>{setVisible({...visible, showChangeStatus:true})} }>批量变更</Button>
           <Button type="danger" ghost onClick={ ()=>{setVisible({...visible, showEdit:true})} }>批量修改</Button>
-          <Button type="danger" ghost onClick={ ()=>{setVisible({...visible, showAddRecord:true})} }>添加维护记录</Button>
-          <Button type="danger" ghost>维护完成</Button>
+          <Button type="danger" ghost onClick={addBatchMaintain}>添加维护记录</Button>
+          <Button type="danger" ghost onClick={maintainCompleted}>维护完成</Button>
         </Col>
         <Col><Pagination total={20} showSizeChanger showQuickJumper /></Col>
       </Row>
 
-      <DetailModal visible={visible.showDetail} {...{itemValues, handleCancel}} wrappedComponentRef={childRef}/>
-      <AddModal visible={visible.showAdd} {...{handleOk, handleCancel}} />
+      <AddModal visible={visible.showAdd} title="添加维护记录" {...{setDirty, handleCancel}} />
       <ImportModal visible={visible.showImport} {...{handleCancel}}/>
       <AuditModal visible={visible.showAudit} {...{handleCancel}}/>
-      <AddRecordModal visible={visible.showAddRecord} {...{handleCancel}}/>
-      <ChangeStatusModal visible={visible.showChangeStatus} {...{handleCancel}}/>
-      <EditModal visible={visible.showEdit} {...{handleCancel}}/>
+      <AddRecordModal visible={visible.showAddRecord} {...{currentId, objectIds, setDirty, addSingle, handleCancel}}/>
+      <ChangeStatusModal visible={visible.showChangeStatus} {...{handleCancel, setDirty}}/>
+      <EditModal visible={visible.showEdit} {...{objectIds, handleCancel, setDirty}}/>
     </div>
   )
 }

@@ -1,6 +1,6 @@
-import React, { useState, useEffect} from 'react';
-import { Modal,Form, Input, Select } from 'antd';
-import Axios from 'axios';
+import React, { useState, useEffect } from 'react'
+import { Modal,Form, Input, Select } from 'antd'
+import { robotConfig } from '../../api'
 
 const formItemLayout = {
   labelCol: {
@@ -11,35 +11,39 @@ const formItemLayout = {
     xs: { span: 24 },
     sm: { span: 16 },
   },
-};
+}
 
 const ConfigModal = (props) => {
-  const { getFieldDecorator } = props.form;
-  const [obj, setObj] = useState({});
+  const { getFieldDecorator, resetFields } = props.form
+  const [obj, setObj] = useState({})
 
   useEffect(() => {
+    //查看详情
     if(props.visible===true && props.currentId !== 0) {
-      Axios.get('/api/patrolConfigList/'+props.currentId)
+      robotConfig.robotConfigDetail(props.currentId)
       .then((res) =>{
-        if(res.status === 200){
-          setObj(res.data);
+        if(res){
+          setObj({...res, siteLine: res.site.slice(0, 4)})
         }
       })
     } else {
-      setObj({});
+      resetFields()
+      setObj({})
     }
-  }, [props.visible, props.currentId]);
+  }, [props.visible, props.currentId, resetFields]);
 
   const handleSubmit = e => {
-    e.preventDefault();
+    e.preventDefault()
     const {
-      form: { validateFields, isFieldsTouched},
+      form: { validateFields, isFieldsTouched },
     } = props;
 
     validateFields((errors, values) => {
       if(errors) {
-        return;
+        return
       }
+      let {siteLine, ...data} = values
+      let params = {...data}
       if(values.id) {//编辑
         if(isFieldsTouched() === true) {  //判断是否有修改
           Modal.confirm({
@@ -49,10 +53,10 @@ const ConfigModal = (props) => {
             okType: 'danger',
             cancelText: '取消',
             onOk: ()=> {
-              Axios.put('/api/patrolConfigList/'+values.id, {...values}
-              ).then((res)=>{
+              robotConfig.robotConfigEdit(values.id, params)
+              .then((res)=>{
                 props.handleCancel()
-                props.setDirty(dirty=>dirty+1)
+                props.setDirty((dirty)=>dirty+1)
               })
             },
             onCancel() {
@@ -62,15 +66,16 @@ const ConfigModal = (props) => {
           props.handleCancel()
         }
       } else {//添加
-        Axios.post('/api/patrolConfigList',{...values, key:values.id}
-        ).then((res)=>{
+        robotConfig.robotConfigAdd(params)
+        .then((res)=>{
           props.handleCancel()
-          props.setDirty(dirty=>dirty+1)
+          props.setDirty((dirty)=>dirty+1)
         });
       }
 
     });
-  };
+  }
+
   return (
     <Modal
       title={props.title}
@@ -79,9 +84,8 @@ const ConfigModal = (props) => {
       visible={props.visible}
       onCancel={props.handleCancel}
       onOk={handleSubmit}
-      currentId = {props.currentId}
-      setDirty = { props.setDirty }
-      location = {props.location}
+      currentId={props.currentId}
+      locationTree={props.locationTree}
     >
       <Form {...formItemLayout}>
         <Form.Item label="id" style={{display: 'none'}}>
@@ -90,16 +94,16 @@ const ConfigModal = (props) => {
           })(<Input />)}
         </Form.Item>
         <Form.Item label="线路">
-          {getFieldDecorator('line', {
-            initialValue: obj.line,
+          {getFieldDecorator('siteLine', {
+            initialValue: obj.siteLine,
             rules: [{required: true}],
           })(
           <Select placeholder="请选择线路">
-          {
-            props.location.line && props.location.line.map( item =>
-              <Select.Option key={item.value} value={item.value}>{item.label}</Select.Option>
-            )
-          }
+            {props.locationTree.line && props.locationTree.line.map(item => (
+              <Select.Option key={item.value} value={item.value}>
+                {item.label}
+              </Select.Option>
+            ))}
           </Select>)}
         </Form.Item>
         <Form.Item label="站点">
@@ -108,28 +112,28 @@ const ConfigModal = (props) => {
             rules: [{required: true}],
           })(
           <Select placeholder="请选择站点">
-            {
-              props.location.site && props.location.site.map( item =>
-                <Select.Option key={item.value} value={item.value}>{item.label}</Select.Option>
-              )
-            }
+            {props.locationTree.site && props.locationTree.site.map(item => (
+              <Select.Option key={item.value} value={item.value}>
+                {item.label}
+              </Select.Option>
+            ))}
           </Select>)}
         </Form.Item>
         <Form.Item label="服务器IP">
-          {getFieldDecorator('serverIP', {
-            initialValue: obj.serverIP,
+          {getFieldDecorator('ip', {
+            initialValue: obj.ip,
             rules: [{required: true}],
           })(<Input placeholder="请输入服务器IP"/>)}
         </Form.Item>
         <Form.Item label="服务器端口">
-          {getFieldDecorator('serverPort', {
-            initialValue: obj.serverPort,
+          {getFieldDecorator('port', {
+            initialValue: obj.port,
             rules: [{required: true}],
           })(<Input placeholder="请输入服务器端口"/>)}
         </Form.Item>
         <Form.Item label="视频流推送">
-          {getFieldDecorator('videoUrl', {
-            initialValue: obj.videoUrl,
+          {getFieldDecorator('cameraStreamUrl', {
+            initialValue: obj.cameraStreamUrl,
             rules: [{required: true}],
           })(<Input placeholder="请输入视频流推送"/>)}
         </Form.Item>
