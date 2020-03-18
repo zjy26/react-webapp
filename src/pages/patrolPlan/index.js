@@ -207,8 +207,8 @@ const PatrolPlan = props => {
   )
 }
 
-const stateToProp = state => ({
+const mapStateToProps = state => ({
   locationTree: state.locationTree
 })
 
-export default connect(stateToProp)(Form.create()(PatrolPlan))
+export default connect(mapStateToProps)(Form.create()(PatrolPlan))

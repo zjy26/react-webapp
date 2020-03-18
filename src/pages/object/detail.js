@@ -3,8 +3,8 @@ import {Breadcrumb, Form, Button, Input, Select, Row, Col, Tabs, Card, Table, me
 import { Link } from 'react-router-dom'
 import { robotObject, robotMaintain } from '../../api'
 import moment from "moment"
-import store from '../../store'
 import AddRecordModal from './addRecordModal'
+import { connect } from "react-redux"
 
 const { TabPane } = Tabs
 const formItemLayout = {
@@ -119,7 +119,6 @@ const ObjectDetail = (props) => {
         setCurrentId(res.id)
         setObj({
           ...res,
-          brand: res.brand.id,
           siteLine: res.site.slice(0, 4)
         })
       }
@@ -250,7 +249,7 @@ const ObjectDetail = (props) => {
                     rules: [{required: true}],
                   })(
                     <Select placeholder="请选择线路">
-                      {store.getState().locationTree.line && store.getState().locationTree.line.map(item => (
+                      {props.locationTree.line && props.locationTree.line.map(item => (
                         <Select.Option key={item.value} value={item.value}>
                           {item.label}
                         </Select.Option>
@@ -265,7 +264,7 @@ const ObjectDetail = (props) => {
                     rules: [{required: true}],
                   })(
                     <Select placeholder="请选择站点">
-                      {store.getState().locationTree.site && store.getState().locationTree.site.map(item => (
+                      {props.locationTree.site && props.locationTree.site.map(item => (
                         <Select.Option key={item.value} value={item.value}>
                           {item.label}
                         </Select.Option>
@@ -290,7 +289,7 @@ const ObjectDetail = (props) => {
                     rules: [{required: true}],
                   })(
                     <Select placeholder="请选择类型">
-                      {store.getState().robotObjectType &&store.getState().robotObjectType.map(item => (
+                      {props.robotObjectType &&props.robotObjectType.map(item => (
                         <Select.Option key={item.code} value={item.code}>
                           {item.name}
                         </Select.Option>
@@ -306,7 +305,7 @@ const ObjectDetail = (props) => {
                     rules: [{required: true}],
                   })(
                     <Select placeholder="请选择品牌">
-                      {store.getState().brands && store.getState().brands.map(item => (
+                      {props.brands && props.brands.map(item => (
                         <Select.Option key={item.id} value={item.id}>
                           {item.name}
                         </Select.Option>
@@ -499,7 +498,7 @@ const ObjectDetail = (props) => {
                     rules: [{required: true}],
                   })(
                     <Select placeholder="请选择视频流程协议">
-                      {store.getState().videoStream && store.getState().videoStream.map(item => (
+                      {props.videoStream && props.videoStream.map(item => (
                         <Select.Option key={item.code} value={item.code}>
                           {item.name}
                         </Select.Option>
@@ -571,4 +570,14 @@ const ObjectDetail = (props) => {
   )
 }
 
-export default Form.create()(ObjectDetail);
+const mapStateToProps = (state) => {
+  return {
+    locationTree: state.locationTree,
+    brands: state.brands,
+    robotObjectType: state.robotObjectType,
+    robotObjectStatus: state.robotObjectStatus,
+    videoStream: state.videoStream
+  }
+}
+
+export default connect(mapStateToProps, null)(React.memo(Form.create()(ObjectDetail)))

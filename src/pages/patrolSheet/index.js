@@ -250,8 +250,8 @@ const PatrolSheet = props => {
   )
 }
 
-const stateToProp = state => ({
+const mapStateToProps = state => ({
   locationTree: state.locationTree
 })
 
-export default connect(stateToProp)(Form.create()(PatrolSheet))
+export default connect(mapStateToProps)(Form.create()(PatrolSheet))

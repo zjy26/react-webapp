@@ -9,7 +9,7 @@ import AuditModal from '../common/auditModal'
 import AddRecordModal from './addRecordModal'
 import ChangeStatusModal from './changeStatusModal'
 import EditModal from './editModal'
-import store from '../../store'
+import { connect } from "react-redux"
 
 const { CheckableTag } = Tag;
 const ObjectModule = props => {
@@ -129,30 +129,30 @@ const ObjectModule = props => {
       title: '线路',
       dataIndex: 'siteLine',
       render: (text, record) => {
-        const lineCode = record.site.slice(0,4)
-        for(var item of store.getState().locationTree.line) {
-          if(lineCode === item.value) {
-            return item.label
-          }
-        }
+        // const lineCode = record.site.slice(0,4)
+        // for(var item of props.locationTree.line) {
+        //   if(lineCode === item.value) {
+        //     return item.label
+        //   }
+        // }
       }
     },
     {
       title: '站点',
       dataIndex: 'site',
       render: (text, record) => {
-        for(var item of store.getState().locationTree.site) {
-          if(record.site === item.value) {
-            return item.label
-          }
-        }
+        // for(var item of props.locationTree.site) {
+        //   if(record.site === item.value) {
+        //     return item.label
+        //   }
+        // }
       }
     },
     {
       title: '类型',
       dataIndex: 'type',
       render: (text, record) => {
-        for(var item of store.getState().robotObjectType) {
+        for(var item of props.robotObjectType) {
           if(record.type === item.code) {
             return item.name
           }
@@ -165,7 +165,14 @@ const ObjectModule = props => {
     },
     {
       title: '品牌',
-      dataIndex: 'brand'
+      dataIndex: 'brand',
+      render: (text, record) => {
+        for(var item of props.brands) {
+          if(record.brand === item.id) {
+            return item.name
+          }
+        }
+      }
     },
     {
       title: '维护/故障数',
@@ -193,7 +200,7 @@ const ObjectModule = props => {
       title: '状态',
       dataIndex: 'robotStatus',
       render: (text, record) => {
-        for(var item of store.getState().robotObjectStatus) {
+        for(var item of props.robotObjectStatus) {
           if(record.robotStatus === item.code) {
             return item.name
           }
@@ -271,7 +278,7 @@ const ObjectModule = props => {
                 rules: [],
               })(
                 <Select placeholder="请输入设备品牌" style={{ width: 200 }} showSearch>
-                  {store.getState().brands && store.getState().brands.map(item => (
+                  {props.brands && props.brands.map(item => (
                       <Select.Option key={item.id} value={item.id}>
                         {item.name}
                       </Select.Option>
@@ -285,7 +292,7 @@ const ObjectModule = props => {
               {getFieldDecorator('lineSite', {
                 rules: [],
               })(
-                <Cascader options={store.getState().locationTree.lineSite} placeholder="请选择线路/站点" />,
+                <Cascader options={props.locationTree.lineSite} placeholder="请选择线路/站点" />,
               )}
             </Form.Item>
           </Col>
@@ -394,4 +401,14 @@ const ObjectModule = props => {
   )
 }
 
-export default Form.create()(ObjectModule);
+const mapStateToProps = (state) => {
+  return {
+    locationTree: state.locationTree,
+    brands: state.brands,
+    robotObjectType: state.robotObjectType,
+    robotObjectStatus: state.robotObjectStatus,
+    videoStream: state.videoStream
+  }
+}
+
+export default connect(mapStateToProps, null)(React.memo(Form.create()(ObjectModule)))

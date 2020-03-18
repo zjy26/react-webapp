@@ -5,13 +5,11 @@ import MeunRoute from '../../routes'
 import EditPassword from './editPassword'
 import './Index.module.scss'
 import { locationTree, brands, ROBOT_OBJECT_TYPE, ROBOT_OBJECT_STATUS, VIDEO_STREAM } from '../../api'
-import store from '../../store'
 import { locationTreeAction, brandsAction, robotObjectTypeAction, robotObjectStatusAction, videoStreamAction } from '../../store/actionCreators'
 import { connect } from 'react-redux'
 
 const { Header, Content } = Layout
 const Index = (props) => {
-  console.log(props)
   const showModal = () => {
     props.showPsdModal()
   }
@@ -22,70 +20,65 @@ const Index = (props) => {
     props.closePsdModal()
   }
 
-  // 方法一connect中不加mapDispatchToProps,能在props中直接获取到dispatch-----这个写法和redux文档上的类似
   useEffect(() => {
     //线路站点
-  locationTree()
-  .then(res => {
-    const siteArr = []
-    const lineArr = []
-    if (res) {
-      for (var item of res.lineSite) {
-        let lineObj = {}
-        lineObj["value"] = item.value
-        lineObj["label"] = item.label
-        lineArr.push(lineObj)
-        siteArr.push(...item.children)
+    locationTree()
+    .then(res => {
+      const siteArr = []
+      const lineArr = []
+      if (res) {
+        for (var item of res.lineSite) {
+          let lineObj = {}
+          lineObj["value"] = item.value
+          lineObj["label"] = item.label
+          lineArr.push(lineObj)
+          siteArr.push(...item.children)
+        }
+        const location = {
+          lineSite: res.lineSite,
+          line: lineArr,
+          site: siteArr
+        }
+        props.locationTree(location)
       }
-      const location = {
-        lineSite: res.lineSite,
-        line: lineArr,
-        site: siteArr
+    }).catch((err) => {
+      console.log("线路站点数据加载失败")
+    })
+    //品牌
+    brands()
+    .then(res => {
+      if (res && res.models) {
+        props.getBrands(res.models)
       }
-      console.log(location)
-      console.log(props.locationTreeAction)
-      props.locationTreeAction(location)
-    }
-  }).catch((err) => {
-    console.log("线路站点数据加载失败")
-  })
+    })
+  
+    //设备类型
+    ROBOT_OBJECT_TYPE()
+    .then(res => {
+      if (res && res.models) {
+        props.getRobotObjectType(res.models)
+      }
+    })
+  
+    //设备状态
+    ROBOT_OBJECT_STATUS()
+    .then(res => {
+      if (res && res.models) {
+        props.getRobotObjectStatus(res.models)
+      }
+    })
+
+    //视频流程协议
+    VIDEO_STREAM()
+    .then(res => {
+      if (res && res.models) {
+        props.getVideoStream(res.models)
+      }
+    })
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  //品牌
-  brands()
-    .then(res => {
-      if (res && res.models) {
-        const action = brandsAction(res.models)
-        store.dispatch(action)
-      }
-    })
-
-  //设备类型
-  ROBOT_OBJECT_TYPE()
-    .then(res => {
-      if (res && res.models) {
-        const action = robotObjectTypeAction(res.models)
-        store.dispatch(action)
-      }
-    })
-
-  //设备状态
-  ROBOT_OBJECT_STATUS()
-    .then(res => {
-      if (res && res.models) {
-        const action = robotObjectStatusAction(res.models)
-        store.dispatch(action)
-      }
-    })
-
-  //视频流程协议
-  VIDEO_STREAM()
-    .then(res => {
-      if (res && res.models) {
-        const action = videoStreamAction(res.models)
-        store.dispatch(action)
-      }
-    })
 
   const pathname = props.history.location.pathname.split('/').slice(1);  //获取当前页面的路径
 
@@ -149,9 +142,13 @@ const Index = (props) => {
 
 //修改密码弹窗
 const mapStateToProps = (state) => {
-  console.log(state)
   return {
-    visible: state.psdModalvisible
+    visible: state.psdModalvisible,
+    locationTree: state.locationTree,
+    brands: state.brands,
+    robotObjectType: state.robotObjectType,
+    robotObjectStatus: state.robotObjectStatus,
+    videoStream: state.videoStream
   }
 }
 const mapDispatchToProps = (dispatch) => {
@@ -168,9 +165,20 @@ const mapDispatchToProps = (dispatch) => {
       }
       dispatch(action)
     },
-    locationTreeAction(data) {
-      console.log(data)
+    locationTree(data) {
       locationTreeAction(dispatch, data)
+    },
+    getBrands(data) {
+      brandsAction(dispatch, data)
+    },
+    getRobotObjectStatus(data) {
+      robotObjectStatusAction(dispatch, data)
+    },
+    getRobotObjectType(data) {
+      robotObjectTypeAction(dispatch, data)
+    },
+    getVideoStream(data) {
+      videoStreamAction(dispatch, data)
     }
   }
 }
