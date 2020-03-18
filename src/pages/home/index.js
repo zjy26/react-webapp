@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useLayoutEffect } from 'react'
 import { Layout, Menu, Icon, Dropdown, Form } from 'antd'
 import { Route, NavLink, Switch, Redirect } from 'react-router-dom'
 import MeunRoute from '../../routes'
@@ -20,7 +20,7 @@ const Index = (props) => {
     props.closePsdModal()
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     //线路站点
     locationTree()
     .then(res => {
@@ -131,7 +131,7 @@ const Index = (props) => {
                 )
               })
             }
-            <Redirect to='/patrol-config' />
+            <Redirect to='/home' />
           </Switch>
         </Content>
       </Layout>

@@ -45,7 +45,6 @@ const View = (props) => {
                   <Col xs={12} sm={8} md={6} lg={4} key={index}>
                     <span>
                       <img src={item.icon} alt={item.name} onClick={showModal}  />
-                      <label>{item.name}</label>
                     </span>
                   </Col>
                 )
@@ -54,7 +53,6 @@ const View = (props) => {
                   <Col xs={12} sm={8} md={6} lg={4} key={index}>
                     <a href={item.href}>
                       <img src={item.icon} alt={item.name}/>
-                      <label>{item.name}</label>
                     </a>
                   </Col>
                 )

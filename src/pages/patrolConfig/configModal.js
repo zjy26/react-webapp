@@ -27,10 +27,10 @@ const ConfigModal = (props) => {
         }
       })
     } else {
-      resetFields()
       setObj({})
+      resetFields()
     }
-  }, [props.visible, props.currentId, resetFields]);
+  }, [props.visible, props.currentId]);
 
   const handleSubmit = e => {
     e.preventDefault()
@@ -64,6 +64,7 @@ const ConfigModal = (props) => {
           });
         } else {
           props.handleCancel()
+          resetFields()
         }
       } else {//添加
         robotConfig.robotConfigAdd(params)

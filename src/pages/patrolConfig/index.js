@@ -55,23 +55,20 @@ const PatrolConfig = props => {
       title: '线路',
       dataIndex: 'siteLine',
       render:(text, record) => {
-        // for(var item of props.locationTree.line) {
-        //   if(record.site.slice(0,4) === item.value) {
-        //     return item.label
-        //   }
-        // }
+        if(props.locationTree && props.locationTree.line) {
+          const item = props.locationTree.line.find(obj=>obj.value===record.site.slice(0,4))
+          return item.label
+        }
       }
     },
     {
       title: '站点',
       dataIndex: 'site',
       render:(text, record) => {
-        console.log("*****", props.locationTree)
-        // for(var item of props.locationTree.site) {
-        //   if(record.site === item.value) {
-        //     return item.label
-        //   }
-        // }
+        if(props.locationTree&&props.locationTree.site) {
+          const item = props.locationTree.site.find(obj=>obj.value===record.site)
+          return item.label
+        }
       }
     },
     {
