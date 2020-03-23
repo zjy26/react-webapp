@@ -1,4 +1,4 @@
 {
   "routes": "test/routes.json",
-  "port": 4000
+  "port": 8000
 }

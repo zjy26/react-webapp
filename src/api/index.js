@@ -89,3 +89,40 @@ robotObject["robotObjectAdd"] = (parms) => {
 robotObject["robotObjectEdit"] = (id, parms) => {
   return axiosInstance.put("/robotObject"+ id, parms)
 }
+
+
+//巡检计划
+export const robotPlan = {}
+robotPlan["robotPlanList"] = () => {
+  return axiosInstance.get("/robotPatrolPlan")
+}
+robotPlan["robotPlanAdd"] = (params) => {
+  return axiosInstance.post("/robotPatrolPlan", params);
+}
+robotPlan["robotPlanEdit"] = (id, params) => {
+  return axiosInstance.put("/robotPatrolPlan/"+ id, params)
+}
+robotPlan["robotPlanDelete"] = (id) => {
+  return axiosInstance.delete("/robotPatrolPlan/" + id)
+}
+
+robotPlan["robotPlanObjList"] = () => {
+  return axiosInstance.get("/robotPlanObjList")
+}
+// robotPlan["robotPlanManual"] = (params) => {
+//   return axiosInstance.post("/robotpatrol/manual.gson", params)
+// }
+// robotPlan["robotPlanStatus"] = (params) => {
+//   return axiosInstance.post("/robotpatrol/start-plan.gson", params)
+// }
+// robotPlan["robotPlanEditTime"] = (params) => {
+//   return axiosInstance.get("/robotpatrol/plan-edit-time.gson", {params: params})
+// }
+
+// robotPlan["robotPlanObj"] = (params) => {
+//   return axiosInstance.get("/robotpatrol/get-robot-plan-obj.gson", {
+//     params: {
+//       robotLocObjs: JSON.stringify([params])
+//     }
+//   })
+// }

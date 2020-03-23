@@ -1,5 +1,6 @@
-import React, {useState} from 'react';
-import { Modal, Form, Select, Button } from 'antd';
+import React, { useState, useRef, useImperativeHandle, forwardRef } from 'react'
+import { Modal, Form, Select } from 'antd'
+import { robotPlan } from '../../api'
 
 const formItemLayout = {
   labelCol: {
@@ -11,15 +12,43 @@ const formItemLayout = {
     sm: { span: 16 },
   },
 };
+
 const {Option} = Select;
 const objNameOption = ['一号变压器', '二号变压器'];
-const AddObjModal = props => {
-  const { getFieldDecorator } = props.form;
+const AddObjModal = (props, ref) => {
+  const { getFieldDecorator, validateFields } = props.form;
+  const [obj, setObj] = useState({})
   const [selectedItems, setItems] = useState([]);
   const filteredOptions = objNameOption.filter(o => !selectedItems.includes(o));
   const selectChange = selectedItems => {
     setItems( selectedItems )
+    setObj({...obj, objects: selectedItems })
   };
+
+  const [robotObjData, setRobotObjData] = useState([])
+  const childRef = useRef()
+  console.log(robotObjData)
+  useImperativeHandle(ref,() => ({
+    getRobotObjData: ()=>{
+      return robotObjData
+    }
+  }))
+
+  const handleOk = e =>{
+    e.preventDefault()
+    validateFields((err, values) => {
+      if (!err) {
+        robotPlan.robotPlanObjList()
+        .then(res=>{
+          setRobotObjData(res.robotPlanLocObjs)
+        })
+        .catch(err=>{
+          console.log("设备添加失败")
+        })
+      }
+    })
+  }
+
   return (
     <Modal
       title="添加设备"
@@ -27,25 +56,32 @@ const AddObjModal = props => {
       cancelText="取消"
       visible={props.visible}
       onCancel={props.handleCancel}
+      onOk={handleOk}
+      site={props.site}
+      ref = {childRef}
     >
       <Form {...formItemLayout}>
         <Form.Item label="物理位置编码">
-          {getFieldDecorator("objCode", {
+          {getFieldDecorator("robotPatrolLoc", {
+            initialValue: obj.robotPatrolLoc,
             rules: [{required: true}],
           })(
             <span>
-              <Select placeholder="请选择物理位置编码" style={{ width: '70%' }}>
+              <Select placeholder="请选择物理位置编码" style={{ width: '70%' }}
+                onChange={(value)=>{
+                  setObj({...obj, robotPatrolLoc: value })
+                }}
+              >
                 <Option value="1">35KV开关柜</Option>
                 <Option value="2">股道</Option>
               </Select>
-              <Button shape="circle" icon="plus"/>
-              <Button shape="circle" icon="minus" />
             </span>
           )}
         </Form.Item>
 
         <Form.Item label="设备名称">
-          {getFieldDecorator('objName', {
+          {getFieldDecorator('objects', {
+            initialValue: obj.objects,
             rules: [{required: true}],
           })(
             <span>
@@ -69,4 +105,4 @@ const AddObjModal = props => {
   )
 }
 
-export default Form.create()(AddObjModal);
+export default React.memo(Form.create()(forwardRef(AddObjModal)))

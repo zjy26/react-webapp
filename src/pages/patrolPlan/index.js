@@ -1,26 +1,26 @@
-import React, { useState, useEffect, useRef } from 'react';
-import Axios from 'axios';
-import { Row, Col, Form, Input, Select, Button, Cascader, Switch, Table, Menu, Dropdown, Icon, Pagination } from 'antd';
-import CycleModal from './cycleModal';
-import DetailModal from './detailModal';
-import ImportModal from '../common/importModal';
-import AuditModal from '../common/auditModal';
-import { connect } from "react-redux"
+import React, { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import moment from "moment"
+import { Row, Col, Form, Input, Select, Button, Cascader, Switch, Table, Menu, Dropdown, Icon, Pagination, Modal, message } from 'antd'
+import CycleModal from './cycleModal'
+import ImportModal from '../common/importModal'
+import AuditModal from '../common/auditModal'
+import { robotPlan } from '../../api'
+import { connect } from 'react-redux'
 
-const {Option} = Select;
 const PatrolPlan = props => {
-  const { getFieldDecorator } = props.form;
-  const [data, setData] = useState([]);  //列表数据
+  const { getFieldDecorator } = props.form
+  const [dirty, setDirty] = useState(0)
+  const [data, setData] = useState([])  //列表数据
   const [loading, setLoading] = useState(true);
-  const [itemValues, setItemValues] = useState([]);  //详情数据
   const [visible, setVisible] = useState({  //弹窗
     showCycle: false,
     showDetail: false,
     showImport: false,
     showAudit: false
-  });
-  const childRef = useRef();
-  const [modalStatus, setModalStatus] = useState("check");  //弹窗状态（查看/新建）
+  })
+  const [recurrence, setRecurrence] = useState(null)
+  const [currentId, setCurrentId] = useState(null)
 
   const handleCancel = () => {
     setVisible({
@@ -28,7 +28,48 @@ const PatrolPlan = props => {
       showDetail: false,
       showImport: false,
       showAudit: false
-    });
+    })
+  }
+
+  //变更状态
+  const showConfirm = (id, checked) => {
+    Modal.confirm({
+      title: `是否将该计划${checked==="APPR" ? '使用状态' : '停用状态'}变更为${checked==="APPR" ? '停用状态' : '使用状态'}？变更后，该巡检计划${checked==="APPR" ? '将会暂停' : '会按时进行巡检'}。`,
+      okText: '确认',
+      cancelText: '取消',
+      onOk() {
+        (() => {
+          robotPlan.robotPlanStatus({id: id, patrolPlanStatus:checked})
+          .then(res=>{
+            message.success("状态变更成功")
+          })
+          .catch(err=>{
+            console.log("状态变更失败")
+          })
+          setDirty(dirty=>dirty+1)
+        })()
+      },
+      onCancel() {
+      },
+    })
+  }
+
+  //编辑周期
+  const editRecurrence = (id, recurrence) => {
+    setCurrentId(id)
+    setRecurrence(recurrence)
+    setVisible({showCycle:true})
+  }
+
+  //手动启动
+  const manual = (id)=> {
+    robotPlan.robotPlanManual({id: id})
+    .then(res=>{
+      message.success("启动成功")
+    })
+    .catch(err=>{
+      console.log("启动失败")
+    })
   }
 
   //更多功能按钮
@@ -38,51 +79,65 @@ const PatrolPlan = props => {
       <Menu.Item key="download">下载</Menu.Item>
       <Menu.Item key="audit" onClick={ ()=>{setVisible({...visible, showAudit:true})} }>审计</Menu.Item>
     </Menu>
-  );
+  )
 
   //列表条目
   const columns = [
     {
       title: '巡检名称',
-      dataIndex: 'patrolName',
+      dataIndex: 'desc',
+      width: 300,
       render: (text, record) => {
         return (
-          <Button type="link" size={'small'} onClick={()=>{checkDetail(record.id)}}>{text}</Button>
+          <Button type="link" size={'small'}><Link to={"/patrol-plan-detail/"+record.id}>{text}</Link></Button>
         )
       }
     },
     {
       title: '线路',
       dataIndex: 'line',
+      render: (text, record) => {
+        if(props.locationTree.line.length>0) {
+          const item = props.locationTree.line.find(obj=> obj.value === record.site.slice(0,4))
+          return item.label
+        }
+      }
     },
     {
       title: '站点',
       dataIndex: 'site',
+      render: (text, record) => record.siteStation
     },
     {
       title: '巡检人',
-      dataIndex: 'patrolPeople',
+      dataIndex: 'peopleName',
     },
     {
       title: '周期',
-      dataIndex: 'cycle',
-    },
-    {
-      title: '计划状态',
-      dataIndex: 'status',
-      render: (text)=> {
-        return (
-          <Switch checkedChildren="使用" unCheckedChildren="停用" checked={text}/>
-        )
+      dataIndex: 'recurrence',
+      render: (text, record) => {
+        const item = props.recurrenceData.find(obj=>obj.value === record.recurrence)
+        return item.name
       }
     },
     {
+      title: '计划状态',
+      dataIndex: 'patrolPlanStatus',
+      render: (text, record)=> (
+        <Switch key={record.id} checkedChildren="使用" unCheckedChildren="停用"
+          checked={record.patrolPlanStatus === "APPR" ? true : false}
+          onChange={()=>showConfirm(record.id, record.patrolPlanStatus)}
+        />
+      )
+    },
+    {
       title: '创建人',
-      dataIndex: 'creator',
+      dataIndex: 'createdbyFullname',
     },
     {
       title: '创建时间',
-      dataIndex: 'createTime',
+      dataIndex: 'created',
+      render: (text, record) => moment(record.startDate).format('YYYY-MM-DD HH:mm:ss')
     },
     {
       title: '操作',
@@ -90,12 +145,12 @@ const PatrolPlan = props => {
       render: (text, record) => {
         return (
           <span>
-            <Dropdown 
+            <Dropdown
               overlay={
                 <Menu>
-                  <Menu.Item key="1" onClick={()=>{checkDetail(record.id)}}>查看详情</Menu.Item>
-                  <Menu.Item key="2" onClick={()=>{setVisible({showCycle:true})}}>编辑周期</Menu.Item>
-                  <Menu.Item key="3">手动启动</Menu.Item>
+                  <Menu.Item key="1"><Link to={"/patrol-plan-detail/"+record.id}>查看详情</Link></Menu.Item>
+                  <Menu.Item key="2" onClick={()=>{editRecurrence(record.id, record.recurrence)}}>编辑周期</Menu.Item>
+                  <Menu.Item key="3" onClick={()=>{manual(record.id)}}>手动启动</Menu.Item>
                 </Menu>
               }
             >
@@ -111,36 +166,20 @@ const PatrolPlan = props => {
 
   //获取列表数据
   useEffect(() => {
-    Axios.get('/api/patrolPlanList').then(res =>{
-      if(res.status === 200){
-        setData(res.data);
-        setLoading(false);
-      }
-    }).catch((err) =>{
-        setLoading(true);
-        console.log("列表数据加载失败")
-    });
-  }, [loading]);
+    document.title = "巡检计划"
 
-  //查看详情
-  const checkDetail = (id)=>{
-    setModalStatus("check");
-    Axios.get('/api/patrolPlanList/'+id)
-    .then((res) =>{
-      if(res.status === 200){
-        setItemValues(res.data);
-        setVisible({...visible, showDetail:true});
-        childRef.current.check();
+    setLoading(true)
+    robotPlan.robotPlanList()
+    .then(res => {
+      if(res){
+        setData(res)
+        setLoading(false)
       }
     })
-  }
-
-  //新建巡检单
-  const newPatrolPlan = ()=> {
-    setModalStatus("add");
-    childRef.current.resetForm();
-    setVisible({...visible, showDetail:true});
-  }
+    .catch(() => {
+      console.log("列表数据加载失败")
+    })
+  }, [dirty])
 
   return (
     <div>
@@ -148,33 +187,33 @@ const PatrolPlan = props => {
         <Row gutter={16}>
           <Col span={4}>
             <Form.Item>
-              {getFieldDecorator('planName')(<Input placeholder="请输入计划名称" />)}
+              {getFieldDecorator('desc')(<Input placeholder="请输入计划名称" />)}
             </Form.Item>
           </Col>
           <Col span={4}>
             <Form.Item>
-              {getFieldDecorator('creator')(<Input placeholder="请输入计划创建人姓名" />)}
+              {getFieldDecorator('createdbyFullname')(<Input placeholder="请输入计划创建人姓名" />)}
             </Form.Item>
           </Col>
           <Col span={4}>
             <Form.Item>
-              {getFieldDecorator('patrolpeople')(<Input placeholder="请输入计划巡检人姓名" />)}
+              {getFieldDecorator('peopleName')(<Input placeholder="请输入计划巡检人姓名" />)}
             </Form.Item>
           </Col>
           <Col span={4}>
             <Form.Item>
-              {getFieldDecorator('lineSite')(<Cascader options={props.locationTree.lineSite} placeholder="请选择线路/站点" />)}
+              {getFieldDecorator('site')(<Cascader options={props.locationTree.lineSite} placeholder="请选择线路/站点" />)}
             </Form.Item>
           </Col>
           <Col span={4}>
             <Form.Item>
-              {getFieldDecorator('cycle')(
+              {getFieldDecorator('recurrence')(
                 <Select placeholder="请选择周期" style={{ width: 160 }}>
-                  <Option value="1">手动</Option>
-                  <Option value="2">日</Option>
-                  <Option value="3">月</Option>
-                  <Option value="4">周</Option>
-                  <Option value="5">年月</Option>
+                  {
+                    props.recurrenceData.map(item=>
+                      <Select.Option key={item.value} value={item.value}>{item.name}</Select.Option>
+                    )
+                  }
                 </Select>
               )}
             </Form.Item>
@@ -187,7 +226,7 @@ const PatrolPlan = props => {
 
       <Row type="flex" justify="end">
         <Col span={2}>
-          <Button type="danger" onClick={newPatrolPlan}>新建</Button>
+          <Button type="danger"><Link to={"/patrol-plan-new"}>新建</Link></Button>
           </Col>
           <Col span={3}>
           <Dropdown overlay={menu}>
@@ -196,19 +235,28 @@ const PatrolPlan = props => {
         </Col>
       </Row>
 
-      <Table columns={columns} dataSource={data} scroll={{ x: 1600 }} pagination={false}/>
+      <Table loading={loading} rowKey="id" columns={columns} dataSource={data} scroll={{ x: 1600 }} pagination={false}/>
       <Row type="flex" justify="end"><Pagination total={20} showSizeChanger showQuickJumper style={{margin:30}}/></Row>
 
-      <DetailModal visible={visible.showDetail} {...{itemValues, modalStatus, handleCancel}} wrappedComponentRef={childRef}/>
-      <CycleModal visible={visible.showCycle} {...{handleCancel}}/>
+      <CycleModal
+        visible={visible.showCycle}
+        recurrenceData={props.recurrenceData}
+        weekData={props.weekData}
+        monthData={props.monthData}
+        {...{currentId, recurrence, handleCancel, setDirty}}
+      />
       <ImportModal visible={visible.showImport} {...{handleCancel}}/>
       <AuditModal visible={visible.showAudit} {...{handleCancel}}/>
     </div>
   )
 }
-
-const mapStateToProps = state => ({
-  locationTree: state.locationTree
-})
-
-export default connect(mapStateToProps)(Form.create()(PatrolPlan))
+const mapStateToProps = (state) => {
+  return {
+    recurrenceData: state.recurrenceData,
+    weekData: state.weekData,
+    monthData: state.monthData,
+    locationTree: state.locationTree,
+    robotPatrolPlanType: state.robotPatrolPlanType
+  }
+}
+export default connect(mapStateToProps, null)(React.memo(Form.create()(PatrolPlan)))

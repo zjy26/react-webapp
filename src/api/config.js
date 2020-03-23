@@ -4,7 +4,7 @@ import axios from "axios";
 let axiosInstance;
 
 axiosInstance = axios.create({
-  baseURL: "http://localhost:4000/"
+  baseURL: "http://localhost:8000/"
 });
 axiosInstance.interceptors.response.use(
   res => res.data,

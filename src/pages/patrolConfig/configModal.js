@@ -30,7 +30,7 @@ const ConfigModal = (props) => {
       setObj({})
       resetFields()
     }
-  }, [props.visible, props.currentId]);
+  }, [props.visible, props.currentId, resetFields]);
 
   const handleSubmit = e => {
     e.preventDefault()
