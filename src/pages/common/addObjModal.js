@@ -1,4 +1,4 @@
-import React, { useState, useRef, useImperativeHandle, forwardRef } from 'react'
+import React, { useState } from 'react'
 import { Modal, Form, Select } from 'antd'
 import { robotPlan } from '../../api'
 
@@ -15,7 +15,7 @@ const formItemLayout = {
 
 const {Option} = Select;
 const objNameOption = ['一号变压器', '二号变压器'];
-const AddObjModal = (props, ref) => {
+const AddObjModal = (props) => {
   const { getFieldDecorator, validateFields } = props.form;
   const [obj, setObj] = useState({})
   const [selectedItems, setItems] = useState([]);
@@ -25,22 +25,14 @@ const AddObjModal = (props, ref) => {
     setObj({...obj, objects: selectedItems })
   };
 
-  const [robotObjData, setRobotObjData] = useState([])
-  const childRef = useRef()
-  console.log(robotObjData)
-  useImperativeHandle(ref,() => ({
-    getRobotObjData: ()=>{
-      return robotObjData
-    }
-  }))
-
   const handleOk = e =>{
     e.preventDefault()
     validateFields((err, values) => {
       if (!err) {
         robotPlan.robotPlanObjList()
         .then(res=>{
-          setRobotObjData(res.robotPlanLocObjs)
+          props.setRobotObjList(res.robotPlanLocObjs)
+          props.handleCancel()
         })
         .catch(err=>{
           console.log("设备添加失败")
@@ -58,7 +50,7 @@ const AddObjModal = (props, ref) => {
       onCancel={props.handleCancel}
       onOk={handleOk}
       site={props.site}
-      ref = {childRef}
+      setRobotObjList = {props.setRobotObjList}
     >
       <Form {...formItemLayout}>
         <Form.Item label="物理位置编码">
@@ -105,4 +97,4 @@ const AddObjModal = (props, ref) => {
   )
 }
 
-export default React.memo(Form.create()(forwardRef(AddObjModal)))
+export default React.memo(Form.create()(AddObjModal))

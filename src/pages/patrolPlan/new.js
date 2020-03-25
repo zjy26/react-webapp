@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {Breadcrumb, Form, Button, Input, DatePicker, TimePicker, Icon, Select, Row, Col, Tabs, Table } from 'antd'
 import { connect } from 'react-redux'
@@ -36,11 +36,10 @@ const NewPatrolPlan = (props) => {
   const [activeKey, setActiveKey] = useState("bascInfo")  //设置显示tab
   const [obj, setObj] = useState({})
   const [recValue, setRecValue] = useState(null)
-  const [robotObjList, setRobotObjList] = useState(null)
+  const [robotObjList, setRobotObjList] = useState([])
   const [visible, setVisible] = useState({  //弹窗
     showAddObj: false,
   })
-  const parentRef = useRef()
 
   useEffect(() => {
     document.title = "新建巡检计划"
@@ -257,6 +256,25 @@ const NewPatrolPlan = (props) => {
     },
   ]
 
+  const expandedRowRender = (record) => {
+    const columns = [
+      { title: '属性', dataIndex: 'property', key: 'property' },
+      { title: '正常值', dataIndex: 'normalValue', key: 'normalValue' },
+      { title: '类型', dataIndex: 'resultType', key: 'resultType'}
+    ];
+
+    const data = record.robotPlanItems
+    return <Table rowKey="objMeter" columns={columns} dataSource={data} pagination={false} />
+  }
+
+  const table = robotObjList.length>0 ? <Table
+    rowKey="object"
+    columns={objCols}
+    expandedRowRender={expandedRowRender}
+    dataSource={robotObjList}
+    style={{marginTop: 20}}
+  /> : null
+
   return (
     <div>
       <Breadcrumb style={{margin: 30, fontSize: 20}}>
@@ -351,18 +369,14 @@ const NewPatrolPlan = (props) => {
             </Row>
         </TabPane>
         <TabPane tab="设备信息" key="objectInfo">
-          <Col span={24}>
-            <label style={{fontSize:18, marginRight:20}}>设备信息</label>
-            <Button onClick={()=>setVisible({...visible, showAddObj:true})}>新增</Button>
-          </Col>
-          {/* <Table
-            columns={objCols}
-            expandedRowRender={record => <p style={{ margin: 0 }}>{record.description}</p>}
-            dataSource={robotObjList}
-          /> */}
+          <Row>
+            <Col span={4}><label style={{fontSize:18, marginRight:20}}>设备信息</label></Col>
+            <Col span={2}><Button onClick={()=>setVisible({...visible, showAddObj:true})}>新增</Button></Col>
+          </Row>
+          {table}
         </TabPane>
       </Tabs>
-      <AddObjModal visible={visible.showAddObj} wrappedComponentRef={parentRef} site={getFieldValue("site")} {...{handleCancel}}/>
+      <AddObjModal visible={visible.showAddObj} site={getFieldValue("site")} {...{setRobotObjList, handleCancel}}/>
     </div>
   )
 }

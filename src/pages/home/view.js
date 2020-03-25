@@ -13,7 +13,7 @@ const View = (props) => {
   }
 
   useEffect(() => {
-    Axios.get('/api/applications').then(res =>{
+    Axios.get('/applications').then(res =>{
       if(res.status === 200){
         setData(res.data)
         setLoading(false)

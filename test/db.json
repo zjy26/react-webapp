@@ -552,39 +552,35 @@
 
   "robotPlanObjList": {
     "robotPlanLocObjs": [{
-      "robotPatrolLoc": {
-          "id":166,
-          "desc": "35kV开关柜室",
-          "code": "1000"
-      },
-      "object": {
-          "id":191356,
-          "desc": "UPS配电柜1&2",
-          "code": "1000"
-      },
-      "drawer":  {
-          "id":14,
-          "drawerName": "西端环控一、二级WLH11"
-      },
-      "stray":  {
-          "id":17,
-          "descr": "上行D1"
-      },
-      "robotPlanItems": [
-        {
-          "property": {
-              "id":1122,
-              "desc": "环境温度下限℃",
-              "code": "07-1000"
-          },
-          "objMeter": 64548,
-          "resultType": "D",
-          "objMeterInfoType": "07",
-          "alarmMinValue": null,
-          "alarmMaxValue": null,
-          "normalValue": 0E-12,
-          "normalValueDesc": "远方"
-        }]
+      "robotPatrolLoc": "35kV开关柜室",
+      "object": "UPS配电柜1&2",
+      "drawer": "西端环控一、二级WLH11",
+      "stray": "上行D1",
+      "robotPlanItems": [{
+        "property": "环境温度下限℃",
+        "objMeter": 64547,
+        "resultType": "D",
+        "objMeterInfoType": "07",
+        "alarmMinValue": null,
+        "alarmMaxValue": null,
+        "normalValue": 0E-12,
+        "normalValueDesc": "远方"
+      }]
+    },{
+      "robotPatrolLoc": "1500VUPS室内",
+      "object": "UPS配电柜",
+      "drawer": "二级WLH11",
+      "stray": "下行A1",
+      "robotPlanItems": [{
+        "property": "环境温度上限℃",
+        "objMeter": 64548,
+        "resultType": "A",
+        "objMeterInfoType": "07",
+        "alarmMinValue": null,
+        "alarmMaxValue": null,
+        "normalValue": 0E-13,
+        "normalValueDesc": "远方"
+      }]
     }]
   },
 
