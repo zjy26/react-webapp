@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {Breadcrumb, Form, Button, Input, Select, Row, Col, Tabs } from 'antd'
-import moment from "moment"
 import { connect } from 'react-redux'
 
 const { TabPane } = Tabs
@@ -22,8 +21,8 @@ const PatrolPlanDetail = (props) => {
   const [obj, setObj] = useState({})
   useEffect(() => {
     document.title = "查看详情"
-
-  })
+    setObj({})
+  }, [])
 
   return (
     <div>

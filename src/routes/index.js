@@ -1,14 +1,15 @@
-import View from '../pages/home/view';
-import Setting from '../pages/home/setting';
-import Application from '../pages/application/index';
-import ObjectModule from '../pages/object/index';
-import PatrolPlan from '../pages/patrolPlan/index';
+import View from '../pages/home/view'
+import Setting from '../pages/home/setting'
+import Application from '../pages/application/index'
+import ObjectModule from '../pages/object/index'
+import PatrolPlan from '../pages/patrolPlan/index'
 import PatrolPlanNew from '../pages/patrolPlan/new'
 import PatrolPlanDetail from '../pages/patrolPlan/detail'
-import PatrolSheet from '../pages/patrolSheet/index';
-import PatrolConfig from '../pages/patrolConfig/index';
-import DataStatistics from '../pages/dataStatistics/index';
-import ObjectModuleDetail from '../pages/object/detail';
+import PatrolSheet from '../pages/patrolSheet/index'
+import PatrolConfig from '../pages/patrolConfig/index'
+import DataStatistics from '../pages/dataStatistics/index'
+import ObjectModuleDetail from '../pages/object/detail'
+import ObjectEnvaluation from '../pages/objectEvaluation';
 
 const menuRoutes = [
   {path: "/home", exact: true, component: View},
@@ -21,7 +22,8 @@ const menuRoutes = [
   {path:"/patrol-plan-detail/:id", exact: false, component: PatrolPlanDetail},
   {path:"/patrol-sheet", exact: false, component: PatrolSheet},
   {path:"/patrol-config", exact: false, component: PatrolConfig},
-  {path:"/data-statistics", exact: false, component: DataStatistics}
+  {path:"/data-statistics", exact: false, component: DataStatistics},
+  {path:"/object-evaluation", exact: false, component: ObjectEnvaluation}
 ]
 
 export default menuRoutes;

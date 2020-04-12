@@ -109,20 +109,15 @@ robotPlan["robotPlanDelete"] = (id) => {
 robotPlan["robotPlanObjList"] = () => {
   return axiosInstance.get("/robotPlanObjList")
 }
-// robotPlan["robotPlanManual"] = (params) => {
-//   return axiosInstance.post("/robotpatrol/manual.gson", params)
-// }
-// robotPlan["robotPlanStatus"] = (params) => {
-//   return axiosInstance.post("/robotpatrol/start-plan.gson", params)
-// }
-// robotPlan["robotPlanEditTime"] = (params) => {
-//   return axiosInstance.get("/robotpatrol/plan-edit-time.gson", {params: params})
-// }
 
-// robotPlan["robotPlanObj"] = (params) => {
-//   return axiosInstance.get("/robotpatrol/get-robot-plan-obj.gson", {
-//     params: {
-//       robotLocObjs: JSON.stringify([params])
-//     }
-//   })
-// }
+//设备评价
+export const objectEvaluation = {}
+objectEvaluation["objectEvaluationVoltage"] = () => {
+  return axiosInstance.get( "/objectEvaluationVoltage")
+}
+objectEvaluation["objectEvaluationsite"] = () => {
+  return axiosInstance.get( "/objectEvaluationsite")
+}
+objectEvaluation["objectEvaluationDetail"] = () => {
+  return axiosInstance.get( "/objectEvaluationDetail")
+}

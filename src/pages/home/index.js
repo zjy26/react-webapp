@@ -108,6 +108,7 @@ const Index = (props) => {
             <Menu.Item key="patrol-sheet"><NavLink to="/patrol-sheet">巡检单</NavLink></Menu.Item>
             <Menu.Item key="patrol-config"><NavLink to="/patrol-config">巡检配置</NavLink></Menu.Item>
             <Menu.Item key="data-statistics"><NavLink to="/data-statistics">数据统计</NavLink></Menu.Item>
+            <Menu.Item key="object-evaluation"><NavLink to="/object-evaluation">设备评价</NavLink></Menu.Item>
             <Menu.Item key="user" style={{ float: 'right' }}>
               <Dropdown overlay={menu} trigger={['click']}>
                 <span>

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {Breadcrumb, Form, Button, Input, DatePicker, TimePicker, Icon, Select, Row, Col, Tabs, Table } from 'antd'
 import { connect } from 'react-redux'
-import { robotPlan } from '../../api'
 import AddObjModal from '../common/addObjModal'
 import styles from './PatrolPlan.module.scss'
 
@@ -32,7 +31,7 @@ const patrolItemLayout = {
 
 let id = 0
 const NewPatrolPlan = (props) => {
-  const { getFieldDecorator, validateFields, getFieldValue, setFieldsValue } = props.form
+  const { getFieldDecorator, getFieldValue, setFieldsValue } = props.form
   const [activeKey, setActiveKey] = useState("bascInfo")  //设置显示tab
   const [obj, setObj] = useState({})
   const [recValue, setRecValue] = useState(null)
@@ -43,7 +42,7 @@ const NewPatrolPlan = (props) => {
 
   useEffect(() => {
     document.title = "新建巡检计划"
-
+    setObj({})
   }, [])
 
   const handleCancel = ()=>{
@@ -273,6 +272,7 @@ const NewPatrolPlan = (props) => {
     expandedRowRender={expandedRowRender}
     dataSource={robotObjList}
     style={{marginTop: 20}}
+    pagination={false}
   /> : null
 
   return (
