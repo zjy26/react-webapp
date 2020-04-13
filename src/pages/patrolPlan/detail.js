@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import {Breadcrumb, Form, Button, Input, Select, Row, Col, Tabs } from 'antd'
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Breadcrumb, Button, Input, Select, Row, Col, Tabs } from 'antd';
 import { connect } from 'react-redux'
 
 const { TabPane } = Tabs

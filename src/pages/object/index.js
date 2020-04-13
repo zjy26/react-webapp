@@ -1,7 +1,26 @@
 import React, { useState, useEffect } from 'react'
 import moment from "moment"
 import { Link } from 'react-router-dom'
-import { Row, Col, Form, Input, Select, Button, Cascader, DatePicker, InputNumber, Table, Checkbox, Tag, Menu, Dropdown, Icon, Pagination, message } from 'antd'
+import { DownOutlined } from '@ant-design/icons';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import {
+  Row,
+  Col,
+  Input,
+  Select,
+  Button,
+  Cascader,
+  DatePicker,
+  InputNumber,
+  Table,
+  Checkbox,
+  Tag,
+  Menu,
+  Dropdown,
+  Pagination,
+  message,
+} from 'antd';
 import { robotObject, robotMaintain } from '../../api'
 import AddModal from './addModal'
 import ImportModal from '../common/importModal'
@@ -218,11 +237,11 @@ const ObjectModule = props => {
               }
             >
               <Button>
-                <Icon type="down" />
+                <DownOutlined />
               </Button>
             </Dropdown>
           </span>
-        )
+        );
       }
     }
   ];
@@ -367,7 +386,7 @@ const ObjectModule = props => {
             </Col>
             <Col span={3}>
             <Dropdown overlay={menu}>
-              <Button type="danger">更多功能<Icon type="down" /></Button>
+              <Button type="danger">更多功能<DownOutlined /></Button>
             </Dropdown>
           </Col>
         </Row>
@@ -392,7 +411,7 @@ const ObjectModule = props => {
       <ChangeStatusModal visible={visible.showChangeStatus} {...{handleCancel, setDirty}}/>
       <EditModal visible={visible.showEdit} {...{objectIds, handleCancel, setDirty}}/>
     </div>
-  )
+  );
 }
 
 const mapStateToProps = (state) => {

@@ -1,9 +1,8 @@
 :global {
   .ant-layout-header {
-    background: #00ADF2;
     padding: 0;
   }
-  .ant-menu-dark, .ant-menu-dark .ant-menu-sub {
+  .ant-menu.ant-menu-dark, .ant-menu-dark .ant-menu-sub {
     background: #00ADF2;
   }
   .ant-menu.ant-menu-dark .ant-menu-item-selected, .ant-menu-submenu-popup.ant-menu-dark .ant-menu-item-selected {

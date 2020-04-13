@@ -1,6 +1,9 @@
 
 import React, { useState, useEffect} from 'react'
-import { Row, Col, Form, Tooltip, Icon, Table, Empty, Spin} from 'antd'
+import { QuestionCircleOutlined } from '@ant-design/icons';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Row, Col, Tooltip, Table, Empty, Spin } from 'antd';
 import ReactEcharts from 'echarts-for-react'
 import { getFaultRateOption, getScoreOption } from './chart'
 import { objectEvaluation } from '../../api'
@@ -89,7 +92,7 @@ const Detail = props => {
                   </div>
                 }
               >
-                <Icon style={{ marginLeft: '0.25em' }} type="question-circle" />
+                <QuestionCircleOutlined style={{ marginLeft: '0.25em' }} />
               </Tooltip>
             </h3>
           </Col>
@@ -121,8 +124,7 @@ const Detail = props => {
         ) : <Empty />
       }
     </div>
-
-  )
+  );
 }
 
 export default React.memo(Form.create()(Detail))

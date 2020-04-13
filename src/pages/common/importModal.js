@@ -1,5 +1,6 @@
 import React from 'react';
-import { Modal, Upload, Button, Icon, Row, Col } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
+import { Modal, Upload, Button, Row, Col } from 'antd';
 
 const ImportModal = props => {
   return (
@@ -15,7 +16,7 @@ const ImportModal = props => {
         <Col span={5}>
           <Upload {...props}>
             <Button>
-              <Icon type="upload" /> 上传文件
+              <UploadOutlined /> 上传文件
             </Button>
           </Upload>
         </Col>
@@ -26,7 +27,7 @@ const ImportModal = props => {
         </Col>
       </Row>
     </Modal>
-  )
+  );
 }
 
 export default ImportModal;

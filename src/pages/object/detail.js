@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import {Breadcrumb, Form, Button, Input, Select, Row, Col, Tabs, Card, Table, message } from 'antd'
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Breadcrumb, Button, Input, Select, Row, Col, Tabs, Card, Table, message } from 'antd';
 import { Link } from 'react-router-dom'
 import { robotObject, robotMaintain } from '../../api'
 import moment from "moment"

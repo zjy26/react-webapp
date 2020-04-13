@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
-import { Modal, Form, Input, Select, DatePicker, message } from 'antd'
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Modal, Input, Select, DatePicker, message } from 'antd';
 import { robotObject } from '../../api'
 import moment from "moment"
 import store from '../../store';

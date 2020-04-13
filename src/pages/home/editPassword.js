@@ -1,5 +1,8 @@
 import React, { useRef, useImperativeHandle, forwardRef }from 'react';
-import { Modal, Form, Icon, Input, Button, Checkbox } from 'antd';
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Modal, Input, Button, Checkbox } from 'antd';
 
 const EditPassword = (props, ref) => {
   const modalRef = useRef();
@@ -37,7 +40,7 @@ const EditPassword = (props, ref) => {
               rules: [{ required: true, message: 'Please input your username!' }],
             })(
               <Input
-                prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
+                prefix={<UserOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
                 placeholder="Username"
               />,
             )}
@@ -47,7 +50,7 @@ const EditPassword = (props, ref) => {
               rules: [{ required: true, message: 'Please input your Password!' }],
             })(
               <Input
-                prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
+                prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
                 type="password"
                 placeholder="Password"
               />,

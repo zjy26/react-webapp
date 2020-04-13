@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import Axios from 'axios';
-import { Modal, Form, Button, Input, Row, Col, Table, Collapse } from 'antd';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Modal, Button, Input, Row, Col, Table, Collapse } from 'antd';
 import styles from './PatrolSheet.module.scss';
 
 const formItemLayout = {

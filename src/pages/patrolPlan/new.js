@@ -1,6 +1,20 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import {Breadcrumb, Form, Button, Input, DatePicker, TimePicker, Icon, Select, Row, Col, Tabs, Table } from 'antd'
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import {
+  Breadcrumb,
+  Button,
+  Input,
+  DatePicker,
+  TimePicker,
+  Select,
+  Row,
+  Col,
+  Tabs,
+  Table,
+} from 'antd';
 import { connect } from 'react-redux'
 import AddObjModal from '../common/addObjModal'
 import styles from './PatrolPlan.module.scss'
@@ -96,11 +110,7 @@ const NewPatrolPlan = (props) => {
         <TimePicker format={"HH:mm"} placeholder="请选择巡检时间" />
       )}
       {keys.length > 1 ? (
-        <Icon
-          type="minus-circle-o"
-          className={styles.dynamicBtn}
-          onClick={() => remove(k)}
-        />
+        <MinusCircleOutlined className={styles.dynamicBtn} onClick={() => remove(k)} />
       ) : null}
     </Form.Item></Col>
   ))
@@ -153,7 +163,7 @@ const NewPatrolPlan = (props) => {
         {patrolTimeItems}
         <Col span={24}><Form.Item>
           <Button type="dashed" onClick={add} style={{ width: '30%' }}>
-            <Icon type="plus" />增加巡检时间
+            <PlusOutlined />增加巡检时间
           </Button>
         </Form.Item></Col>
       </div>
@@ -193,7 +203,7 @@ const NewPatrolPlan = (props) => {
         {patrolTimeItems}
         <Col span={24}><Form.Item>
           <Button type="dashed" onClick={add} style={{ width: '30%' }}>
-            <Icon type="plus" />增加巡检时间
+            <PlusOutlined />增加巡检时间
           </Button>
         </Form.Item></Col>
       </div>
@@ -233,7 +243,7 @@ const NewPatrolPlan = (props) => {
         {patrolTimeItems}
         <Col span={24}><Form.Item>
           <Button type="dashed" onClick={add} style={{ width: '30%' }}>
-            <Icon type="plus" />增加巡检时间
+            <PlusOutlined />增加巡检时间
           </Button>
         </Form.Item></Col>
       </div>

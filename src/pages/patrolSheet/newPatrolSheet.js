@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Form, Button, Input, Select, Row, Col, Tabs, DatePicker,Table, Badge } from 'antd';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Button, Input, Select, Row, Col, Tabs, DatePicker, Table, Badge } from 'antd';
 import AddObjModal from '../patrolPlan/addObjModal';
 import AddPatrolItemModal from '../patrolPlan/addPatrolItemModal';
 

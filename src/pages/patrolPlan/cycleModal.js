@@ -1,5 +1,8 @@
 import React, {useState} from 'react';
-import { Modal, Form, Select, DatePicker, TimePicker, Button, Icon, message } from 'antd'
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Modal, Select, DatePicker, TimePicker, Button, message } from 'antd';
 import moment from "moment"
 import { robotPlan } from '../../api'
 import styles from './PatrolPlan.module.scss'
@@ -59,11 +62,7 @@ const CycleModal = props => {
         <TimePicker format={"HH:mm"} placeholder="请选择巡检时间" />
       )}
       {keys.length > 1 ? (
-        <Icon
-          type="minus-circle-o"
-          className={styles.dynamicBtn}
-          onClick={() => remove(k)}
-        />
+        <MinusCircleOutlined className={styles.dynamicBtn} onClick={() => remove(k)} />
       ) : null}
     </Form.Item>
   ))
@@ -117,7 +116,7 @@ const CycleModal = props => {
         {patrolTimeItems}
         <Form.Item {...formItemLayoutWithOutLabel}>
           <Button type="dashed" onClick={add} style={{ width: '30%' }}>
-            <Icon type="plus" />增加巡检时间
+            <PlusOutlined />增加巡检时间
           </Button>
         </Form.Item>
       </div>
@@ -157,7 +156,7 @@ const CycleModal = props => {
         {patrolTimeItems}
         <Form.Item {...formItemLayoutWithOutLabel}>
           <Button type="dashed" onClick={add} style={{ width: '30%' }}>
-            <Icon type="plus" />增加巡检时间
+            <PlusOutlined />增加巡检时间
           </Button>
         </Form.Item>
       </div>
@@ -197,7 +196,7 @@ const CycleModal = props => {
         {patrolTimeItems}
         <Form.Item {...formItemLayoutWithOutLabel}>
           <Button type="dashed" onClick={add} style={{ width: '30%' }}>
-            <Icon type="plus" />增加巡检时间
+            <PlusOutlined />增加巡检时间
           </Button>
         </Form.Item>
       </div>

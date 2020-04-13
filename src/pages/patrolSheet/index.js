@@ -1,6 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Axios from 'axios';
-import { Row, Col, Form, Input, Select, Button, Cascader, DatePicker, Table, Tag, Menu, Dropdown, Icon } from 'antd';
+import { DownOutlined } from '@ant-design/icons';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import {
+  Row,
+  Col,
+  Input,
+  Select,
+  Button,
+  Cascader,
+  DatePicker,
+  Table,
+  Tag,
+  Menu,
+  Dropdown,
+} from 'antd';
 import DetailModal from './detailModal';
 import AddModal from './addModal';
 import CancelModal from './cancelModal';
@@ -232,7 +247,7 @@ const PatrolSheet = props => {
             </Col>
             <Col span={3}>
             <Dropdown overlay={menu}>
-              <Button type="danger">更多功能<Icon type="down" /></Button>
+              <Button type="danger">更多功能<DownOutlined /></Button>
             </Dropdown>
           </Col>
         </Row>
@@ -247,7 +262,7 @@ const PatrolSheet = props => {
       <ImportModal visible={visible.showImport} {...{handleCancel}}/>
       <AuditModal visible={visible.showAudit} {...{handleCancel}}/>
     </div>
-  )
+  );
 }
 
 const mapStateToProps = state => ({

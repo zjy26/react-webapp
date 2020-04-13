@@ -1,5 +1,8 @@
 import React, { useLayoutEffect } from 'react'
-import { Layout, Menu, Icon, Dropdown, Form } from 'antd'
+import { UserOutlined } from '@ant-design/icons';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Layout, Menu, Dropdown } from 'antd';
 import { Route, NavLink, Switch, Redirect } from 'react-router-dom'
 import MeunRoute from '../../routes'
 import EditPassword from './editPassword'
@@ -112,7 +115,7 @@ const Index = (props) => {
             <Menu.Item key="user" style={{ float: 'right' }}>
               <Dropdown overlay={menu} trigger={['click']}>
                 <span>
-                  <Icon type="user" />
+                  <UserOutlined />
                 </span>
               </Dropdown>
             </Menu.Item>

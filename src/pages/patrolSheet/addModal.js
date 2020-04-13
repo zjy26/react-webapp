@@ -1,5 +1,7 @@
 import React, { useState, useRef, useImperativeHandle, forwardRef } from 'react';
-import { Modal, Form, Button, Input, Select, Row, Col, Tabs, DatePicker, Table, Badge } from 'antd';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Modal, Button, Input, Select, Row, Col, Tabs, DatePicker, Table, Badge } from 'antd';
 import moment from "moment";
 import AddObjModal from '../common/addObjModal';
 import AddPatrolItemModal from '../common/addPatrolItemModal';

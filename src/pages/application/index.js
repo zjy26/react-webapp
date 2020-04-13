@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Col, Row, Modal, Form, Input, Upload, Icon, Typography, Button, Spin } from 'antd';
+import { Form, Icon as LegacyIcon } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { DeleteOutlined, EditOutlined, LinkOutlined, PlusOutlined } from '@ant-design/icons';
+import { Card, Col, Row, Modal, Input, Upload, Typography, Button, Spin } from 'antd';
 import style from './Application.module.scss';
 import Axios from 'axios';
 import Error from '../error';
@@ -164,7 +167,7 @@ const Application = props => {
   const { getFieldDecorator } = props.form;
   const uploadButton = (
     <div>
-      <Icon type={loading ? 'loading' : 'plus'} />
+      <LegacyIcon type={loading ? 'loading' : 'plus'} />
       <div className="ant-upload-text">Upload</div>
     </div>
   );
@@ -199,25 +202,25 @@ const Application = props => {
         <Row>
           {
             data.map((item, index)=>{
-              return(
+              return (
                 <Col md={12} lg={8} xl={6} xxl={6} key={index}>
                   <Card title={item.name}
                     actions={[
-                    <Button type="primary" shape="circle" icon="link" href={item.href} target="_blank" />,
-                    <Button type="primary" shape="circle" icon="edit" onClick={()=>{edit(item.id)}} />,
-                    <Button type="primary" shape="circle" icon="delete" onClick={()=>{handleDelete(item.id)}} />,
+                    <Button type="primary" shape="circle" icon={<LinkOutlined />} href={item.href} target="_blank" />,
+                    <Button type="primary" shape="circle" icon={<EditOutlined />} onClick={()=>{edit(item.id)}} />,
+                    <Button type="primary" shape="circle" icon={<DeleteOutlined />} onClick={()=>{handleDelete(item.id)}} />,
                   ]}>
                     <Col span={10}><img src={item.icon} alt="" style={{width:60,height:60}} /></Col>
                     <Col span={14}><Text strong>ID：{item.id}</Text></Col>
                   </Card>
                 </Col>
-              )
+              );
             })
           }
           <Col md={12} lg={8} xl={6} xxl={6}>
             <Card className={style.addApplication}>
               <Button type="primary" shape="circle" style={{width:'66px',height:'66px'}} onClick={addApplication}>
-                <Icon type="plus" style={{width:'35px',height:'35px',fontSize:'35px'}} />
+                <PlusOutlined style={{width:'35px',height:'35px',fontSize:'35px'}} />
               </Button>
               <div>添加应用</div>
             </Card>

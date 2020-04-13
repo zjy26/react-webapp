@@ -1,7 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import Axios from 'axios';
 
-import { Layout, Form, Input, Button, Row, Col, Divider, Upload, Avatar, Typography, message } from 'antd';
+import { UserOutlined } from '@ant-design/icons';
+
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+
+import {
+  Layout,
+  Input,
+  Button,
+  Row,
+  Col,
+  Divider,
+  Upload,
+  Avatar,
+  Typography,
+  message,
+} from 'antd';
 const { Text, Title  } = Typography;
 const { TextArea } = Input;
 const { Content } = Layout;
@@ -69,7 +85,7 @@ const Setting = (props) => {
 
               <Row>
                 <Col md={10} lg={8} xl={6}>
-                  <Avatar size={160} icon="user" src={avatar}/>
+                  <Avatar size={160} icon={<UserOutlined />} src={avatar}/>
                 </Col>
                 <Col md={14} lg={16} xl={8}>
                   <Form.Item label="上传新头像" colon={false} extra="允许的最大文件大小为200KB。">

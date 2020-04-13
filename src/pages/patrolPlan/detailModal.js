@@ -1,5 +1,20 @@
 import React, { useState, useRef, useImperativeHandle, forwardRef } from 'react';
-import { Modal, Form, Button, Input, Select, Row, Col, Tabs, DatePicker, InputNumber, Table, Badge } from 'antd';
+import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import {
+  Modal,
+  Button,
+  Input,
+  Select,
+  Row,
+  Col,
+  Tabs,
+  DatePicker,
+  InputNumber,
+  Table,
+  Badge,
+} from 'antd';
 import AddObjModal from '../common/addObjModal';
 import AddPatrolItemModal from '../common/addPatrolItemModal';
 
@@ -291,8 +306,8 @@ const DetailModal = (props, ref) => {
                             </Select.Option>
                           ))}
                         </Select>
-                        <Button shape="circle" icon="plus"/>
-                        <Button shape="circle" icon="minus" />
+                        <Button shape="circle" icon={<PlusOutlined />}/>
+                        <Button shape="circle" icon={<MinusOutlined />} />
                       </span>
                     )}
                   </Form.Item>
@@ -306,8 +321,8 @@ const DetailModal = (props, ref) => {
                       <span>
                         <InputNumber min={1} max={24} style={{ width: '25%' }}/>时
                         <InputNumber min={0} max={59} style={{ width: '25%' }}/>分
-                        <Button shape="circle" icon="plus" />
-                        <Button shape="circle" icon="minus" />
+                        <Button shape="circle" icon={<PlusOutlined />} />
+                        <Button shape="circle" icon={<MinusOutlined />} />
                       </span>
                     )}
                   </Form.Item>
@@ -357,7 +372,7 @@ const DetailModal = (props, ref) => {
         <AddPatrolItemModal visible={visible.showAddPatrolItem} {...{handleCancel}}/>
       </div>
     </Modal>
-  )
+  );
 }
 
 export default Form.create()(forwardRef(DetailModal));

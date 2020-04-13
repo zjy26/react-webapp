@@ -1,7 +1,24 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import moment from "moment"
-import { Row, Col, Form, Input, Select, Button, Cascader, Switch, Table, Menu, Dropdown, Icon, Pagination, Modal, message } from 'antd'
+import { DownOutlined } from '@ant-design/icons';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import {
+  Row,
+  Col,
+  Input,
+  Select,
+  Button,
+  Cascader,
+  Switch,
+  Table,
+  Menu,
+  Dropdown,
+  Pagination,
+  Modal,
+  message,
+} from 'antd';
 import CycleModal from './cycleModal'
 import ImportModal from '../common/importModal'
 import AuditModal from '../common/auditModal'
@@ -155,11 +172,11 @@ const PatrolPlan = props => {
               }
             >
               <Button>
-                <Icon type="down" />
+                <DownOutlined />
               </Button>
             </Dropdown>
           </span>
-        )
+        );
       }
     }
   ];
@@ -230,7 +247,7 @@ const PatrolPlan = props => {
           </Col>
           <Col span={3}>
           <Dropdown overlay={menu}>
-            <Button type="danger">更多功能<Icon type="down" /></Button>
+            <Button type="danger">更多功能<DownOutlined /></Button>
           </Dropdown>
         </Col>
       </Row>
@@ -248,7 +265,7 @@ const PatrolPlan = props => {
       <ImportModal visible={visible.showImport} {...{handleCancel}}/>
       <AuditModal visible={visible.showAudit} {...{handleCancel}}/>
     </div>
-  )
+  );
 }
 const mapStateToProps = (state) => {
   return {

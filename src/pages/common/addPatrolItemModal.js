@@ -1,5 +1,8 @@
 import React from 'react';
-import { Modal, Form, Select, Button, Input } from 'antd';
+import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Modal, Select, Button, Input } from 'antd';
 
 const formItemLayout = {
   labelCol: {
@@ -34,8 +37,8 @@ const AddPatrolItemModal = props => {
                 <Option value="1">开关</Option>
                 <Option value="2">电源指示</Option>
               </Select>
-              <Button shape="circle" icon="plus"/>
-              <Button shape="circle" icon="minus" />
+              <Button shape="circle" icon={<PlusOutlined />}/>
+              <Button shape="circle" icon={<MinusOutlined />} />
             </span>
           )}
         </Form.Item>
@@ -62,7 +65,7 @@ const AddPatrolItemModal = props => {
         </Form.Item>
       </Form>
     </Modal>
-  )
+  );
 }
 
 export default Form.create()(AddPatrolItemModal);

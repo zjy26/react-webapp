@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Axios from 'axios';
-import { Row, Col, Form, Tabs, Card, Button, DatePicker, Select, Table } from 'antd';
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Row, Col, Tabs, Card, Button, DatePicker, Select, Table } from 'antd';
 import ObjDetailModal from './objDetailModal';
 import PatrolDetailModal from './patrolDetailModal';
 import ImplementationPie from './charts/implementationPie';

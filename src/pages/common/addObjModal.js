@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
-import { Modal, Form, Select } from 'antd'
+import { Form } from '@ant-design/compatible';
+import '@ant-design/compatible/assets/index.css';
+import { Modal, Select } from 'antd';
 import { robotPlan } from '../../api'
 
 const formItemLayout = {
