@@ -1,8 +1,6 @@
 import React, { useLayoutEffect } from 'react'
-import { UserOutlined } from '@ant-design/icons';
-import { Form } from '@ant-design/compatible';
-import '@ant-design/compatible/assets/index.css';
-import { Layout, Menu, Dropdown } from 'antd';
+import { UserOutlined } from '@ant-design/icons'
+import { Layout, Menu, Dropdown } from 'antd'
 import { Route, NavLink, Switch, Redirect } from 'react-router-dom'
 import MeunRoute from '../../routes'
 import EditPassword from './editPassword'
@@ -139,7 +137,7 @@ const Index = (props) => {
           </Switch>
         </Content>
       </Layout>
-      <EditPassword form={props.form} visible={props.visible} {...{ handleOk, handleCancel }} />
+      <EditPassword visible={props.visible} {...{ handleOk, handleCancel }} />
     </div>
   );
 }
@@ -187,4 +185,4 @@ const mapDispatchToProps = (dispatch) => {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(React.memo(Form.create()(Index)))
+export default connect(mapStateToProps, mapDispatchToProps)(React.memo((Index)))

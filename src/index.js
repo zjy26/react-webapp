@@ -1,12 +1,12 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import {Provider} from 'react-redux';
-import store from './store';
-import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
+import React from 'react'
+import ReactDOM from 'react-dom'
+import {Provider} from 'react-redux'
+import store from './store'
+import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom'
 import Login from './pages/login'
 import Index from './pages/home/index'
-import zhCN from 'antd/es/locale/zh_CN';
-import { ConfigProvider } from 'antd';
+import zhCN from 'antd/es/locale/zh_CN'
+import { ConfigProvider } from 'antd'
 
 ReactDOM.render(
   <ConfigProvider locale={zhCN}>
@@ -20,4 +20,4 @@ ReactDOM.render(
       </Router>
     </Provider>
   </ConfigProvider>
-  , document.getElementById("root"));
+  , document.getElementById("root"))

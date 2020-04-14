@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Row, Col, Button, Cascader, Table, Modal, message } from 'antd'
 import ConfigModal from './configModal'
 import { robotConfig } from '../../api'
@@ -12,9 +12,11 @@ const PatrolConfig = props => {
   const [dirty, setDirty] = useState(0)
   const [currentId, setCurrentId] = useState(0)
 
+  const siteRef = useRef()
+
   const newModal = ()=> {
     setModalTitle("新增配置")
-    setCurrentId(0)
+    setCurrentId(null)
     setVisible(true)
   }
 
@@ -47,6 +49,11 @@ const PatrolConfig = props => {
     setCurrentId(id)
     setModalTitle("编辑配置")
     setVisible(true)
+  }
+
+  //搜索
+  const search = ()=> {
+    console.log(siteRef.current.state.value)
   }
 
   //列表条目
@@ -118,8 +125,8 @@ const PatrolConfig = props => {
     <div>
       <Row style={{margin:30}}>
         <Col span={12}>
-          <Cascader options={props.locationTree.lineSite} placeholder="请选择线路/站点" />,
-          <Button type="primary">搜索</Button>
+          <Cascader options={props.locationTree.lineSite} placeholder="请选择线路/站点" ref={siteRef} />,
+          <Button type="primary" onClick={search}>搜索</Button>
         </Col>
         <Col span={12} style={{textAlign: "right"}}>
           <Button type="danger" onClick={newModal}>新建</Button>

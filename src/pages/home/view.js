@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import {connect} from 'react-redux';
-import { Row, Col, Spin } from 'antd';
-import Axios from 'axios';
-import Error from '../error';
+import React, { useState, useEffect } from 'react'
+import {connect} from 'react-redux'
+import { Row, Col, Spin } from 'antd'
+import Axios from 'axios'
+import Error from '../error'
 
 const View = (props) => {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [statusCode, setStatusCode] = useState(200);
+  const [data, setData] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [statusCode, setStatusCode] = useState(200)
   const showModal = ()=>{
-    props.showModal1()
+    props.showModal()
   }
 
   useEffect(() => {
@@ -21,7 +21,7 @@ const View = (props) => {
     }).catch((err) =>{
       setStatusCode(err.response.status)
     })
-  }, []);
+  }, [])
 
   if(loading === true) {
     if(statusCode === 500 || statusCode === 404){
@@ -66,13 +66,13 @@ const View = (props) => {
 }
 const mapDispatchToProps = (dispatch) => {
   return {
-      showModal1(e) {
-          let action = {
-              type:'showModal'
-          }
-          dispatch(action)
+      showModal() {
+        let action = {
+          type:'showPsdModal'
+        }
+        dispatch(action)
       }
   }
 }
 
-export default connect(null, mapDispatchToProps)(React.memo(View));
+export default connect(null, mapDispatchToProps)(React.memo(View))

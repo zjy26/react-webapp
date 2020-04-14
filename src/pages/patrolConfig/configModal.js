@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { Form, Modal, Input, Select } from 'antd';
 import { robotConfig } from '../../api'
 
@@ -18,7 +18,7 @@ const ConfigModal = (props) => {
 
   useEffect(() => {
     //查看详情
-    if(props.currentId !== 0) {
+    if(props.currentId) {
       robotConfig.robotConfigDetail(props.currentId)
       .then((res) =>{
         if(res){
@@ -28,7 +28,8 @@ const ConfigModal = (props) => {
     } else {
       form.resetFields()
     }
-  }, [props.visible, props.currentId])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.currentId])
 
   const handleSubmit = async () => {
     try {

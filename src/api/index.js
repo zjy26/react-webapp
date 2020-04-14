@@ -1,5 +1,19 @@
 import { axiosInstance } from "./config"
 
+//登录
+export const login = ()=> {
+  return axiosInstance.get("/login")
+}
+
+//个人设置
+export const setting = {}
+setting["settingShow"] = () => {
+  return axiosInstance.get("/setting")
+}
+setting["settingEdit"] = (id, params) => {
+  return axiosInstance.put("/setting/" +id, params)
+}
+
 //线路站点
 export const locationTree = () => {
   return axiosInstance.get("/locationTree")

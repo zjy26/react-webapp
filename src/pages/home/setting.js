@@ -1,12 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import Axios from 'axios';
-
-import { UserOutlined } from '@ant-design/icons';
-
-import { Form } from '@ant-design/compatible';
-import '@ant-design/compatible/assets/index.css';
-
+import React, { useState, useEffect } from 'react'
+import { setting } from '../../api/index'
+import { UserOutlined } from '@ant-design/icons'
 import {
+  Form,
   Layout,
   Input,
   Button,
@@ -17,40 +13,38 @@ import {
   Avatar,
   Typography,
   message,
-} from 'antd';
-const { Text, Title  } = Typography;
-const { TextArea } = Input;
-const { Content } = Layout;
+} from 'antd'
+const { Text, Title  } = Typography
+const { TextArea } = Input
+const { Content } = Layout
 
 const Setting = (props) => {
-  const [ avatar, setAvatar ] = useState(null);
-  const { getFieldDecorator } = props.form;
+  const [form] = Form.useForm()
+  const [ avatar, setAvatar ] = useState(null)
 
   useEffect(() => {
-    Axios.get('/api/setting').then(res =>{
+    setting.settingShow().then(res =>{
       if(res.status === 200){
-        props.form.setFieldsValue( res.data[0] );
+        form.setFieldsValue( res.data[0] )
       }
-   }).catch((err) =>{
+   }).catch(() =>{
 
    })
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [])
 
-  const handleSubmit = e => {
-    e.preventDefault();
-    props.form.validateFields((err, values) => {
-      if (!err) {
-        const fieldsValues = {...values};
-        console.log(fieldsValues)
-        Axios.put('/api/setting/'+fieldsValues.id, fieldsValues
-        ).then((res)=>{
+  const handleSubmit = () => {
+    form.validateFields()
+    .then(values=>{
+      const fieldsValues = {...values};
+      console.log(values)
 
-        })
-        message.success("保存成功");
-      }
-    });
-  };
+      setting.settingEdit(fieldsValues.id, fieldsValues)
+      .then((res)=>{
+        message.success("保存成功")
+      })
+    })
+  }
 
   const uploadProps = {
     name: "avatar",
@@ -72,13 +66,18 @@ const Setting = (props) => {
   };
 
   return (
-    <div>
-      <Layout>
-        <Content style={{ background: '#fff', padding: 34, margin: 0 }}>
+    <Layout>
+      <Content style={{ background: '#fff', padding: 34, margin: 0 }}>
+        <Form
+          form={form} 
+          initialValue={{
+            avatar: ''
+          }}
+        >
           <Row>
             <Col span={7}>
               <Title level={4}>公开头像</Title>
-              <Text >您可以在此处更改头像</Text >
+              <Text>您可以在此处更改头像</Text>
             </Col>
             <Col span={1}></Col>
             <Col span={16}>
@@ -88,16 +87,16 @@ const Setting = (props) => {
                   <Avatar size={160} icon={<UserOutlined />} src={avatar}/>
                 </Col>
                 <Col md={14} lg={16} xl={8}>
-                  <Form.Item label="上传新头像" colon={false} extra="允许的最大文件大小为200KB。">
-                    {getFieldDecorator('avatar', {
-                      initialValue: '',
-                      valuePropName: 'file',
-                      getValueFromEvent: normFile
-                    })(
-                      <Upload {...uploadProps}>
-                         <Button>选择文件...</Button>
-                      </Upload>
-                    )}
+                  <Form.Item label="上传新头像"
+                    name="avatar" 
+                    colon={false} 
+                    extra="允许的最大文件大小为200KB。"
+                    valuePropName= 'file'
+                    getValueFromEvent= {normFile}
+                  >
+                    <Upload {...uploadProps}>
+                      <Button>选择文件...</Button>
+                    </Upload>
                   </Form.Item>
                 </Col>
               </Row>
@@ -108,62 +107,28 @@ const Setting = (props) => {
           <Row>
             <Col span={7}>
               <Title level={4}>系统设置</Title>
-              <Text >此信息将显示在您的个人资料中，以便想认识您的人更全面的了解您。</Text >
+              <Text>此信息将显示在您的个人资料中，以便想认识您的人更全面的了解您。</Text>
             </Col>
             <Col span={1}></Col>
             <Col span={16}>
-              <Form>
-                <Form.Item label="id" style={{display: 'none'}}>
-                  {getFieldDecorator('id')(
-                    <Input  disabled/>,
-                  )}
-                </Form.Item>
-                <Form.Item label="默认站点" extra="输入您所处的站点" required colon={false}>
-                  {getFieldDecorator('line', {
-                    rules: [{ required: true, message: ' '}],
-                  })(
-                    <Input
-                      placeholder="17号线" style={{ width:'450px'}}
-                    />,
-                  )}
-                </Form.Item>
-                <Form.Item label="语言" extra="请选择您最擅长的语言，以便更好的阅读" required colon={false}>
-                  {getFieldDecorator('language', {
-                    rules: [{ required: true,  message: ' ' }],
-                  })(
-                    <Input
-                      placeholder="简体中文" style={{ width:'450px'}}
-                    />,
-                  )}
-                </Form.Item>
-                <Form.Item label="账号" extra="账号名注册后将不允许修改" colon={false}>
-                  {getFieldDecorator('username', {
-                    rules: [{ required: true, message: ' ' }],
-                  })(
-                    <Input
-                      placeholder="Wl97893012" style={{ width:'450px'}}
-                    />,
-                  )}
-                </Form.Item>
-                <Form.Item label="主题" required colon={false}>
-                  {getFieldDecorator('theme', {
-                    rules: [{ required: true,  message: ' ' }],
-                  })(
-                    <Input
-                      placeholder="小清新" style={{ width:'450px'}}
-                    />,
-                  )}
-                </Form.Item>
-                <Form.Item label="证件号码" required colon={false}>
-                  {getFieldDecorator('IDNumber', {
-                    rules: [{ required: true,  message: ' ' }],
-                  })(
-                    <Input
-                      placeholder="846562810" style={{ width:'450px'}}
-                    />,
-                  )}
-                </Form.Item>
-              </Form>
+              <Form.Item label="id" name="id" style={{display: 'none'}}>
+                <Input disabled/>
+              </Form.Item>
+              <Form.Item label="默认站点" name="line" extra="输入您所处的站点" required colon={false} rules={[{ required: true, message: ' '}]}>
+                <Input
+                  placeholder="17号线" style={{ width:'450px'}}
+                />
+              </Form.Item>
+              <Form.Item label="语言" name="language" extra="请选择您最擅长的语言，以便更好的阅读" required colon={false}>
+                <Input
+                  placeholder="简体中文" style={{ width:'450px'}}
+                />
+              </Form.Item>
+              <Form.Item label="账号" name="username" extra="账号名注册后将不允许修改" colon={false}>
+                <Input
+                  placeholder="Wl97893012" style={{ width:'450px'}}
+                />
+              </Form.Item>
             </Col>
           </Row>
           <Divider />
@@ -171,84 +136,47 @@ const Setting = (props) => {
           <Row>
             <Col span={7}>
               <Title level={4}>联系方式</Title>
-              <Text >此信息将显示在您的个人资料中，以便想认识您的人更快的联系到您。</Text >
+              <Text>此信息将显示在您的个人资料中，以便想认识您的人更快的联系到您。</Text>
             </Col>
             <Col span={1}></Col>
             <Col span={16}>
-              <Form>
-                <Form.Item label="通讯地址" required colon={false}>
-                  {getFieldDecorator('location', {
-                    rules: [{ required: true,  message: ' '}],
-                  })(
-                    <Input
-                      placeholder="浙江省杭州市西湖区塘苗路18号" style={{ width:'450px'}}
-                    />,
-                  )}
-                </Form.Item>
-                <Form.Item label="手机"  required colon={false}>
-                  {getFieldDecorator('mobile', {
-                    rules: [{ required: true,  message: ' ' }],
-                  })(
-                    <Input
-                      placeholder="15888888888" style={{ width:'450px'}}
-                    />,
-                  )}
-                </Form.Item>
-                <Form.Item label="电话" colon={false}>
-                  {getFieldDecorator('phone', {
-                    rules: [],
-                  })(
-                    <Input
-                      placeholder="15888888888" style={{ width:'450px'}}
-                    />,
-                  )}
-                </Form.Item>
-                <Form.Item label="邮箱" colon={false}>
-                  {getFieldDecorator('email', {
-                    rules: [],
-                  })(
-                    <Input
-                      placeholder="xxxx@jiudaotech.com" style={{ width:'450px'}}
-                    />,
-                  )}
-                </Form.Item>
-                <Form.Item label="QQ" colon={false}>
-                  {getFieldDecorator('QQ', {
-                    rules: [],
-                  })(
-                    <Input
-                      placeholder="12345678" style={{ width:'450px'}}
-                    />,
-                  )}
-                </Form.Item>
-                <Form.Item label="微信" colon={false}>
-                  {getFieldDecorator('Wechat', {
-                    rules: [],
-                  })(
-                    <Input
-                      placeholder="xxx" style={{ width:'450px'}}
-                    />,
-                  )}
-                </Form.Item>
-                <Form.Item label="自我描述" colon={false} extra="用不到250个字符告诉我们有关您自己的信息">
-                  {getFieldDecorator('introduction', {
-                    rules: [],
-                  })(
-                    <TextArea rows={4} placeholder="输入你的描述内容..." />
-                  )}
-                </Form.Item>
-                <Form.Item>
-                  <Button type="primary" onClick={handleSubmit}>更新配置内容</Button>
-                </Form.Item>
-
-              </Form>
+              <Form.Item label="通讯地址" name="location" required colon={false}>
+                <Input
+                  placeholder="浙江省杭州市西湖区塘苗路18号" style={{ width:'450px'}}
+                />
+              </Form.Item>
+              <Form.Item label="手机" name="mobile" required colon={false}>
+                <Input
+                  placeholder="15888888888" style={{ width:'450px'}}
+                />
+              </Form.Item>
+              <Form.Item label="邮箱" name="email" colon={false}>
+                <Input
+                  placeholder="xxxx@jiudaotech.com" style={{ width:'450px'}}
+                />
+              </Form.Item>
+              <Form.Item label="QQ" name=" QQ"colon={false}>
+                <Input
+                  placeholder="12345678" style={{ width:'450px'}}
+                />
+              </Form.Item>
+              <Form.Item label="微信" name="Wechat" colon={false}>
+                <Input
+                  placeholder="xxx" style={{ width:'450px'}}
+                />
+              </Form.Item>
+              <Form.Item label="自我描述" name="introduction" colon={false} extra="用不到250个字符告诉我们有关您自己的信息">
+                <TextArea rows={4} placeholder="输入你的描述内容..." />
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" onClick={handleSubmit}>更新配置内容</Button>
+              </Form.Item>
             </Col>
           </Row>
-
-        </Content>
-      </Layout>
-    </div>
-  );
+        </Form>
+      </Content>
+    </Layout>
+  )
 }
 
-export default Form.create()(Setting);
+export default React.memo(Setting)
