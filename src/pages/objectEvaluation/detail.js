@@ -16,11 +16,39 @@ const Detail = props => {
   const [score, setScore] = useState(null)
   const [loading, setLoading] = useState(false)
 
+  const createNewArr=(data)=>{
+    return data.reduce((result, item) => {
+    //首先将time字段作为新数组result取出
+      if (result.indexOf(item.time) < 0) {
+        result.push(item.time)
+      }
+      return result
+    }, []).reduce((result, time) => {
+    //将name相同的数据作为新数组取出，并在其内部添加新字段**rowSpan**
+      const children = data.filter(item => item.time === time);
+      result = result.concat(
+        children.map((item, index) => ({
+          ...item,
+          rowSpan: index === 0 ? children.length : 0,//将第一行数据添加rowSpan字段
+        }))
+      )
+      return result;
+    }, [])
+  }
+
   const columns = [
     {
       title: 'time',
       dataIndex: 'time',
       key: 'time',
+      render: (value, row, index) => {
+        const obj = {
+          children: value,
+          props: {},
+        }
+        obj.props.rowSpan = row.rowSpan
+        return obj
+      }
     },
     {
       title: 'contente',
@@ -111,7 +139,7 @@ const Detail = props => {
           <Row style={{margin:"0 20px"}} key={index}>
             <Col span={24} style={{marginTop:30}}><h2>{item.name} {item.indicatorValue}分</h2></Col>
             <Col span={12}>
-              <Table rowKey="id" columns={columns} dataSource={item.recordList} pagination={{pageSize:8}} showHeader={false}/>
+              <Table rowKey="id" columns={columns} dataSource={createNewArr(item.recordList)} pagination={{pageSize:8}} showHeader={false}/>
             </Col>
             <Col span={12}>
               <ReactEcharts
