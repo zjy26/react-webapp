@@ -1,8 +1,9 @@
-import React, {useEffect} from 'react'
+import React, { useEffect, useState } from 'react'
 import { PlusOutlined } from '@ant-design/icons'
-import { Form, Modal, Input, Upload, DatePicker, TimePicker, Select, Row, Col, Button } from 'antd'
+import { Form, Modal, Input, Upload, DatePicker, TimePicker, Select, Row, Col, Button, message } from 'antd'
 import './Line.module.scss'
 import moment from 'moment'
+import { configLocation } from '../../../api'
 
 const formItemLayout = {
   labelCol: {
@@ -16,26 +17,50 @@ const formItemLayout = {
 }
 
 const NewModal = props => {
+  const {catenaryTypeOption, lineLeaderOption} = props
   const [form] = Form.useForm()
+  const [initValues, setInitValues] = useState({})
+  const [prefix, setPrefix] = useState()
 
   useEffect(()=>{
     if(props.visible === true) {
-
+      configLocation.configLocationNew({level:2})
+      .then((res)=>{
+        setPrefix(res.code)
+        const {code, ...data} = res
+        setInitValues({...data, code:null, runTime:[res.runStartTime, res.runEndTime]})
+        form.resetFields()
+      })
     }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.visible])
 
   //确定
   const handleSubmit = () => {
     form.validateFields()
     .then(values=> {
+      const {runTime, ...data} = values
+      const runTimeArr = values.runTime.map(item=>item ? moment(item).format('HH:mm') : "")
+
       const params = {
-        ...values,
+        ...data,
+        level: 2,
+        org: props.user.org,
+        code: `${prefix}${values.code}`,
         commissionDate: values.commissionDate ? moment(values.commissionDate , 'YYYY-MM-DD HH:mm:ss').valueOf() : null,
-        runStartTime: values.runStartTime ? moment(values.runStartTime).format('HH:mm') : null,
-        runEndTime: values.runEndTime ? moment(values.runEndTime).format('HH:mm') : null
+        runStartTime: runTimeArr[0],
+        runEndTime: runTimeArr[1]
       }
-      console.log(params)
+      configLocation.configLocationAdd(params)
+      .then((res)=>{
+        if(res.success) {
+          props.handleCancel()
+          props.setDirty((dirty)=>dirty+1)
+        } else {
+          message.error("新建失败，站点代码可能重复")
+        }
+      })
     })
   }
 
@@ -49,31 +74,48 @@ const NewModal = props => {
       visible={props.visible}
       onCancel={props.handleCancel}
     >
-      <Form {...formItemLayout} form={form}>
+      <Form {...formItemLayout} form={form} initialValues={initValues}>
         <Row gutter={24}>
           <Col span={12}>
-            <Form.Item label="线路描述" name="name" rules={[{required: true, message: '请输入线路描述'}]}>
+            <Form.Item label="线路代码" name="code" rules={[{required: true, message: '请输入线路代码'}]}>
+              <Input addonBefore={prefix} maxLength={2} placeholder="请输入线路代码" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item label="线路描述" name="desc" rules={[{required: true, message: '请输入线路描述'}]}>
               <Input placeholder="请输入线路描述" />
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item label="开始运营时间" name="commissionDate">
-              <DatePicker placeholder="请选择开始运营时间" />
+            <Form.Item label="开始运营日期" name="commissionDate">
+              <DatePicker placeholder="请选择开始运营日期" />
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item label="日运营开始时间" name="runStartTime">
-              <TimePicker placeholder="请选择日运营开始时间" format={"HH:mm"} />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item label="日运营结束时间" name="runEndTime">
-              <TimePicker placeholder="请选择日运营结束时间" format={"HH:mm"} />
+            <Form.Item label="日运营时间" name="runTime">
+              <TimePicker.RangePicker format={"HH:mm"} />
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item label="触网类型" name="catenaryType">
-              <Select placeholder="请选择触网类型" allowClear={true} />
+              <Select placeholder="请选择触网类型" allowClear>
+                {
+                  catenaryTypeOption.map(item=>(
+                    <Select.Option key={item.code} value={item.code}>{item.name}</Select.Option>
+                  ))
+                }
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item label="线长" name="lineLeader">
+              <Select placeholder="请选择线长" allowClear>
+                {
+                  lineLeaderOption.map(item=>(
+                  <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
+                  ))
+                }
+              </Select>
             </Form.Item>
           </Col>
           <Col span={12}>

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { DownOutlined } from '@ant-design/icons'
-import { Row, Col, Button, Select, DatePicker, Modal, Dropdown, Menu } from 'antd'
+import { Row, Col, Button, Select, DatePicker, Modal, Dropdown, Menu, message, Tooltip } from 'antd'
 import AuditModal from '../../common/auditModal'
 import ImportModal from '../../common/importModal'
 import UploadModal from './uploadModal'
 import NewModal from './newModal'
-import { robotConfig } from '../../../api'
+import { configLocation, people, CATENARY_TYPE } from '../../../api'
 import { connect } from 'react-redux'
 import {setTable, commonTable } from '../../common/table'
 import { Link } from 'react-router-dom'
@@ -15,11 +15,7 @@ const LineInfo = props => {
   const [data, setData] = useState([])  //列表数据
   const [loading, setLoading] = useState(false)
   const [uploadTitle, setupLoadTitle] = useState("上传附件")
-  const [visible, setVisible] = useState({
-    showAudit: false,
-    showImport: false,
-    showUpload: false
-  })
+  const [visible, setVisible] = useState({})
   const [dirty, setDirty] = useState(0)
   const [pager, setPager] = useState({
     total: 0,
@@ -32,15 +28,34 @@ const LineInfo = props => {
     {"property":"code","value":""},
     {"property":"commissionDate","value":""}
   ])
+  const [catenaryTypeOption, setCatenaryTypeOption] = useState([])  //触网类型
+  const [lineLeaderOption, setLineLeaderDataOption] = useState([])  //线长
 
-  const handleCancel = () => {
-    setVisible({
-      showAudit: false,
-      showImport: false,
-      showUpload: false,
-      showNew: false
+  useEffect(() => {
+    document.title = "线路信息"
+    setTable(configLocation.configLocationList, setData, setLoading, pager, setPager, filter, {level: 2})
+
+    //线长
+    people()
+    .then((res)=>{
+      if(res && res.models) {
+        setLineLeaderDataOption(res.models)
+      }
     })
-  }
+
+    //触网类型
+    CATENARY_TYPE()
+    .then((res)=>{
+      if(res && res.models) {
+        setCatenaryTypeOption(res.models)
+      }
+    })
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dirty])
+
+  //关闭弹窗
+  const handleCancel = () => setVisible({})
 
   //搜索
   const search = () => {
@@ -53,20 +68,23 @@ const LineInfo = props => {
     setDirty(dirty=>dirty+1)
   }
 
-  //新建
-  const addItem = () => {
-    setVisible({...visible, showNew: true})
-  }
-
   //删除
   const deleteItem = (id)=>{
     Modal.confirm({
-      title: '是否删除此配置，删除后数据不能恢复？/此条系统配置已在应用，请先移除，进行删除！',
+      title: '是否删除此配置，删除后数据不能恢复？',
       okText: '确认',
       okType: 'danger',
       cancelText: '取消',
       onOk: ()=> {
-
+        configLocation.configLocationDelete(id)
+        .then((res) =>{
+          if(res.success === true) {
+            message.success("删除成功")
+            setDirty((dirty)=> dirty+1)
+          } else {
+            message.error("该线路下存在站点，禁止删除!")
+          }
+        })
       },
       onCancel() {
       },
@@ -91,15 +109,33 @@ const LineInfo = props => {
     },
     {
       title: '开始运营日期',
-      dataIndex: 'commissionDate'
+      dataIndex: 'commissionDate',
+      render: (text) => {
+        if(text) {
+          return moment(text ).format("YYYY-MM-DD")
+        }
+      }
     },
     {
       title: '日运营时间',
-      dataIndex: 'runTime'
+      render: (text, record) => {
+        if(record.runStartTime) {
+          const time1 = moment(record.runStartTime, 'hh:mm')
+          const time2 = moment(record.runEndTime, 'hh:mm')
+          const time = time2.diff(time1, 'minute')  //相差的分钟数
+          const hours = Math.round(time/60*100)/100  //相差的小时数(保留两位小数)
+          return (
+            <Tooltip title={<><div>开始时间：{record.runStartTime}</div><div>结束时间：{record.runEndTime}</div></>}>
+              <span>{hours}h</span>
+            </Tooltip>
+          )
+        }
+      }
     },
     {
       title: '线长',
-      dataIndex: 'lineLeader'
+      dataIndex: 'lineLeader',
+      render: (text, record) => record._displayName.lineLeader
     },
     {
       title: '班次',
@@ -107,7 +143,13 @@ const LineInfo = props => {
     },
     {
       title: '触网类型',
-      dataIndex: 'catenaryType'
+      dataIndex: 'catenaryType',
+      render: (text) => {
+        const item = catenaryTypeOption.find(obj=>obj.code === text)
+        if(item) {
+          return item.name
+        }
+      }
     },
     {
       title: '备注',
@@ -139,12 +181,6 @@ const LineInfo = props => {
     }
   ]
 
-  useEffect(() => {
-    document.title = "线路信息"
-    setTable(robotConfig.robotConfigList, setData, setLoading, pager, setPager, filter)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dirty])
-
   return (
     <div>
       <Row style={{marginTop:30, marginLeft:30}}>
@@ -161,8 +197,8 @@ const LineInfo = props => {
             }}
           >
             {
-              props.locationTree.line&&props.locationTree.line.map(item=>
-                <Select.Option key={item.value} value={item.value}>{item.label}</Select.Option>
+              data&&data.map(item=>
+                <Select.Option key={item.code} value={item.code}>{item.desc}</Select.Option>
               )
             }
           </Select>
@@ -184,7 +220,14 @@ const LineInfo = props => {
 
       <Row type="flex" justify="end">
         <Col span={2}>
-          <Button type="danger" onClick={addItem}>新建线路</Button>
+          <Button
+            type="danger"
+            onClick={
+              ()=>setVisible({showNew: true})
+            }
+          >
+            新建线路
+          </Button>
         </Col>
         <Col span={3}>
           <Dropdown
@@ -206,7 +249,7 @@ const LineInfo = props => {
       <AuditModal {...{handleCancel, visible: visible.showAudit}} />
       <ImportModal {...{handleCancel, visible: visible.showImport}} />
       <UploadModal {...{handleCancel, visible: visible.showUpload, title:uploadTitle}} />
-      <NewModal {...{handleCancel, visible: visible.showNew}} />
+      <NewModal {...{handleCancel, visible: visible.showNew, setDirty, user:props.user, catenaryTypeOption, lineLeaderOption}} />
 
     </div>
   )
@@ -214,7 +257,7 @@ const LineInfo = props => {
 
 const mapStateToProps = (state) => {
   return {
-    locationTree: state.locationTree
+    user: state.user
   }
 }
 

@@ -13,17 +13,19 @@ import ObjectEnvaluation from '../pages/objectEvaluation';
 
 const menuRoutes = [
   {path: "/home", exact: true, component: View},
-  {path: "/setting", exact: false, component: Setting},
-  {path:"/applications", exact: false, component: Application},
+  {path: "/setting", exact: true, component: Setting},
+  {path:"/applications", exact: true, component: Application},
+
   {path:"/patrol-object", exact: true, component: ObjectModule},
-  {path:"/patrol-object-detail/:id", exact: false, component: ObjectModuleDetail},
-  {path:"/patrol-plan", exact: false, component: PatrolPlan},
-  {path:"/patrol-plan-new", exact: false, component: PatrolPlanNew},
-  {path:"/patrol-plan-detail/:id", exact: false, component: PatrolPlanDetail},
-  {path:"/patrol-sheet", exact: false, component: PatrolSheet},
-  {path:"/patrol-config", exact: false, component: PatrolConfig},
-  {path:"/data-statistics", exact: false, component: DataStatistics},
-  {path:"/object-evaluation", exact: false, component: ObjectEnvaluation}
+  {path:"/patrol-object-detail/:id", exact: true, component: ObjectModuleDetail},
+  {path:"/patrol-plan", exact: true, component: PatrolPlan},
+  {path:"/patrol-plan-new", exact: true, component: PatrolPlanNew},
+  {path:"/patrol-plan-detail/:id", exact: true, component: PatrolPlanDetail},
+  {path:"/patrol-sheet", exact: true, component: PatrolSheet},
+  {path:"/patrol-config", exact: true, component: PatrolConfig},
+  {path:"/patrol-statistics", exact: true, component: DataStatistics},
+  
+  {path:"/object-evaluation", exact: true, component: ObjectEnvaluation}
 ]
 
 export default menuRoutes;

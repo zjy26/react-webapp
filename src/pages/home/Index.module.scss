@@ -1,14 +1,30 @@
-:global {
-  .ant-layout-header {
-    padding: 0;
-  }
-  .ant-menu.ant-menu-dark, .ant-menu-dark .ant-menu-sub {
-    background: #00ADF2;
-  }
-  .ant-menu.ant-menu-dark .ant-menu-item-selected, .ant-menu-submenu-popup.ant-menu-dark .ant-menu-item-selected {
-    background-color: #49CBFF;
-  }
-  .ant-layout-content {
-    background-color: #fff;
+.trigger {
+  font-size: 18px;
+  line-height: 64px;
+  padding: 0 24px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.trigger:hover {
+  color: #1890ff;
+}
+
+.logo {
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 16px;
+}
+
+.siteLayout {
+  :global {
+    .ant-layout-header {
+      background-color: #fff;
+    }
+    .ant-layout-content {
+      margin: '24px 16px';
+      padding: 24;
+      min-height: 580 !important;
+    }
   }
 }

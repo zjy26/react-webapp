@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Form, Modal, Input, Select } from 'antd';
 import { robotConfig } from '../../api'
 
@@ -13,27 +13,30 @@ const formItemLayout = {
   },
 }
 
-const ConfigModal = (props) => {
+const ConfigModal = props => {
+  const {currentId, handleCancel, setDirty, title, visible, locationTree } = props
   const [form] = Form.useForm()
+  const [initValues, setInitValues] = useState({})
 
   useEffect(() => {
     //查看详情
-    if(props.currentId) {
-      robotConfig.robotConfigDetail(props.currentId)
+    if(currentId) {
+      robotConfig.robotConfigDetail(currentId)
       .then((res) =>{
         if(res){
-          form.setFieldsValue({...res, siteLine: res.site.slice(0, 4)})
+          setInitValues({...res, siteLine: res.site.slice(0, 4)})
+          form.resetFields()
         }
       })
     } else {
       form.resetFields()
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.currentId])
+  }, [currentId, visible])
 
-  const handleSubmit = async () => {
-    try {
-      const values = await form.validateFields()
+  const handleSubmit = () => {
+    form.validateFields()
+    .then(values => {
       let {siteLine, ...data} = values
       let params = {...data}
       if(values.id) {//编辑
@@ -46,8 +49,8 @@ const ConfigModal = (props) => {
           onOk: ()=> {
             robotConfig.robotConfigEdit(values.id, params)
             .then((res)=>{
-              props.handleCancel()
-              props.setDirty((dirty)=>dirty+1)
+              handleCancel()
+              setDirty((dirty)=>dirty+1)
             })
           },
           onCancel() {
@@ -55,29 +58,25 @@ const ConfigModal = (props) => {
         })
       } else {//添加
         robotConfig.robotConfigAdd(params)
-        .then((res)=>{
-          props.handleCancel()
-          props.setDirty((dirty)=>dirty+1)
+        .then(()=>{
+          handleCancel()
+          setDirty((dirty)=>dirty+1)
         });
       }
-    } catch (errorInfo) {
-      return;
-    }
+    })
   }
 
   return (
     <Modal
       getContainer={false}
-      title={props.title}
+      title={title}
       okText="确认"
       cancelText="取消"
-      visible={props.visible}
-      onCancel={props.handleCancel}
+      visible={visible}
+      onCancel={handleCancel}
       onOk={handleSubmit}
-      currentId={props.currentId}
-      locationTree={props.locationTree}
     >
-      <Form form={form} {...formItemLayout}>
+      <Form form={form} {...formItemLayout} initialValues={initValues}>
         <Form.Item
           label="id" 
           name="id"
@@ -91,7 +90,7 @@ const ConfigModal = (props) => {
           rules= {[{required: true}]}
         >
           <Select placeholder="请选择线路">
-            {props.locationTree.line && props.locationTree.line.map(item => (
+            {locationTree.line && locationTree.line.map(item => (
               <Select.Option key={item.value} value={item.value}>
                 {item.label}
               </Select.Option>
@@ -104,7 +103,7 @@ const ConfigModal = (props) => {
           rules= {[{required: true}]}
         >
           <Select placeholder="请选择站点">
-            {props.locationTree.site && props.locationTree.site.map(item => (
+            {locationTree.site && locationTree.site.map(item => (
               <Select.Option key={item.value} value={item.value}>
                 {item.label}
               </Select.Option>

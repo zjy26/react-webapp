@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Row, Col, Button, Input, Modal } from 'antd'
+import { Row, Col, Button, Input, Modal, message } from 'antd'
+import { ExclamationCircleOutlined } from '@ant-design/icons'
 import AuditModal from '../../common/auditModal'
 import NewModal from './newModal'
-import { robotConfig } from '../../../api'
+import { configEntity } from '../../../api'
 import { connect } from 'react-redux'
 import {setTable, commonTable } from '../../common/table'
 import { Link } from 'react-router-dom'
@@ -45,14 +46,23 @@ const ConfigInfo = props => {
   }
 
   //删除
-  const deleteItem = (id)=>{
+  const deleteItem = (code)=>{
     Modal.confirm({
       title: '是否删除此条系统配置，删除后数据不能恢复？',
+      icon: <ExclamationCircleOutlined />,
       okText: '确认',
       okType: 'danger',
       cancelText: '取消',
       onOk: ()=> {
-
+        configEntity.configEntityDelete(code)
+        .then((res) =>{
+          if(res.success === true) {
+            message.success("删除成功")
+            setDirty((dirty)=> dirty+1)
+          } else {
+            message.error("此条业务数据在使用中，如需要删除，请调整关联信息，再进行删除!")
+          }
+        })
       },
       onCancel() {
       },
@@ -66,8 +76,8 @@ const ConfigInfo = props => {
       dataIndex: 'name'
     },
     {
-      title: '描述',
-      dataIndex: 'descr'
+      title: '业务数据代码',
+      dataIndex: 'code'
     },
     {
       title: '类型',
@@ -76,6 +86,14 @@ const ConfigInfo = props => {
     {
       title: '代码类型',
       dataIndex: 'codeType'
+    },
+    {
+      title: '应用类型',
+      dataIndex: 'applyType'
+    },
+    {
+      title: '描述',
+      dataIndex: 'descr'
     },
     {
       title: '备注',
@@ -87,8 +105,8 @@ const ConfigInfo = props => {
       render: (text, record) => {
         return (
           <span>
-            <Button type="link" size={'small'}><Link to={"/config/config-info-detail/"+record.id}>查看详情</Link></Button>&nbsp;&nbsp;
-            <Button type="link" size={'small'} onClick={()=>{deleteItem(record.id)}}>删除</Button>
+            <Button type="link" size={'small'}><Link to={"/config/config-info-detail/"+record.code}>查看详情</Link></Button>&nbsp;&nbsp;
+            <Button type="link" size={'small'} onClick={()=>{deleteItem(record.code)}}>删除</Button>
           </span>
         )
       }
@@ -96,15 +114,16 @@ const ConfigInfo = props => {
   ]
 
   useEffect(() => {
-    document.title = "系统配置"
-    setTable(robotConfig.robotConfigList, setData, setLoading, pager, setPager, filter)
+    document.title = "业务基础数据"
+    setTable(configEntity.configEntityList, setData, setLoading, pager, setPager, filter)
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dirty])
 
   return (
     <div>
       <Row style={{margin:30}}>
-        <Col span={6}><Input placeholder="请输入业务数据名称" ref={nameRef} /></Col>
+        <Col span={6}><Input placeholder="请输入业务数据名称" ref={nameRef} onPressEnter={search}/></Col>
         <Col span={4}><Button type="primary" onClick={search}>搜索</Button></Col>
         <Col span={14} style={{textAlign: "right"}}>
           <Button type="danger"
@@ -122,10 +141,10 @@ const ConfigInfo = props => {
         </Col>
       </Row>
 
-      { commonTable(columns, data, "id", loading, setDirty, pager, setPager, {}) }
+      { commonTable(columns, data, "code", loading, setDirty, pager, setPager, {}) }
 
       <AuditModal {...{handleCancel, visible: visible.showAudit}} />
-      <NewModal {...{handleCancel, visible: visible.showNew}} />
+      <NewModal {...{handleCancel, setDirty, visible: visible.showNew}} />
     </div>
   )
 }
