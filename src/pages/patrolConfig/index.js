@@ -7,21 +7,13 @@ import { connect } from "react-redux"
 const PatrolConfig = props => {
   const [data, setData] = useState([])  //列表数据
   const [loading, setLoading] = useState(true)
-  const [visible, setVisible] = useState(false)
-  const [modalTitle, setModalTitle] = useState("新增配置")
+  const [modalProperty, setModalProperty] = useState({})
   const [dirty, setDirty] = useState(0)
-  const [currentId, setCurrentId] = useState(0)
 
   const siteRef = useRef()
 
-  const newModal = ()=> {
-    setModalTitle("新增配置")
-    setCurrentId(null)
-    setVisible(true)
-  }
-
   const handleCancel = () => {
-    setVisible(false);
+    setModalProperty({visible: false})
   }
 
   //删除
@@ -44,11 +36,20 @@ const PatrolConfig = props => {
     });
   }
 
-  //编辑
-  const editItem = (id)=>{
-    setCurrentId(id)
-    setModalTitle("编辑配置")
-    setVisible(true)
+  //新增、编辑
+  const checkItem = (type, id) => {
+    type === "add" ?
+    setModalProperty({
+      visible: true,
+      title: '新增',
+      currentId: null
+    })
+    :
+    setModalProperty({
+      visible: true,
+      title: '编辑',
+      currentId: id
+    })
   }
 
   //搜索
@@ -73,7 +74,7 @@ const PatrolConfig = props => {
       dataIndex: 'site',
       render:(text, record) => {
         if(props.locationTree&&props.locationTree.site) {
-          const item = props.locationTree.site.find(obj=>obj.value===record.site)
+          const item = props.locationTree.site.find(obj=>obj.value===text)
           return item.label
         }
       }
@@ -96,7 +97,7 @@ const PatrolConfig = props => {
       render: (text, record) => {
         return (
           <span>
-            <Button type="link" size={'small'} onClick={()=>{editItem(record.id)}}>编辑</Button>&nbsp;&nbsp;
+            <Button type="link" size={'small'} onClick={()=>{checkItem("edit", record.id)}}>编辑</Button>&nbsp;&nbsp;
             <Button type="link" size={'small'} onClick={()=>{deleteItem(record.id)}}>删除</Button>
           </span>
         )
@@ -129,11 +130,11 @@ const PatrolConfig = props => {
           <Button type="primary" onClick={search}>搜索</Button>
         </Col>
         <Col span={12} style={{textAlign: "right"}}>
-          <Button type="danger" onClick={newModal}>新建</Button>
+          <Button type="danger" onClick={()=>{checkItem("add", null)}}>新建</Button>
         </Col>
       </Row>
       <Table loading={loading} rowKey="id" columns={columns} dataSource={data} style={{marginTop:30}}/>
-      <ConfigModal visible={visible} title={modalTitle} locationTree={props.locationTree} {...{handleCancel, currentId, setDirty}} />
+      <ConfigModal  locationTree={props.locationTree} {...{modalProperty, handleCancel, setDirty}} />
     </div>
   )
 }
