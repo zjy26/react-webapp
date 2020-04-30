@@ -14,25 +14,32 @@ const formItemLayout = {
 }
 
 const ConfigModal = props => {
-  const {currentId, handleCancel, setDirty, title, visible, locationTree } = props
+  const {modalProperty, handleCancel, setDirty, locationTree } = props
   const [form] = Form.useForm()
   const [initValues, setInitValues] = useState({})
 
   useEffect(() => {
     //查看详情
-    if(currentId) {
-      robotConfig.robotConfigDetail(currentId)
-      .then((res) =>{
-        if(res){
-          setInitValues({...res, siteLine: res.site.slice(0, 4)})
-          form.resetFields()
-        }
-      })
-    } else {
-      form.resetFields()
+    if(modalProperty.visible) {
+      if(modalProperty.currentId) {
+        robotConfig.robotConfigDetail(modalProperty.currentId)
+        .then((res) =>{
+          if(res){
+            setInitValues({...res, siteLine: res.site.slice(0, 4)})
+            form.resetFields()
+          }
+        })
+      } else {
+        setInitValues((initValues) => {
+          if(initValues) {
+            Object.keys(initValues).forEach(key => initValues[key] = undefined)
+          }
+        })
+        form.resetFields()
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentId, visible])
+  }, [modalProperty])
 
   const handleSubmit = () => {
     form.validateFields()
@@ -69,10 +76,10 @@ const ConfigModal = props => {
   return (
     <Modal
       getContainer={false}
-      title={title}
+      title={modalProperty.title}
       okText="确认"
       cancelText="取消"
-      visible={visible}
+      visible={modalProperty.visible}
       onCancel={handleCancel}
       onOk={handleSubmit}
     >
@@ -87,7 +94,7 @@ const ConfigModal = props => {
         <Form.Item
           label="线路"
           name="siteLine"
-          rules= {[{required: true}]}
+          rules= {[{required: true, message:'请选择线路'}]}
         >
           <Select placeholder="请选择线路">
             {locationTree.line && locationTree.line.map(item => (
@@ -100,7 +107,7 @@ const ConfigModal = props => {
         <Form.Item
           label="站点"
           name="site"
-          rules= {[{required: true}]}
+          rules= {[{required: true, message:'请选择站点'}]}
         >
           <Select placeholder="请选择站点">
             {locationTree.site && locationTree.site.map(item => (
@@ -113,21 +120,18 @@ const ConfigModal = props => {
         <Form.Item
           label="服务器IP"
           name="ip"
-          rules= {[{required: true}]}
         >
           <Input placeholder="请输入服务器IP"/>
         </Form.Item>
         <Form.Item
           label="服务器端口"
           name="port"
-          rules= {[{required: true}]}
         >
           <Input placeholder="请输入服务器端口"/>
         </Form.Item>
         <Form.Item
           label="视频流推送"
           name="cameraStreamUrl"
-          rules= {[{required: true}]}
         >
           <Input placeholder="请输入视频流推送"/>
         </Form.Item>
