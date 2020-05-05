@@ -5,13 +5,31 @@ import { robotConfig } from '../../api'
 import { connect } from "react-redux"
 
 const PatrolConfig = props => {
+  const locationJS = props.location.toJS()
   const [data, setData] = useState([])  //列表数据
   const [loading, setLoading] = useState(true)
   const [modalProperty, setModalProperty] = useState({})
   const [dirty, setDirty] = useState(0)
-
   const siteRef = useRef()
 
+  useEffect(() => {
+    document.title = "巡检配置"
+
+    setLoading(true)
+    //列表数据
+    robotConfig.robotConfigList()
+    .then(res => {
+      if(res){
+        setData(res)
+        setLoading(false)
+      }
+    })
+    .catch(() => {
+      console.log("列表数据加载失败")
+    })
+  }, [dirty])
+
+  //弹窗关闭
   const handleCancel = () => {
     setModalProperty({visible: false})
   }
@@ -63,8 +81,8 @@ const PatrolConfig = props => {
       title: '线路',
       dataIndex: 'siteLine',
       render:(text, record) => {
-        if(props.locationTree && props.locationTree.line) {
-          const item = props.locationTree.line.find(obj=>obj.value===record.site.slice(0,4))
+        if(locationJS && locationJS.line) {
+          const item = locationJS.line.find(obj=>obj.value===record.site.slice(0,4))
           return item.label
         }
       }
@@ -72,9 +90,9 @@ const PatrolConfig = props => {
     {
       title: '站点',
       dataIndex: 'site',
-      render:(text, record) => {
-        if(props.locationTree&&props.locationTree.site) {
-          const item = props.locationTree.site.find(obj=>obj.value===text)
+      render:(text) => {
+        if(locationJS&&locationJS.site) {
+          const item = locationJS.site.find(obj=>obj.value===text)
           return item.label
         }
       }
@@ -103,30 +121,13 @@ const PatrolConfig = props => {
         )
       }
     }
-  ];
-
-  useEffect(() => {
-    document.title = "巡检配置"
-
-    setLoading(true)
-    //列表数据
-    robotConfig.robotConfigList()
-    .then(res => {
-      if(res){
-        setData(res)
-        setLoading(false)
-      }
-    })
-    .catch(() => {
-      console.log("列表数据加载失败")
-    })
-  }, [dirty]);
+  ]
 
   return (
     <div>
       <Row style={{margin:30}}>
         <Col span={12}>
-          <Cascader options={props.locationTree.lineSite} placeholder="请选择线路/站点" ref={siteRef} />,
+          <Cascader options={locationJS.lineSite} placeholder="请选择线路/站点" ref={siteRef} />,
           <Button type="primary" onClick={search}>搜索</Button>
         </Col>
         <Col span={12} style={{textAlign: "right"}}>
@@ -134,14 +135,14 @@ const PatrolConfig = props => {
         </Col>
       </Row>
       <Table loading={loading} rowKey="id" columns={columns} dataSource={data} style={{marginTop:30}}/>
-      <ConfigModal  locationTree={props.locationTree} {...{modalProperty, handleCancel, setDirty}} />
+      <ConfigModal  locationTree={locationJS} {...{modalProperty, handleCancel, setDirty}} />
     </div>
   )
 }
 
 const mapStateToProps = (state) => {
   return {
-    locationTree: state.locationTree
+    location: state.getIn(['common', 'location'])
   }
 }
 

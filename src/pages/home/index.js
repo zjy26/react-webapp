@@ -12,7 +12,7 @@ import { connect } from 'react-redux'
 const { Header, Content, Sider } = Layout
 const Index = (props) => {
 
-  let locationJS = props.location.toJS()
+  const locationJS = props.location.toJS()
 
   console.log(locationJS)
 
@@ -28,8 +28,6 @@ const Index = (props) => {
   const handleCancel = () => {
     closePsd()
   }
-
-console.log(props)
   
   useEffect(() => {
     getLocationDispatch();
@@ -192,51 +190,8 @@ console.log(props)
 
       <EditPassword visible={psdVisible} {...{ handleOk, handleCancel }} />
     </div>
-  );
+  )
 }
-
-// //修改密码弹窗
-// const mapStateToProps = (state) => {
-//   return {
-//     visible: state.psdModalvisible,
-//     locationTree: state.locationTree,
-//     brands: state.brands,
-//     robotObjectType: state.robotObjectType,
-//     robotObjectStatus: state.robotObjectStatus,
-//     videoStream: state.videoStream
-//   }
-// }
-// const mapDispatchToProps = (dispatch) => {
-//   return {
-//     showPsdModal(e) {
-//       let action = {
-//         type: 'showPsdModal'
-//       }
-//       dispatch(action)
-//     },
-//     closePsdModal() {
-//       let action = {
-//         type: 'closePsdModal'
-//       }
-//       dispatch(action)
-//     },
-//     locationTree(data) {
-//       locationTreeAction(dispatch, data)
-//     },
-//     getBrands(data) {
-//       brandsAction(dispatch, data)
-//     },
-//     getRobotObjectStatus(data) {
-//       robotObjectStatusAction(dispatch, data)
-//     },
-//     getRobotObjectType(data) {
-//       robotObjectTypeAction(dispatch, data)
-//     },
-//     getVideoStream(data) {
-//       videoStreamAction(dispatch, data)
-//     }
-//   }
-// }
 
 // 映射Redux全局的state到组件的props上
 const mapStateToProps = (state) => ({
@@ -258,6 +213,6 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(closePassword())
     }
   }
-};
+}
 
-export default connect(mapStateToProps, mapDispatchToProps)(React.memo((Index)))
+export default connect(mapStateToProps, mapDispatchToProps)(React.memo(Index))

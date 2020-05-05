@@ -1,4 +1,4 @@
-import { CHANGE_LOCATION, SHOW_PASSWORD, CLOSE_PASSWORD } from './constants'
+import { CHANGE_LOCATION, SHOW_PASSWORD, CLOSE_PASSWORD } from './actionTypes'
 import { locationTree } from '../../../api/index'
 import { fromJS } from 'immutable'
 

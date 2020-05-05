@@ -18,17 +18,17 @@ const { Text, Title  } = Typography
 const { TextArea } = Input
 const { Content } = Layout
 
-const Setting = (props) => {
+const Setting = () => {
   const [form] = Form.useForm()
+  const [ initValues, setInitValues ] = useState({})
   const [ avatar, setAvatar ] = useState(null)
 
   useEffect(() => {
     setting.settingShow().then(res =>{
-      if(res.status === 200){
-        form.setFieldsValue( res.data[0] )
+      if(res && res[0]) {
+        setInitValues(res[0])
+        form.resetFields()
       }
-   }).catch(() =>{
-
    })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -40,7 +40,7 @@ const Setting = (props) => {
       console.log(values)
 
       setting.settingEdit(fieldsValues.id, fieldsValues)
-      .then((res)=>{
+      .then(()=>{
         message.success("保存成功")
       })
     })
@@ -70,9 +70,7 @@ const Setting = (props) => {
       <Content style={{ background: '#fff', padding: 34, margin: 0 }}>
         <Form
           form={form} 
-          initialValue={{
-            avatar: ''
-          }}
+          initialValues={initValues}
         >
           <Row>
             <Col span={7}>
@@ -111,15 +109,15 @@ const Setting = (props) => {
             </Col>
             <Col span={1}></Col>
             <Col span={16}>
-              <Form.Item label="id" name="id" style={{display: 'none'}}>
+              <Form.Item label="ID" name="id" rules={[{ required: true, message: '请输入ID'}]}>
                 <Input disabled/>
               </Form.Item>
-              <Form.Item label="默认站点" name="line" extra="输入您所处的站点" required colon={false} rules={[{ required: true, message: ' '}]}>
+              <Form.Item label="默认站点" name="line" extra="输入您所处的站点" colon={false} rules={[{ required: true, message: ' '}]}>
                 <Input
                   placeholder="17号线" style={{ width:'450px'}}
                 />
               </Form.Item>
-              <Form.Item label="语言" name="language" extra="请选择您最擅长的语言，以便更好的阅读" required colon={false}>
+              <Form.Item label="语言" name="language" extra="请选择您最擅长的语言，以便更好的阅读" colon={false}>
                 <Input
                   placeholder="简体中文" style={{ width:'450px'}}
                 />
@@ -140,12 +138,12 @@ const Setting = (props) => {
             </Col>
             <Col span={1}></Col>
             <Col span={16}>
-              <Form.Item label="通讯地址" name="location" required colon={false}>
+              <Form.Item label="通讯地址" name="location" colon={false}>
                 <Input
                   placeholder="浙江省杭州市西湖区塘苗路18号" style={{ width:'450px'}}
                 />
               </Form.Item>
-              <Form.Item label="手机" name="mobile" required colon={false}>
+              <Form.Item label="手机" name="mobile" colon={false}>
                 <Input
                   placeholder="15888888888" style={{ width:'450px'}}
                 />
@@ -155,7 +153,7 @@ const Setting = (props) => {
                   placeholder="xxxx@jiudaotech.com" style={{ width:'450px'}}
                 />
               </Form.Item>
-              <Form.Item label="QQ" name=" QQ"colon={false}>
+              <Form.Item label="QQ" name="QQ" colon={false}>
                 <Input
                   placeholder="12345678" style={{ width:'450px'}}
                 />
