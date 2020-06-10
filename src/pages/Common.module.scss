@@ -1,0 +1,78 @@
+:global {
+  //table分页
+  .ant-table-pagination.ant-pagination {
+    margin: 0;
+    height: 65px;
+    padding: 16px;
+    width: 100%;
+    text-align: end;
+    background-color: #fff;
+  }
+
+  //table悬浮颜色
+  .ant-table-tbody > tr.ant-table-row:hover > td {
+    background: #F5F5F5;
+  }
+
+  .ant-select, .ant-picker, .ant-cascader-picker, .ant-input-number {
+    width: 100%
+  }
+
+  //详情页NavTab
+  .ant-tabs .ant-tabs-left-bar .ant-tabs-nav-container {
+    background-color: #fff;
+    margin-right: 10px;
+    padding-top: 20px;
+    min-height: calc(100vh - 170px);
+
+    .ant-tabs-nav .ant-tabs-tab-active {
+      background-color: #E6F7FF;
+    }
+  }
+
+  .ant-tabs .ant-tabs-left-content {
+    background-color: #fff;
+    padding-top: 20px;
+    min-height: calc(100vh - 170px);
+  }
+
+  //自动换行(查看详情时备注字段)
+  .ant-form-item-control-input-content {
+    word-wrap:break-word;
+    word-break:normal;
+  }
+
+  //table中图标颜色
+  table svg{
+    color: rgba(0, 0, 0, 0.65)
+  }
+
+}
+
+//搜索框
+.searchForm {
+  background: #fff;
+  min-height: 80px;
+  padding: 24px 24px 0 24px;
+}
+
+//列表头部标题和操作按钮
+.topHeader {
+  background: #fff;
+  height: 60px;
+  line-height: 60px;
+  margin-top: 25px;
+  padding: 0 20px;
+
+  :global{
+    .ant-btn {
+      margin: 0 0 0 10px;
+    }
+  }
+}
+
+//详情页面form
+.basicForm {
+  background: #fff;
+  padding: 20px;
+}

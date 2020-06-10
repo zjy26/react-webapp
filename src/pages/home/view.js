@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import EZUIKit from "./ezuikit"
 let decoder = null
 const View = (props) => {
@@ -19,23 +19,13 @@ const View = (props) => {
             url: url,
             accessToken: accessToken,
             decoderPath: '',
-            width: 600,
+            width: 900,
             height: 400,
             handleError: handleError,
             handleSuccess: handleSuccess,
         });
     }
-    const handleStart = () => {
-        function handleError(e){
-            console.log('handleError',e)
-        }
-        function handleSuccess(){
-            console.log('handleSuccess')
-        }
-        decoder.play({
-            handleError: handleError,
-        });
-    }
+    
     const handleEnd = () => {
         /*停止播放方法1*/
         // decoder.stop();
@@ -116,8 +106,7 @@ const View = (props) => {
                 <button id="stopSave" onClick={stopSave}>停止录像</button>
                 <button id="enableZoom" onClick={enableZoom}>开启电子放大</button>
                 <button id="closeZoom" onClick={closeZoom}>关闭电子放大</button>
-                <span>录制功能不支持加密视频，且录制的文件需要<a href="https://service.ys7.com/downloadInfoSite/admin"
-                                             target="_blank">下载海康播放器播放</a></span>
+                <span>录制功能不支持加密视频，且录制的文件需要<a href="https://service.ys7.com/downloadInfoSite/admin"  rel="noopener noreferrer" target="_blank">下载海康播放器播放</a></span>
 
             </div>
             <div id="playWind">

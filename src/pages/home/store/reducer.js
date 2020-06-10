@@ -3,7 +3,7 @@ import { fromJS } from 'immutable';
 
 const defaultState = fromJS({
   location: {},
-  psdVisible: false
+  psdVisible: false,
 })
 
 export default (state = defaultState, action) => {

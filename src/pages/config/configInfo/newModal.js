@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react'
-import { Form, Modal, Input, Radio, Select } from 'antd'
-import { configEntity } from '../../../api'
+import React, { useEffect, useState } from 'react'
+import { Form, Modal, Input, Radio, Select, message } from 'antd'
+import { configEntity } from '../../../api/config/configInfo'
 
 const formItemLayout = {
   labelCol: {
@@ -15,30 +15,37 @@ const formItemLayout = {
 
 const NewModal = props => {
   const [form] = Form.useForm()
+  const [initValues, setInitValues] = useState({})
 
-  useEffect(()=>{
-    if(props.visible === true) {
-      form.resetFields()
+  useEffect(() => {
+    if (props.visible === true) {
+      configEntity.configEntityNew()
+        .then(res => {
+          setInitValues({ ...res, type: 2, codeType: 3, category: 1 })
+          form.resetFields()
+        })
     }
   }, [form, props.visible])
 
   const handleSubmit = () => {
     form.validateFields()
-
-    //TODO 目前接口参数缺少 应用类型（applyType） 字段
-    .then(values => {
-      const {applyType, ...data} = values
-      const params = {...data}
-      configEntity.configEntityAdd(params)
-      .then(()=>{
-        props.handleCancel()
-        props.setDirty((dirty)=>dirty+1)
+      .then(values => {
+        configEntity.configEntityAdd(values)
+          .then(res => {
+            if (res.success) {
+              message.success("新建成功")
+              props.handleCancel()
+              props.setDirty((dirty) => dirty + 1)
+            } else {
+              message.error(res.fieldErrors.name)
+            }
+          })
       })
-    })
   }
 
   return (
     <Modal
+      maskClosable={false}
       getContainer={false}
       title="新建业务数据"
       okText="确认"
@@ -47,30 +54,40 @@ const NewModal = props => {
       visible={props.visible}
       onCancel={props.handleCancel}
     >
-      <Form {...formItemLayout} form={form} initialValues={{type:2, codeType:3, applyType:2}}>
-        <Form.Item label="业务数据名称" name="name" rules={[{required: true, message: '请输入业务数据名称'}]}>
-          <Input placeholder="请输入业务数据名称" />
+      <Form
+        name="configNewForm"
+        {...formItemLayout}
+        form={form}
+        initialValues={initValues}
+      >
+        <Form.Item
+          label="业务数据名称"
+          name="name"
+          rules={[
+            { whitespace: true, message: '内容不能为空' },
+            { required: true, message: '请输入业务数据名称' },
+            { max: 20, message: '最大长度为20个字符' }
+          ]}
+        >
+          <Input placeholder="请输入业务数据名称" maxLength={20} />
         </Form.Item>
-        <Form.Item label="业务数据代码" name="code" rules={[{required: true, message: '请输入业务数据代码'}]}>
-          <Input placeholder="请输入业务数据代码" />
-        </Form.Item>
-        <Form.Item label="类型" name="type" rules={[{required: true, message: '请选择类型'}]} style={{display:'none'}}>
+        <Form.Item label="类型" name="type" style={{ display: "none" }}>
           <Radio.Group>
             <Radio value={2}>代码</Radio>
             <Radio value={1}>分类</Radio>
           </Radio.Group>
         </Form.Item>
-        <Form.Item label="代码类型" name="codeType" style={{display:'none'}}>
+        <Form.Item label="代码类型" name="codeType" style={{ display: "none" }}>
           <Select placeholder="请选择代码类型">
             <Select.Option value={3}>3</Select.Option>
             <Select.Option value={2}>数字及文本</Select.Option>
             <Select.Option value={1}>数字</Select.Option>
           </Select>
         </Form.Item>
-        <Form.Item label="应用类型" name="applyType">
+        <Form.Item label="应用类型" name="category" style={{ display: "none" }}>
           <Radio.Group>
-            <Radio value={2}>业务</Radio>
-            <Radio value={1}>系统</Radio>
+            <Radio value={1}>业务</Radio>
+            <Radio value={0}>系统</Radio>
           </Radio.Group>
         </Form.Item>
         <Form.Item label="描述" name="descr">

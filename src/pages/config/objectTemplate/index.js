@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Row, Col, Button, Input, Modal } from 'antd'
+import { DownOutlined, DeleteOutlined, FormOutlined } from '@ant-design/icons'
+import { Row, Col, Button, Input, Modal, Dropdown, Menu, message, Divider } from 'antd'
 import AuditModal from '../../common/auditModal'
-import { robotConfig } from '../../../api'
-import { connect } from 'react-redux'
-import {setTable, commonTable } from '../../common/table'
+import ImportModal from '../../common/importModal'
+import { configObjectTemplate } from '../../../api/config/objectTemplate'
+import { setTable, MainTable } from '../../common/table'
 import { Link } from 'react-router-dom'
+import commonStyles from '../../Common.module.scss'
 
-const ObjectTemplate = props => {
+const ObjectTemplate = () => {
   const [data, setData] = useState([])  //列表数据
   const [loading, setLoading] = useState(false)
-  const [visible, setVisible] = useState({
-    showAudit: false
-  })
+  const [visible, setVisible] = useState({})
   const [dirty, setDirty] = useState(0)
   const [pager, setPager] = useState({
     total: 0,
@@ -20,36 +20,52 @@ const ObjectTemplate = props => {
     start: 0,
     limit: 20
   })
-  const [filter, setFilter] = useState(null)
-  const nameRef = useRef(null)
+  const [filter, setFilter] = useState([])
+  const templateRef = useRef(null)
 
-  const handleCancel = () => {
-    setVisible({
-      showAudit: false
-    })
-  }
+  useEffect(() => {
+    document.title = "模板定义"
+    setTable(configObjectTemplate.objectTemplateList, setData, setLoading, pager, setPager, filter)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dirty])
+
+  //关闭弹窗
+  const handleCancel = () => setVisible({})
 
   //搜索
   const search = () => {
-    setFilter([{"property":"name","value":nameRef.current.state.value}])
+    if (templateRef.current.state.value) {
+      setFilter([{ "property": "name", "value": templateRef.current.state.value }])
+    } else {
+      setFilter([])
+    }
+
     setPager({
       ...pager,
       current: 1,
       page: 1,
       start: 0,
     })
-    setDirty(dirty=>dirty+1)
+    setDirty(dirty => dirty + 1)
   }
 
   //删除
-  const deleteItem = (id)=>{
+  const deleteItem = (id) => {
     Modal.confirm({
-      title: '是否删除模板信息，删除后模板将不能恢复？/模板正在引用，暂不可删除模板！',
+      title: '是否删除此配置，删除后数据不能恢复？',
       okText: '确认',
       okType: 'danger',
       cancelText: '取消',
-      onOk: ()=> {
-
+      onOk: () => {
+        configObjectTemplate.objectTemplateDelete(id)
+          .then((res) => {
+            if (res.success === true) {
+              message.success("删除成功")
+              setDirty((dirty) => dirty + 1)
+            } else {
+              message.error(res.message)
+            }
+          })
       },
       onCancel() {
       },
@@ -60,73 +76,92 @@ const ObjectTemplate = props => {
   const columns = [
     {
       title: '模板名称',
-      dataIndex: 'template'
+      dataIndex: 'name'
     },
     {
-      title: '创建人',
-      dataIndex: 'createdby'
+      title: '编码',
+      dataIndex: 'code'
     },
     {
-      title: '创建时间',
-      dataIndex: 'created'
+      title: '版本/镜像',
+      dataIndex: 'version'
     },
     {
-      title: '代码类型',
-      dataIndex: 'type'
+      title: '类型',
+      dataIndex: 'type',
+      render: (text) => {
+        const descr = text === "01" ? "设备" : "部件"
+        return descr
+      }
     },
     {
-      title: '更新人',
-      dataIndex: 'updatedby'
+      title: '设备/部件分类',
+      dataIndex: 'clsName'
     },
     {
-      title: '更新时间',
-      dataIndex: 'updated'
+      title: '品牌',
+      dataIndex: 'brandName'
+    },
+    {
+      title: '型号',
+      dataIndex: 'modelNumber'
     },
     {
       title: '操作',
-      dataIndex: 'option',
       render: (text, record) => {
         return (
-          <span>
-            <Button type="link" size={'small'}><Link to={"/config/object-template-detail/"+record.id}>查看详情</Link></Button>&nbsp;&nbsp;
-            <Button type="link" size={'small'} onClick={()=>{deleteItem(record.id)}}>删除</Button>
-          </span>
+          <>
+            <Link to={"/config/object-template-detail/" + record.id}><FormOutlined /></Link>
+            <Divider type="vertical" />
+            <DeleteOutlined onClick={() => { deleteItem(record.id) }} />
+          </>
         )
       }
     }
   ]
 
-  useEffect(() => {
-    document.title = "模板定义"
-    setTable(robotConfig.robotConfigList, setData, setLoading, pager, setPager, filter)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dirty])
 
   return (
-    <div>
-      <Row style={{margin:30}}>
-        <Col span={6}><Input placeholder="请输入模板名称" ref={nameRef} onPressEnter={search}/></Col>
-        <Col span={4}><Button type="primary" onClick={search}>搜索</Button></Col>
-        <Col span={14} style={{textAlign: "right"}}>
-          <Button type="danger"style={{marginRight:30}}><Link to={"/config/object-template-detail/"+ null}>新建</Link></Button>
-          <Button type="danger"
-            onClick={
-              ()=>setVisible({...visible, showAudit:true})
-            }>
-            审计
+    <React.Fragment>
+      <Row className={commonStyles.searchForm}>
+        <Col span={5}><Input placeholder="请输入模板名称" ref={templateRef} onPressEnter={search} /></Col>
+        <Col offset={1}><Button type="primary" onClick={search}>搜索</Button></Col>
+      </Row>
+
+      <Row type="flex" justify="space-between" className={commonStyles.topHeader}>
+        <Col><h3>模板数据列表</h3></Col>
+        <Col>
+          <Button type="primary">
+            <Link to={"/config/object-template-detail/" + null}>
+              新建
+            </Link>
           </Button>
+          <Dropdown
+            overlay={
+              <Menu>
+                <Menu.Item key="import" onClick={() => { setVisible({ ...visible, showImport: true }) }}>信息导入</Menu.Item>
+                <Menu.Item key="download">下载</Menu.Item>
+                <Menu.Item key="audit" onClick={() => { setVisible({ ...visible, showAudit: true }) }}>审计</Menu.Item>
+              </Menu>
+            }
+          >
+            <Button>更多功能<DownOutlined /></Button>
+          </Dropdown>
         </Col>
       </Row>
 
-      { commonTable(columns, data, "id", loading, setDirty, pager, setPager, {}) }
+      <MainTable
+        {...{
+          columns, data, loading, pager, setPager, setDirty,
+          rowkey: "code",
+        }}
+      />
 
-      <AuditModal {...{handleCancel, visible: visible.showAudit}} />
-    </div>
+      <AuditModal {...{ handleCancel, visible: visible.showAudit }} />
+      <ImportModal {...{ handleCancel, visible: visible.showImport }} />
+
+    </React.Fragment>
   )
 }
 
-const mapStateToProps = (state) => {
-  return state
-}
-
-export default connect(mapStateToProps, null)(React.memo(ObjectTemplate))
+export default React.memo(ObjectTemplate)

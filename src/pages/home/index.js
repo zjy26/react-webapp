@@ -5,7 +5,6 @@ import { Route, NavLink, Switch, Redirect } from 'react-router-dom'
 import MeunRoute from '../../routes'
 import EditPassword from './editPassword'
 import styles from './Index.module.scss'
-// import { locationTree, brands, ROBOT_OBJECT_TYPE, ROBOT_OBJECT_STATUS, VIDEO_STREAM } from '../../api'
 import { closePassword, showPassword, getLocation } from './store/actionCreators'
 import { connect } from 'react-redux'
 
@@ -13,7 +12,6 @@ const { Header, Content, Sider } = Layout
 const Index = (props) => {
 
   const locationJS = props.location.toJS()
-
   console.log(locationJS)
 
   const { getLocationDispatch, showPsd, closePsd, psdVisible } = props
@@ -32,66 +30,6 @@ const Index = (props) => {
   useEffect(() => {
     getLocationDispatch();
   }, [getLocationDispatch]);
-
-  // useLayoutEffect(() => {
-  //   //线路站点
-  //   locationTree()
-  //   .then(res => {
-  //     const siteArr = []
-  //     const lineArr = []
-  //     if (res) {
-  //       for (var item of res.lineSite) {
-  //         let lineObj = {}
-  //         lineObj["value"] = item.value
-  //         lineObj["label"] = item.label
-  //         lineArr.push(lineObj)
-  //         siteArr.push(...item.children)
-  //       }
-  //       const location = {
-  //         lineSite: res.lineSite,
-  //         line: lineArr,
-  //         site: siteArr
-  //       }
-  //       props.locationTree(location)
-  //     }
-  //   }).catch((err) => {
-  //     console.log("线路站点数据加载失败")
-  //   })
-  //   //品牌
-  //   brands()
-  //   .then(res => {
-  //     if (res && res.models) {
-  //       props.getBrands(res.models)
-  //     }
-  //   })
-  
-  //   //设备类型
-  //   ROBOT_OBJECT_TYPE()
-  //   .then(res => {
-  //     if (res && res.models) {
-  //       props.getRobotObjectType(res.models)
-  //     }
-  //   })
-  
-  //   //设备状态
-  //   ROBOT_OBJECT_STATUS()
-  //   .then(res => {
-  //     if (res && res.models) {
-  //       props.getRobotObjectStatus(res.models)
-  //     }
-  //   })
-
-  //   //视频流程协议
-  //   VIDEO_STREAM()
-  //   .then(res => {
-  //     if (res && res.models) {
-  //       props.getVideoStream(res.models)
-  //     }
-  //   })
-
-  // // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [])
-
 
   const pathname = props.history.location.pathname.split('/').slice(1);  //获取当前页面的路径
 

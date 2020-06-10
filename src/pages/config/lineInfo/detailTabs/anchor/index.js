@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { Button, Row, Col, Dropdown, Menu, Modal, message } from 'antd'
-import { DownOutlined } from '@ant-design/icons'
+import { Button, Row, Col, Dropdown, Menu, Modal, message, Divider } from 'antd'
+import { MenuOutlined, FileSearchOutlined } from '@ant-design/icons'
 import AnchorModal from './modal'
-import { setTable, commonTable } from '../../../../common/table'
-import { configLocation } from '../../../../../api'
+import { setTable, MainTable } from '../../../../common/table'
+import { configLocation } from '../../../../../api/config/lineInfo'
 
 const Anchor = props => {
-  const {MyContext} = props
-  const {lineCode, intervalList} = useContext(MyContext)
+  const { MyContext } = props
+  const { lineCode, intervalList } = useContext(MyContext)
   const [data, setData] = useState([])  //列表数据
   const [loading, setLoading] = useState(false)
   const [dirty, setDirty] = useState(0)
@@ -43,7 +43,7 @@ const Anchor = props => {
       dataIndex: 'interval',
       render: (text) => {
         const intervalArr = text.split(",")
-        const intArr = intervalArr.map(item=> +item)
+        const intArr = intervalArr.map(item => +item)
         const descrArr = intArr.map(item => {
           const data = intervalList.find(obj => obj.id === item)
           return "".concat(data ? data.descr : "")
@@ -56,29 +56,28 @@ const Anchor = props => {
       dataIndex: 'option',
       render: (text, record) => {
         return (
-          <span>
-            <Button key="check" type="link" size={'small'} onClick={(e)=>{checkItem("check", record.id)}}>查看详情</Button>
+          <>
+            <FileSearchOutlined onClick={(e) => { checkItem("check", record.id) }} />
+            <Divider type="vertical" />
             <Dropdown
               overlay={
                 <Menu>
-                  <Menu.Item key="edit" onClick={(e)=>{checkItem("edit", record.id)}}>编辑</Menu.Item>
-                  <Menu.Item key="delete" onClick={(e)=>{deleteItem(record.id)}}>删除</Menu.Item>
+                  <Menu.Item key="edit" onClick={(e) => { checkItem("edit", record.id) }}>编辑</Menu.Item>
+                  <Menu.Item key="delete" onClick={(e) => { deleteItem(record.id) }}>删除</Menu.Item>
                 </Menu>
               }
             >
-              <Button>
-                <DownOutlined />
-              </Button>
+              <MenuOutlined style={{ cursor: 'pointer' }} />
             </Dropdown>
-          </span>
+          </>
         )
       }
     }
   ]
 
   useEffect(() => {
-    setTable(configLocation.configAnchorlList, setData, setLoading, pager, setPager, [], {line:lineCode})
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    setTable(configLocation.configAnchorlList, setData, setLoading, pager, setPager, [], { line: lineCode })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dirty])
 
   //关闭弹窗
@@ -88,13 +87,13 @@ const Anchor = props => {
     setVisible(true)
     switch (type) {
       case "add":
-        setModalProperty({title: "新建", type: "add", id: null})
+        setModalProperty({ title: "新建", type: "add", id: null })
         break;
       case "edit":
-        setModalProperty({title: "编辑", type: "edit", id: id})
+        setModalProperty({ title: "编辑", type: "edit", id: id })
         break;
       default:
-        setModalProperty({title: "查看详情", type: "check", id: id})
+        setModalProperty({ title: "查看详情", type: "check", id: id })
     }
   }
 
@@ -104,16 +103,16 @@ const Anchor = props => {
       okText: '确认',
       okType: 'danger',
       cancelText: '取消',
-      onOk: ()=> {
+      onOk: () => {
         configLocation.configAnchorDelete(id)
-        .then((res) =>{
-          if(res.success === true) {
-            message.success("删除成功")
-            setDirty((dirty)=> dirty+1)
-          } else {
-            message.error("删除失败!")
-          }
-        })
+          .then((res) => {
+            if (res.success === true) {
+              message.success("删除成功")
+              setDirty((dirty) => dirty + 1)
+            } else {
+              message.error("删除失败!")
+            }
+          })
       },
       onCancel() {
       },
@@ -124,11 +123,17 @@ const Anchor = props => {
     <React.Fragment>
       <Row type="flex" justify="space-between">
         <Col><h3>锚段信息</h3></Col>
-        <Col><Button type="danger" onClick={()=>checkItem("add", null)}>新建锚段</Button></Col>
+        <Col><Button type="primary" onClick={() => checkItem("add", null)} style={{ marginRight: 20 }}>新建锚段</Button></Col>
       </Row>
-      { commonTable(columns, data, "id", loading, setDirty, pager, setPager, {}) }
 
-      <AnchorModal {...{visible:visible, modalProperty, handleCancel, setDirty, MyContext}} />
+      <MainTable
+        {...{
+          columns, data, loading, pager, setPager, setDirty,
+          rowkey: "id",
+        }}
+      />
+
+      <AnchorModal {...{ visible: visible, modalProperty, handleCancel, setDirty, MyContext }} />
     </React.Fragment>
   )
 }

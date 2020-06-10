@@ -1,0 +1,1 @@
+export const CHANGE_PATROL_SHEET_TYPE = 'patrolSheet/CHANGE_PATROL_SHEET_TYPE'

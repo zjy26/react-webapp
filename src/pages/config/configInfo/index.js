@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Row, Col, Button, Input, Modal, message } from 'antd'
-import { ExclamationCircleOutlined } from '@ant-design/icons'
+import { Row, Col, Button, Input, Modal, message, Divider } from 'antd'
+import { ExclamationCircleOutlined, FileSearchOutlined, DeleteOutlined } from '@ant-design/icons'
 import AuditModal from '../../common/auditModal'
 import NewModal from './newModal'
-import { configEntity } from '../../../api'
-import { connect } from 'react-redux'
-import {setTable, commonTable } from '../../common/table'
+import { configEntity } from '../../../api/config/configInfo'
+import { setTable, MainTable } from '../../common/table'
 import { Link } from 'react-router-dom'
+import commonStyles from '../../Common.module.scss'
 
 const ConfigInfo = props => {
   const [data, setData] = useState([])  //列表数据
@@ -23,7 +23,7 @@ const ConfigInfo = props => {
     start: 0,
     limit: 20
   })
-  const [filter, setFilter] = useState(null)
+  const [filter, setFilter] = useState([])
   const nameRef = useRef(null)
 
   const handleCancel = () => {
@@ -35,34 +35,36 @@ const ConfigInfo = props => {
 
   //搜索
   const search = () => {
-    setFilter([{"property":"name","value":nameRef.current.state.value}])
+    const nameVal = nameRef.current.state.value
+    nameVal ? setFilter([{ "property": "name", "value": nameVal }]) : setFilter([])
+
     setPager({
       ...pager,
       current: 1,
       page: 1,
       start: 0,
     })
-    setDirty(dirty=>dirty+1)
+    setDirty(dirty => dirty + 1)
   }
 
   //删除
-  const deleteItem = (code)=>{
+  const deleteItem = (code) => {
     Modal.confirm({
       title: '是否删除此条系统配置，删除后数据不能恢复？',
       icon: <ExclamationCircleOutlined />,
       okText: '确认',
       okType: 'danger',
       cancelText: '取消',
-      onOk: ()=> {
+      onOk: () => {
         configEntity.configEntityDelete(code)
-        .then((res) =>{
-          if(res.success === true) {
-            message.success("删除成功")
-            setDirty((dirty)=> dirty+1)
-          } else {
-            message.error("此条业务数据在使用中，如需要删除，请调整关联信息，再进行删除!")
-          }
-        })
+          .then((res) => {
+            if (res.success === true) {
+              message.success("删除成功")
+              setDirty((dirty) => dirty + 1)
+            } else {
+              message.error("此条业务数据在使用中，如需要删除，请调整关联信息，再进行删除!")
+            }
+          })
       },
       onCancel() {
       },
@@ -73,41 +75,32 @@ const ConfigInfo = props => {
   const columns = [
     {
       title: '业务数据名称',
-      dataIndex: 'name'
+      dataIndex: 'name',
+      ellipsis: true
     },
     {
       title: '业务数据代码',
       dataIndex: 'code'
     },
     {
-      title: '类型',
-      dataIndex: 'type'
-    },
-    {
-      title: '代码类型',
-      dataIndex: 'codeType'
-    },
-    {
-      title: '应用类型',
-      dataIndex: 'applyType'
-    },
-    {
       title: '描述',
-      dataIndex: 'descr'
+      dataIndex: 'descr',
+      ellipsis: true
     },
     {
       title: '备注',
-      dataIndex: 'comment'
+      dataIndex: 'comment',
+      ellipsis: true
     },
     {
       title: '操作',
-      dataIndex: 'option',
       render: (text, record) => {
         return (
-          <span>
-            <Button type="link" size={'small'}><Link to={"/config/config-info-detail/"+record.code}>查看详情</Link></Button>&nbsp;&nbsp;
-            <Button type="link" size={'small'} onClick={()=>{deleteItem(record.code)}}>删除</Button>
-          </span>
+          <>
+            <Link to={"/config/config-info-detail/" + record.code}><FileSearchOutlined /></Link>
+            <Divider type="vertical" />
+            <DeleteOutlined onClick={() => { deleteItem(record.code) }} />
+          </>
         )
       }
     }
@@ -117,40 +110,44 @@ const ConfigInfo = props => {
     document.title = "业务基础数据"
     setTable(configEntity.configEntityList, setData, setLoading, pager, setPager, filter)
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dirty])
 
   return (
     <div>
-      <Row style={{margin:30}}>
-        <Col span={6}><Input placeholder="请输入业务数据名称" ref={nameRef} onPressEnter={search}/></Col>
-        <Col span={4}><Button type="primary" onClick={search}>搜索</Button></Col>
-        <Col span={14} style={{textAlign: "right"}}>
-          <Button type="danger"
-            style={{marginRight:30}}
+      <Row className={commonStyles.searchForm}>
+        <Col span={5}><Input placeholder="请输入业务数据名称" ref={nameRef} onPressEnter={search} /></Col>
+        <Col offset={1}><Button type="primary" onClick={search}>搜索</Button></Col>
+      </Row>
+
+      <Row type="flex" justify="space-between" className={commonStyles.topHeader}>
+        <Col><h3>业务数据列表</h3></Col>
+        <Col>
+          <Button type="primary"
             onClick={
-              ()=>setVisible({...visible, showNew:true})
+              () => setVisible({ ...visible, showNew: true })
             }
           >新建</Button>
-          <Button type="danger"
+          <Button
             onClick={
-              ()=>setVisible({...visible, showAudit:true})
+              () => setVisible({ ...visible, showAudit: true })
             }>
             审计
           </Button>
         </Col>
       </Row>
 
-      { commonTable(columns, data, "code", loading, setDirty, pager, setPager, {}) }
+      <MainTable
+        {...{
+          columns, data, loading, pager, setPager, setDirty,
+          rowkey: "code",
+        }}
+      />
 
-      <AuditModal {...{handleCancel, visible: visible.showAudit}} />
-      <NewModal {...{handleCancel, setDirty, visible: visible.showNew}} />
+      <AuditModal {...{ handleCancel, visible: visible.showAudit }} />
+      <NewModal {...{ handleCancel, setDirty, visible: visible.showNew }} />
     </div>
   )
 }
 
-const mapStateToProps = (state) => {
-  return state
-}
-
-export default connect(mapStateToProps, null)(React.memo(ConfigInfo))
+export default React.memo(ConfigInfo)

@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Icon as LegacyIcon } from '@ant-design/compatible';
-import '@ant-design/compatible/assets/index.css';
 import { DeleteOutlined, EditOutlined, LinkOutlined, PlusOutlined } from '@ant-design/icons';
-import { Card, Col, Row, Modal, Input, Upload, Typography, Button, Spin } from 'antd';
+import { Card, Col, Row, Modal, Input, Upload, Typography, Button, Spin, Form } from 'antd';
 import style from './Application.module.scss';
 import Axios from 'axios';
 import Error from '../error';
@@ -21,132 +19,124 @@ const formItemLayout = {
 };
 
 const Application = props => {
+  const [form] = Form.useForm();
   const [data, setData] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [obj, setObj] = useState({});
   const [loading, setLoading] = useState(true);
   const [statusCode, setStatusCode] = useState(200);
-  const img = {icon: "/images/Setting.png", iconFile: [{"uid": "-1", "name": "test", "thumbUrl": "/images/Setting.png"}]};  //设置默认图标
+  const img = { icon: "/images/Setting.png", iconFile: [{ "uid": "-1", "name": "test", "thumbUrl": "/images/Setting.png" }] };  //设置默认图标
 
   useEffect(() => {
-    Axios.get('/api/applications').then(res =>{
-      if(res.status === 200){
+    Axios.get('/api/applications').then(res => {
+      if (res.status === 200) {
         setData(res.data)
         setLoading(false)
       }
-   }).catch((err) =>{
+    }).catch((err) => {
       setStatusCode(err.response.status)
       setLoading(true)
-   })
+    })
   }, [loading]);
 
   //应用弹窗
   //弹窗确认
   const comfirm = () => {
-    const {
-      form: { validateFields, isFieldsTouched},
-    } = props;
-
-    validateFields((errors, values) => {
-      if(errors) {
-        return;
-      }
-
-      if(values.id) {//修改
-        if(isFieldsTouched() === true) {  //判断是否有修改
-          confirm({
-            title: '确认提示',
-            content: '是否确认修改？',
-            okText: '确认',
-            okType: 'danger',
-            cancelText: '取消',
-            onOk: ()=> {
-              const fieldsValues = {...values};
-              Axios.put('/api/applications/'+values.id,
-              {
-                name: fieldsValues.name,
-                href: fieldsValues.href,
-                iconFile: img.iconFile,
-                icon: img.icon
-              }
-              ).then((res)=>{
-                setObj({})
-                setShowModal(false)
-                setLoading(true)
-              })
-            },
-            onCancel() {
-            },
+    form.validateFields()
+      .then(values => {
+        if (values.id) {//修改
+          if (form.isFieldsTouched()) {  //判断是否有修改
+            confirm({
+              title: '确认提示',
+              content: '是否确认修改？',
+              okText: '确认',
+              okType: 'danger',
+              cancelText: '取消',
+              onOk: () => {
+                const fieldsValues = { ...values };
+                Axios.put('/api/applications/' + values.id,
+                  {
+                    name: fieldsValues.name,
+                    href: fieldsValues.href,
+                    iconFile: img.iconFile,
+                    icon: img.icon
+                  }
+                ).then((res) => {
+                  setShowModal(false)
+                  setLoading(true)
+                })
+              },
+              onCancel() {
+              },
+            });
+          } else {
+            setShowModal(false)
+          }
+        } else {//添加
+          const newFieldsValues = { ...values };
+          Axios.post('/api/applications',
+            {
+              name: newFieldsValues.name,
+              href: newFieldsValues.href,
+              iconFile: img.iconFile,
+              icon: img.icon
+            }
+          ).then((res) => {
+            setShowModal(false)
+            setLoading(true)
           });
-        } else {
-          setShowModal(false)
         }
-      } else {//添加
-        const newFieldsValues = {...values};
-        Axios.post('/api/applications',
-        {
-          name: newFieldsValues.name,
-          href: newFieldsValues.href,
-          iconFile: img.iconFile,
-          icon: img.icon
-        }
-        ).then((res)=>{
-          setShowModal(false)
-          setLoading(true)
-        });
-      }
-
-    });
-
-
+      })
   };
 
   //弹窗取消
   const cancel = () => {
-    const {
-      form: { resetFields },
-    } = props;
     setShowModal(false);
-    resetFields();
   };
 
   //添加应用
-  const addApplication = ()=>{
-    const {
-      form: { resetFields },
-    } = props;
-    resetFields();
+  const addApplication = () => {
+    setObj((obj) => {
+      if (obj) {
+        Object.keys(obj).forEach(key => {
+          if (key !== "icon") {
+            return obj[key] = undefined
+          }
+        })
+      }
+    })
+    form.resetFields();
     setShowModal(true);
-    setObj({});
     setModalTitle("添加应用");
   }
 
   //编辑
-  const edit = (id)=>{
-    Axios.get('/api/applications/'+id)
-    .then((res) =>{
-      if(res.status === 200){
-        setShowModal(true);
-        setObj(res.data);
-        setModalTitle("编辑应用");
-      }
-    })
+  const edit = (id) => {
+    Axios.get('/api/applications/' + id)
+      .then((res) => {
+        if (res.status === 200) {
+          setShowModal(true);
+          setObj(res.data);
+          form.resetFields();
+          setModalTitle("编辑应用");
+        }
+      })
   }
 
   //删除
-  const handleDelete = (id)=> {
+  const handleDelete = (id) => {
     confirm({
       title: '删除提示',
       content: '是否确认删除，如果删除，将不能恢复',
       okText: '删除',
       okType: 'danger',
       cancelText: '取消',
-      onOk: ()=> {
-        Axios.delete('/api/applications/'+id)
-        .then((res) =>{
-          setLoading(true);
-        })
+      onOk: () => {
+        Axios.delete('/api/applications/' + id)
+          .then((res) => {
+            setLoading(true);
+          })
 
       },
       onCancel() {
@@ -155,19 +145,8 @@ const Application = props => {
     });
   }
 
-  const normFile = e => {
-    console.log('Upload event:', e);
-    if (Array.isArray(e)) {
-      return e;
-    }
-    return e && e.fileList;
-  };
-
-
-  const { getFieldDecorator } = props.form;
   const uploadButton = (
     <div>
-      <LegacyIcon type={loading ? 'loading' : 'plus'} />
       <div className="ant-upload-text">Upload</div>
     </div>
   );
@@ -183,17 +162,17 @@ const Application = props => {
     }
   }
 
-  if(loading === true) {
-    if(statusCode === 500 || statusCode === 404){
-      return(
-        <Error status={statusCode}/>
-      )
-    }else{
+  if (loading === true) {
+    if (statusCode === 500 || statusCode === 404) {
       return (
-      //加载中状态
-      <div className={style.loading}>
-        <Spin />
-      </div>
+        <Error status={statusCode} />
+      )
+    } else {
+      return (
+        //加载中状态
+        <div className={style.loading}>
+          <Spin />
+        </div>
       )
     }
   } else {
@@ -201,16 +180,16 @@ const Application = props => {
       <div className={style.cardPanel}>
         <Row>
           {
-            data.map((item, index)=>{
+            data.map((item, index) => {
               return (
                 <Col md={12} lg={8} xl={6} xxl={6} key={index}>
                   <Card title={item.name}
                     actions={[
-                    <Button type="primary" shape="circle" icon={<LinkOutlined />} href={item.href} target="_blank" />,
-                    <Button type="primary" shape="circle" icon={<EditOutlined />} onClick={()=>{edit(item.id)}} />,
-                    <Button type="primary" shape="circle" icon={<DeleteOutlined />} onClick={()=>{handleDelete(item.id)}} />,
-                  ]}>
-                    <Col span={10}><img src={item.icon} alt="" style={{width:60,height:60}} /></Col>
+                      <Button type="primary" shape="circle" icon={<LinkOutlined />} href={item.href} target="_blank" />,
+                      <Button type="primary" shape="circle" icon={<EditOutlined />} onClick={() => { edit(item.id) }} />,
+                      <Button type="primary" shape="circle" icon={<DeleteOutlined />} onClick={() => { handleDelete(item.id) }} />,
+                    ]}>
+                    <Col span={10}><img src={item.icon} alt="" style={{ width: 60, height: 60 }} /></Col>
                     <Col span={14}><Text strong>ID：{item.id}</Text></Col>
                   </Card>
                 </Col>
@@ -219,8 +198,8 @@ const Application = props => {
           }
           <Col md={12} lg={8} xl={6} xxl={6}>
             <Card className={style.addApplication}>
-              <Button type="primary" shape="circle" style={{width:'66px',height:'66px'}} onClick={addApplication}>
-                <PlusOutlined style={{width:'35px',height:'35px',fontSize:'35px'}} />
+              <Button type="primary" shape="circle" style={{ width: '66px', height: '66px' }} onClick={addApplication}>
+                <PlusOutlined style={{ width: '35px', height: '35px', fontSize: '35px' }} />
               </Button>
               <div>添加应用</div>
             </Card>
@@ -228,6 +207,7 @@ const Application = props => {
         </Row>
 
         <Modal
+          getContainer={false}
           title={modalTitle}
           visible={showModal}
           onOk={comfirm}
@@ -236,44 +216,47 @@ const Application = props => {
           cancelText="取消"
           width="630px"
         >
-          <Form {...formItemLayout} className={style.applicationForm}>
+          <Form
+            form={form}
+            {...formItemLayout}
+            initialValues={obj}
+            className={style.applicationForm}
+          >
             <Row gutter={24}>
-            <Col span={24}><Form.Item label="ID" style={{display: 'none'}}>
-                {getFieldDecorator('id', {
-                  initialValue: obj.id
-                })(
-                  <Input  disabled/>,
-                )}
-              </Form.Item></Col>
               <Col span={24}>
-                <Form.Item label="标题">
-                {getFieldDecorator('name', {
-                  initialValue: obj.name,
-                  rules: [{required: true, whitespace: true, message: "必填项不能为空"}],
-                })(
-                  <Input />,
-                )}
-                </Form.Item></Col>
-              <Col span={24}><Form.Item label="链接">
-                {getFieldDecorator('href', {
-                  initialValue: obj.href,
-                  rules: [{ required: true , whitespace: true, message: "必填项不能为空" }],
-                })(
-                  <Input />,
-                )}
-              </Form.Item></Col>
-              <Col span={24}><Form.Item label="上传图片">
-                {getFieldDecorator('iconFile', {
-                  initialValue: obj.iconFile,
-                  valuePropName: 'file',
-                  getValueFromEvent: normFile,
-                  rules: [{ required: true , message: "必填项不能为空" }],
-                })(
+                <Form.Item label="ID" style={{ display: 'none' }} name="id">
+                  <Input disabled />
+                </Form.Item>
+              </Col>
+              <Col span={24}>
+                <Form.Item
+                  label="标题"
+                  name="name"
+                  rules={[{ required: true, whitespace: true, message: "必填项不能为空" }]}
+                >
+                  <Input />
+                </Form.Item>
+              </Col>
+              <Col span={24}>
+                <Form.Item
+                  label="链接"
+                  name="href"
+                  rules={[{ required: true, whitespace: true, message: "必填项不能为空" }]}
+                >
+                  <Input />
+                </Form.Item>
+              </Col>
+              <Col span={24}>
+                <Form.Item
+                  label="上传图片"
+                  name="iconFile"
+                  rules={[{ required: true, message: "必填项不能为空" }]}
+                >
                   <Upload {...uploadProps}>
-                    {obj.icon ? <img src={obj.icon} alt="avatar" /> : uploadButton }
+                    {obj && obj.icon ? <img src={obj.icon} alt="avatar" /> : uploadButton}
                   </Upload>
-                )}
-              </Form.Item></Col>
+                </Form.Item>
+              </Col>
             </Row>
           </Form>
         </Modal>
@@ -282,4 +265,4 @@ const Application = props => {
   }
 }
 
-export default Form.create()(Application);
+export default React.memo(Application);

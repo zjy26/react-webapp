@@ -1,0 +1,72 @@
+//基础信息Form
+.detailForm {
+  width: "80%";
+  margin-left: "5%";
+
+  :global {
+    .ant-input[disabled] {
+      color: #000;
+      background-color: #fff;
+      cursor: auto;
+      border: 0;
+    }
+    .ant-select[disabled] {
+      color: #000;
+      background-color: #fff;
+      cursor: auto;
+      border: 0;
+    }
+    .ant-form-item {
+      margin-bottom: 0;
+    }
+  }
+}
+//调试记录Form
+.testingForm {
+  width: "80%";
+  margin-left: "5%";
+
+  :global {
+    .ant-input[disabled] {
+      color: #000;
+      background-color: rgba(218, 207, 207, 0);
+      cursor: auto;
+      border: 0;
+    }
+
+    .ant-form-item {
+      margin-bottom: 0;
+    }
+  }
+}
+//基础信息Form
+.detailForm {
+  width: "80%";
+  margin-left: "5%";
+
+  :global {
+    .ant-input[disabled] {
+      color: #000;
+      background-color: #fff;
+      cursor: auto;
+      border: 0;
+    }
+
+    .ant-form-item {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.site-tag-plus {
+  background: #fff;
+  border-style: dashed;
+}
+.edit-tag {
+  user-select: none;
+}
+.tag {
+  width: 80px;
+  margin-right: 8px;
+  vertical-align: top;
+}

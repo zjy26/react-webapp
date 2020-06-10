@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { Button, Row, Col, Modal, message } from 'antd'
+import { Button, Row, Col, Modal, message, Divider } from 'antd'
+import { FormOutlined, DeleteOutlined } from '@ant-design/icons'
 import CatenaryModal from './modal'
-import { setTable, commonTable } from '../../../../common/table'
-import { configLocation } from '../../../../../api'
+import { setTable, MainTable } from '../../../../common/table'
+import { configLocation } from '../../../../../api/config/lineInfo'
 
 const Catenary = props => {
-  const {lineCode, MyContext, entity} = props
+  const { lineCode, MyContext, entity } = props
   const [data, setData] = useState([])  //列表数据
   const [loading, setLoading] = useState(false)
   const [dirty, setDirty] = useState(0)
@@ -19,26 +20,19 @@ const Catenary = props => {
   const [visible, setVisible] = useState(false)
   const [modalProperty, setModalProperty] = useState({})
 
+  const clsArr = []
+  entity.classOption.map(data => {
+    return clsArr.push(...data.children)
+  })
+
   const columns = [
     {
       title: '设备分类',
-      dataIndex: 'cls',
-      render: (text) => {
-        const item = entity.classOption.find(obj => obj.code === text)
-        if(item) {
-          return item.desc
-        }
-      }
+      dataIndex: 'clsDesc'
     },
     {
       title: '品牌',
-      dataIndex: 'brand',
-      render: (text) => {
-        const item = entity.brandOption.find(obj => obj.code === text)
-        if(item) {
-          return item.name
-        }
-      }
+      dataIndex: 'brandName'
     },
     {
       title: '型号',
@@ -53,18 +47,19 @@ const Catenary = props => {
       dataIndex: 'option',
       render: (text, record) => {
         return (
-          <span>
-            <Button type="link" size={'small'} onClick={(e)=>{checkItem("edit", record.id)}}>编辑</Button> &nbsp;&nbsp;
-            <Button type="link" size={'small'} onClick={(e)=>{deleteItem(record.id)}}>删除</Button>
-          </span>
+          <>
+            <FormOutlined onClick={(e) => { checkItem("edit", record.id) }} />
+            <Divider type="vertical" />
+            <DeleteOutlined onClick={(e) => { deleteItem(record.id) }} />
+          </>
         )
       }
     }
   ]
 
   useEffect(() => {
-    setTable(configLocation.configCatenaryList, setData, setLoading, pager, setPager, [], {level: 4, line:lineCode})
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    setTable(configLocation.configCatenaryList, setData, setLoading, pager, setPager, [], { level: 4, line: lineCode })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dirty])
 
   //关闭弹窗
@@ -74,10 +69,10 @@ const Catenary = props => {
     setVisible(true)
     switch (type) {
       case "add":
-        setModalProperty({title: "新建", type: "add", id: null})
+        setModalProperty({ title: "新建", type: "add", id: null })
         break;
       case "edit":
-        setModalProperty({title: "编辑", type: "edit", id: id})
+        setModalProperty({ title: "编辑", type: "edit", id: id })
         break;
       default:
     }
@@ -89,16 +84,16 @@ const Catenary = props => {
       okText: '确认',
       okType: 'danger',
       cancelText: '取消',
-      onOk: ()=> {
+      onOk: () => {
         configLocation.configCatenaryDelete(id)
-        .then((res) =>{
-          if(res.success === true) {
-            message.success("删除成功")
-            setDirty((dirty)=> dirty+1)
-          } else {
-            message.error("删除失败!")
-          }
-        })
+          .then((res) => {
+            if (res.success === true) {
+              message.success("删除成功")
+              setDirty((dirty) => dirty + 1)
+            } else {
+              message.error("删除失败!")
+            }
+          })
       },
       onCancel() {
       },
@@ -109,11 +104,17 @@ const Catenary = props => {
     <React.Fragment>
       <Row type="flex" justify="space-between">
         <Col><h3>设备信息</h3></Col>
-        <Col><Button type="danger" onClick={()=>checkItem("add", null)}>新建设备</Button></Col>
+        <Col><Button type="primary" onClick={() => checkItem("add", null)} style={{ marginRight: 20 }}>新建设备</Button></Col>
       </Row>
-      { commonTable(columns, data, "id", loading, setDirty, pager, setPager, {}) }
 
-      <CatenaryModal {...{visible:visible, modalProperty, handleCancel, setDirty, MyContext}} />
+      <MainTable
+        {...{
+          columns, data, loading, pager, setPager, setDirty,
+          rowkey: "id",
+        }}
+      />
+
+      <CatenaryModal {...{ visible: visible, modalProperty, handleCancel, setDirty, MyContext }} />
     </React.Fragment>
   )
 }

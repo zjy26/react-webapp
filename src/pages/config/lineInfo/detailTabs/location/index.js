@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { Button, Row, Col, Dropdown, Menu, Modal, message } from 'antd'
-import { DownOutlined } from '@ant-design/icons'
+import { Button, Row, Col, Dropdown, Menu, Modal, message, Tag, Divider } from 'antd'
+import { MenuOutlined, FileSearchOutlined } from '@ant-design/icons'
 import SiteModal from './modal'
-import { setTable, commonTable } from '../../../../common/table'
-import { configLocation } from '../../../../../api'
+import { setTable, MainTable } from '../../../../common/table'
+import { configLocation } from '../../../../../api/config/lineInfo'
 
 const Location = props => {
-  const {id, MyContext, entity, setSiteList} = props
+  const { lineCode, MyContext, setSiteList } = props
   const [data, setData] = useState([])  //列表数据
   const [loading, setLoading] = useState(false)
   const [dirty, setDirty] = useState(0)
@@ -22,36 +22,49 @@ const Location = props => {
 
   const columns = [
     {
+      title: null,
+      width: 30,
+      render: (text, record) => {
+        if (record.isDutyPoint) {
+          return (
+            <Tag color="blue"> 值守点</Tag>
+          )
+        } else {
+          return null
+        }
+      }
+    },
+    {
       title: '站点',
       dataIndex: 'desc'
     },
     {
+      title: '站点代码',
+      dataIndex: 'code'
+    },
+    {
       title: '车站类型',
       dataIndex: 'siteFunction',
-      render: (text) => {
-        const item = entity.siteFunctionOption.find(obj=> obj.code === text)
-        if(item) {
-          return item.name
-        }
-      }
+      render: (text, record) => record._displayName.siteFunction
     },
     {
       title: '变电所类型',
       dataIndex: 'style',
-      render: (text) => {
-        const item = entity.styleOption.find(obj=> obj.code === text)
-        if(item) {
-          return item.name
-        }
-      }
+      render: (text, record) => record._displayName.style
     },
     {
       title: '车站位置类型',
       dataIndex: 'locationType',
-      render: (text) => {
-        const item = entity.locationTypeOption.find(obj=> obj.code === text)
-        if(item) {
-          return item.name
+      render: (text, record) => record._displayName.locationType
+    },
+    {
+      title: '房间数量',
+      dataIndex: 'roomNum',
+      render: (text, record) => {
+        if (record.roomNum > 0) {
+          return (<a href={window.apiBase + '/iomm/config/robotpatrolloc/index?filter=%5B%7B%22property%22%3A%22siteStation%22%2C%22value%22%3A%22' + record.desc + '%22%7D%5D'}>{record.roomNum}</a>)
+        } else {
+          return record.roomNum
         }
       }
     },
@@ -60,23 +73,22 @@ const Location = props => {
       dataIndex: 'option',
       render: (text, record) => {
         return (
-          <span>
-            <Button key="check" type="link" size={'small'} onClick={(e)=>{checkSite("check", record.id)}}>查看详情</Button>
+          <>
+            <FileSearchOutlined onClick={(e) => { checkSite("check", record.id) }} />
+            <Divider type="vertical" />
             <Dropdown
               overlay={
                 <Menu>
-                  <Menu.Item key="edit" onClick={(e)=>{checkSite("edit", record.id)}}>编辑</Menu.Item>
-                  <Menu.Item key="deleteSite" onClick={(e)=>{deleteItem(record.id)}}>删除</Menu.Item>
-                  <Menu.Item key="upload" onClick={(e)=>{upload("upload", record.id)}}>上传平面图</Menu.Item>
-                  <Menu.Item key="graph" onClick={(e)=>{upload("graph", record.id)}}>上传HT图形</Menu.Item>
+                  <Menu.Item key="edit" onClick={(e) => { checkSite("edit", record.id) }}>编辑</Menu.Item>
+                  <Menu.Item key="deleteSite" onClick={(e) => { deleteItem(record.id) }}>删除</Menu.Item>
+                  <Menu.Item key="upload" onClick={(e) => { upload("upload", record.id) }}>上传平面图</Menu.Item>
+                  <Menu.Item key="graph" onClick={(e) => { upload("graph", record.id) }}>上传HT图形</Menu.Item>
                 </Menu>
               }
             >
-              <Button>
-                <DownOutlined />
-              </Button>
+              <MenuOutlined style={{ cursor: 'pointer' }} />
             </Dropdown>
-          </span>
+          </>
         )
       }
     }
@@ -85,24 +97,24 @@ const Location = props => {
   setSiteList(data)  //当前线路所有站点，传给区间站点选择所用
 
   useEffect(() => {
-    setTable(configLocation.configLocationList, setData, setLoading, pager, setPager, [], {level: 4, lineId:id})
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    setTable(configLocation.configLocationList, setData, setLoading, pager, setPager, [], { level: 4, line: lineCode })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dirty])
 
   //关闭弹窗
   const handleCancel = () => setVisible({})
 
   const checkSite = (type, id) => {
-    setVisible({showSite: true})
+    setVisible({ showSite: true })
     switch (type) {
       case "add":
-        setModalProperty({title: "新建", type: "add", siteId: null})
+        setModalProperty({ title: "新建", type: "add", siteId: null })
         break;
       case "edit":
-        setModalProperty({title: "编辑", type: "edit", siteId: id})
+        setModalProperty({ title: "编辑", type: "edit", siteId: id })
         break;
       default:
-        setModalProperty({title: "查看详情", type: "check", siteId: id})
+        setModalProperty({ title: "查看详情", type: "check", siteId: id })
     }
   }
 
@@ -112,16 +124,16 @@ const Location = props => {
       okText: '确认',
       okType: 'danger',
       cancelText: '取消',
-      onOk: ()=> {
+      onOk: () => {
         configLocation.configLocationDelete(id)
-        .then((res) =>{
-          if(res.success === true) {
-            message.success("删除成功")
-            setDirty((dirty)=> dirty+1)
-          } else {
-            message.error("删除失败!")
-          }
-        })
+          .then((res) => {
+            if (res.success === true) {
+              message.success("删除成功")
+              setDirty((dirty) => dirty + 1)
+            } else {
+              message.error("删除失败!")
+            }
+          })
       },
       onCancel() {
       },
@@ -136,11 +148,17 @@ const Location = props => {
     <React.Fragment>
       <Row type="flex" justify="space-between">
         <Col><h3>站点信息</h3></Col>
-        <Col><Button type="danger" onClick={()=>checkSite("add", null)}>新建站点</Button></Col>
+        <Col><Button type="primary" onClick={() => checkSite("add", null)} style={{ marginRight: 20 }}>新建站点</Button></Col>
       </Row>
-      { commonTable(columns, data, "id", loading, setDirty, pager, setPager, {}) }
 
-      <SiteModal {...{visible:visible.showSite, modalProperty, handleCancel, setDirty, MyContext}} />
+      <MainTable
+        {...{
+          columns, data, loading, pager, setPager, setDirty,
+          rowkey: "id",
+        }}
+      />
+
+      <SiteModal {...{ visible: visible.showSite, modalProperty, handleCancel, setDirty, MyContext, data }} />
     </React.Fragment>
   )
 }
