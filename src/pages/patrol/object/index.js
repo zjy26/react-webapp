@@ -436,7 +436,7 @@ const ObjectModule = props => {
             </Col>
             <Col span={4} offset={1}>
               <Form.Item name="site">
-                <Cascader options={locationTree.lineSite} placeholder="请选择线路/站点" allowClear />
+                <Cascader options={locationTree&&locationTree.lineSite} placeholder="请选择线路/站点" allowClear />
               </Form.Item>
             </Col>
             <Col span={4} offset={1}>

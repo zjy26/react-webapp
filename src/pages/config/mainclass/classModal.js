@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import '@ant-design/compatible/assets/index.css';
-import { Modal, Input, Select, Form } from 'antd'
+import { Modal, Input, Select, Form, message } from 'antd'
 import { assetClass, getFunByCode } from '../../../api'
 
 const formItemLayout = {
@@ -15,21 +15,23 @@ const formItemLayout = {
 }
 const ClassModal = (props) => {
   const [form] = Form.useForm()
+  const { handleCancel, currentId, setDirty, level, parItem, visible, title, org } = props
   useEffect(() => {
-    if(props.currentId.edit) {
-      form.setFieldsValue({...props.currentId.model})
+    if(currentId.edit) {
+      form.setFieldsValue({...currentId.model})
     }else{
       form.resetFields()
+      form.setFieldsValue({levelOption: currentId.canCreate && !currentId.readOnly ? 0 : 1})
     }
-  }, [props.currentId,form,props.parItem,props.user,props.title])
+  }, [currentId,form,title,level])
 
   const handleSubmit = () => {
     form.validateFields()
     .then(value => {
       const {levelOption, ...classObj} = value
-      getFunByCode()
+      getFunByCode('asset.classification')
       .then(res =>{
-        if(props.currentId.edit) {
+        if(currentId.edit) {
           Modal.confirm({
             title: '确认提示',
             content: '是否确认修改？',
@@ -37,48 +39,62 @@ const ClassModal = (props) => {
             okType: 'danger',
             cancelText: '取消',
             onOk: ()=> {
-              assetClass.updateClass(props.currentId.id, {...classObj, _method:"PUT", function: res.id, id:props.currentId.id})
+              assetClass.updateClass(currentId.id, {...classObj, _method:"PUT", function: res.id, id:currentId.id})
               .then(res =>{
-                props.handleCancel()
-                props.setDirty(dirty=>dirty+1)
+                handleCancel()
+                message.success('修改成功')
+                setDirty(dirty=>dirty+1)
+              })
+              .catch(error => {
+                message.error('修改失败')
               })
             },
             onCancel() {
-              props.handleCancel()
+              handleCancel()
             },
           })
         } else {//添加
-          classObj["org"] = parseInt(res.mos)? props.org : "*"
+          classObj["org"] = parseInt(res.mos)? org : "*"
           classObj["function"] = res.id
-          if(props.currentId.readOnly && props.currentId.canCreate){ //都true
-            if(props.parItem && props.parItem.level){
-              switch (props.parItem.level){
+          if(currentId.readOnly && currentId.canCreate){ //都true
+            if(level && parItem){
+              switch (level){
                 case 2:
-                  classObj["major"] = props.currentId.model.code
+                  classObj["major"] = currentId.model.code
                   break;
                 default:
-                  classObj["major"] = props.parItem.item.model.code
-                  classObj["type"] = props.currentId.model.code
+                  classObj["major"] = parItem.model.code
+                  classObj["type"] = currentId.model.code
                   break;
               }
             }
-          }else if(!props.currentId.readOnly){ //readOnlyfalse
-            classObj["major"] = props.currentId.model.major
-            classObj["type"] = props.currentId.model.type
+          }else if(!currentId.readOnly){ //readOnlyfalse
+            classObj["major"] = currentId.model.major
+            classObj["type"] = currentId.model.type
             if(levelOption===0){//同级
-              if(!props.parItem.item.readOnly){
-                classObj["parentCls"] = props.parItem.item.model.code
-                classObj["parentClsOrg"] = props.parItem.item.model.org
+              if(!parItem.readOnly){
+                classObj["parentCls"] = parItem.model.code
+                classObj["parentClsOrg"] = parItem.model.org
               }
             }else if(levelOption===1){
-              classObj["parentCls"] = props.currentId.model.code
-              classObj["parentClsOrg"] = props.currentId.model.org
+              classObj["parentCls"] = currentId.model.code
+              classObj["parentClsOrg"] = currentId.model.org
             }
           }
           assetClass.addObjectClass(classObj)
           .then(res =>{
-            props.handleCancel()
-            props.setDirty(dirty => dirty+1)
+            handleCancel()
+            if(res.success){
+              setDirty(dirty => dirty+1)
+              message.success('新增分类成功')
+            }
+            if(res.actionErrors && res.actionErrors.length){
+              message.error(res.actionErrors[0])
+            }
+          })
+          .catch(error => {
+            message.error('新增分类失败')
+            handleCancel()
           })
         }
       })
@@ -89,14 +105,14 @@ const ClassModal = (props) => {
     <Modal
       maskClosable={false}
       getContainer={false}
-      title={props.title}
+      title={title}
       okText="确定"
       okType="danger"
       cancelText="取消"
-      visible={props.visible}
-      onCancel={props.handleCancel}
+      visible={visible}
+      onCancel={handleCancel}
       onOk={handleSubmit}
-      currentId={props.currentId}
+      currentId={currentId}
     >
       <Form form={form} {...formItemLayout}>
         <Form.Item label="层级名称"
@@ -112,7 +128,7 @@ const ClassModal = (props) => {
             }
           ]}
         >
-          <Input maxLength={20}/>
+          <Input maxLength={20} placeholder="请输入层级名称"/>
         </Form.Item>
         <Form.Item label="分类代码"
           name="code"
@@ -127,15 +143,15 @@ const ClassModal = (props) => {
               }
             ]}
           >
-            <Input maxLength={20}/>
+            <Input maxLength={20} placeholder="请输入分类代码"/>
           </Form.Item>
         {
-          props.currentId.edit ? null :
+          currentId.edit ? null :
 
           <Form.Item label="级别选择" name="levelOption" rules={[{required: true, message: '请选择分类级别'}]}>
-            <Select>
+            <Select placeholder="请选择分类级别">
               {
-                props.currentId.canCreate && !props.currentId.readOnly ?
+                currentId.canCreate && !currentId.readOnly ?
                   <Select.Option value={0}>添加同级</Select.Option> :
                   null
               }

@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useContext } from 'react'
-import { Button, Row, Col, Form, Input, Select, Radio, Tag, Modal, message } from 'antd'
+import { Button, Row, Col, Form, Input, InputNumber, Select, Radio, Tag, Modal, message, Upload } from 'antd'
 import { configLocation } from '../../../../../api/config/lineInfo'
-import { overheadLine, anchorSections, stationTracks } from '../../../../../api'
+import { upload, overheadLine, anchorSections, stationTracks } from '../../../../../api'
 import { connect } from 'react-redux'
 import { PlusOutlined } from '@ant-design/icons'
+import { EditUpload, showFile } from '../../../../common/upload'
 
 const formItemLayout = {
   labelCol: {
@@ -21,7 +22,7 @@ const Basic = props => {
   const locationTree = props.location
   const [inputValue, setInputValue] = useState('')
   const [inputVisible, setInputVisible] = useState(false)
-  const { MyContext, setLine } = props
+  const { MyContext, setLine, setEditStatus, base } = props
   const [edit, setEdit] = useState(false)
   const [dirty, setDirty] = useState(0)
   const [tagHidden, setTagHidden] = useState(true)
@@ -33,8 +34,16 @@ const Basic = props => {
   const [form] = Form.useForm()
   const [obj, setObj] = useState({})
 
-  useEffect(() => {
+  const [fileList, setFileList] = useState([])
+  const [preview, setPreview] = useState({
+    previewVisible: false,
+    previewImage: '',
+    previewTitle: ''
+  })
 
+  setEditStatus(edit)
+
+  useEffect(() => {
     if (line) {
       anchorSections({ line: line })
         .then(res => {
@@ -42,26 +51,18 @@ const Basic = props => {
             setAnchorSectionList(res.models)
           }
         })
-        .catch(() => {
-          console.log("列表数据加载失败")
-        })
-
       configLocation.configIntervalList({ line: line })
         .then(res => {
           if (res.models) {
             setIntervals(res.models)
           }
         })
-        .catch(() => {
-          console.log("列表数据加载失败")
-        })
     }
 
   }, [line])
 
-
   useEffect(() => {
-    if (locationTree.toJS().lineSite && intervals) {
+    if (locationTree.toJS().lineSite && edit === false) {
       overheadLine.overHeadLineDetail(id)
         .then(res => {
           if (res) {
@@ -70,28 +71,15 @@ const Basic = props => {
                 setSiteOption(item.children)
               }
             })
-            form.setFieldsValue({ ...res })
             setLine(res.line)
-            const line = locationTree.toJS().lineSite.find(obj => obj.value === res.line)
+            const lineDesc = locationTree.toJS().lineSite.find(obj => obj.value === res.line)
             const site1 = locationTree.toJS().site.find(obj => obj.value === res.site1)
             const site2 = locationTree.toJS().site.find(obj => obj.value === res.site2)
-            const vehicleRoute = vehicleRouteOption.find(obj => obj.code === res.vehicleRoute)
-            const catenaryTypes = catenaryTypeOption.find(obj => obj.code === res.catenaryType)
-            const anchorSection = anchorSectionList.find(obj => obj.code === res.anchorSection)
-            const stationTrack = stationTrackList.find(obj => obj.code === res.stationTrack)
-            const locationType = catenaryLocationTypeOption.find(obj => obj.code === res.locationType)
-            const interval = intervals.find(obj => obj.id === res.interval)
             setObj({
               ...res,
-              lineDesc: line ? line.label : '',
-              site1Desc: site1 ? site1.label : '',
-              site2Desc: site2 ? site2.label : '',
-              vehicleRouteDesc: vehicleRoute ? vehicleRoute.name : vehicleRoute,
-              catenaryTypeDesc: catenaryTypes ? catenaryTypes.name : catenaryTypes,
-              anchorSectionDesc: anchorSection ? anchorSection.descr : anchorSection,
-              stationTrackDesc: stationTrack ? stationTrack.descr : stationTrack,
-              locationTypeDesc: locationType ? locationType.name : locationType,
-              intervalDesc: interval ? interval.descr : undefined
+              lineDesc: lineDesc ? lineDesc.label : undefined,
+              site1Desc: site1 ? site1.label : undefined,
+              site2Desc: site2 ? site2.label : undefined,
             })
             form.resetFields()
             if (res.etag) {
@@ -99,12 +87,12 @@ const Basic = props => {
             }
           }
         })
-        .catch(() => {
-          console.log("列表数据加载失败")
+        .then(() => {
+          showFile(id, "d9OverheadLine-img", setFileList)
         })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [locationTree, dirty, intervals])
+  }, [locationTree, dirty, base])
 
   //取消编辑
   const cancel = () => {
@@ -116,8 +104,8 @@ const Basic = props => {
     setInputValue(e.target.value)
   }
 
-  const changeInterval = (value) => {
-    configLocation.configIntervalDetail(value)
+  const changeInterval = (value, Option) => {
+    configLocation.configIntervalDetail(Option.id)
       .then(res => {
         if (res) {
           form.setFieldsValue({ site1: res.site1, site2: res.site2, catenaryType: res.catenaryType, vehicleRoute: res.vehicleRoute })
@@ -190,22 +178,29 @@ const Basic = props => {
                   .then(res => {
                     if (res) {
                       message.success("保存成功")
-                      setDirty((dirty) => dirty + 1)
                       setEdit(false)
+                      setDirty((dirty) => dirty + 1)
                     }
                   })
-                  .catch(() => {
-                    console.log("列表数据加载失败")
-                  })
-
               },
               onCancel() {
               },
             }) : setEdit(false)
         }
       })
-      .catch(errorInfo => {
-        return
+      .then(() => {
+        if (id) {
+          const ids = []
+          fileList.forEach(item => {
+            if (item.status === "done") {
+              ids.push(item.uid)
+            }
+          })
+          upload({
+            ids: ids.toString(),
+            record: id
+          })
+        }
       })
   }
 
@@ -213,6 +208,29 @@ const Basic = props => {
     const tagList = tags.filter(tag => tag !== item);
     setTags(tagList)
   }
+
+  //图片预览
+  function getBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+    });
+  }
+  const handlePreview = async file => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj);
+    }
+
+    setPreview({
+      ...preview,
+      previewImage: file.url || file.preview,
+      previewVisible: true,
+      previewTitle: file.name || file.url.substring(file.url.lastIndexOf('/') + 1),
+    })
+  }
+  const previewCancel = () => setPreview({ ...preview, previewVisible: false })
 
   return (
     <React.Fragment>
@@ -234,7 +252,6 @@ const Basic = props => {
         <Form {...formItemLayout} form={form} initialValues={obj} style={{ margin: 20 }}>
           {
             edit === false ?
-
               <Row gutter={24}>
                 <Col span={12}>
                   <Form.Item label="定位点编码">
@@ -258,7 +275,12 @@ const Basic = props => {
                 </Col>
                 <Col span={12}>
                   <Form.Item label="区间信息">
-                    {obj.intervalDesc}
+                    {
+                      obj.interval && intervals && intervals.length > 0 ?
+                        intervals.find(val => val.code === obj.interval) ? intervals.find(val => val.code === obj.interval).descr : ""
+                        :
+                        ''
+                    }
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -273,22 +295,34 @@ const Basic = props => {
                 </Col>
                 <Col span={12}>
                   <Form.Item label="行车路线">
-                    {obj.vehicleRouteDesc}
+                    {
+                     vehicleRouteOption.find(data => data.code === obj.vehicleRoute) &&
+                     vehicleRouteOption.find(data => data.code === obj.vehicleRoute).name
+                    }
                   </Form.Item>
                 </Col>
                 <Col span={12}>
                   <Form.Item label="触网类型">
-                    {obj.catenaryTypeDesc}
+                    {
+                     catenaryTypeOption.find(data => data.code === obj.catenaryType) &&
+                     catenaryTypeOption.find(data => data.code === obj.catenaryType).name
+                    }
                   </Form.Item>
                 </Col>
                 <Col span={12}>
                   <Form.Item label="锚段号" >
-                    {obj.anchorSectionDesc}
+                    {
+                     anchorSectionList.find(data => data.code === obj.anchorSection) &&
+                     anchorSectionList.find(data => data.code === obj.anchorSection).name
+                    }
                   </Form.Item>
                 </Col>
                 <Col span={12}>
                   <Form.Item label="股道号">
-                    {obj.stationTrackDesc}
+                  {
+                     stationTrackList.find(data => data.code === obj.stationTrack) &&
+                     stationTrackList.find(data => data.code === obj.stationTrack).name
+                    }
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -327,18 +361,49 @@ const Basic = props => {
                 </Col>
                 <Col span={12}>
                   <Form.Item label="布置位置">
-                    {obj.locationTypeDesc}
+                    {
+                     catenaryLocationTypeOption.find(data => data.code === obj.locationType) &&
+                     catenaryLocationTypeOption.find(data => data.code === obj.locationType).name
+                    }
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item label="公里表">
+                  <Form.Item label="公里标">
                     {obj.kmTable}
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label="顺序">
+                    {obj.sn}
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label="曲面半径">
+                    {obj.surfaceRadius ? obj.surfaceRadius + 'm' : null}
+                  </Form.Item>
+                </Col>
+                <Col span={24}>
+                  <Form.Item label="定位点图片" {...{ labelCol: { span: 4 } }}>
+                    <Upload
+                      fileList={fileList}
+                      listType="picture-card"
+                      onPreview={handlePreview}
+                      disabled
+                    />
+                    <Modal
+                      visible={preview.previewVisible}
+                      title={preview.previewTitle}
+                      footer={null}
+                      onCancel={previewCancel}
+                    >
+                      <img alt="定位点图片" style={{ width: '100%' }} src={preview.previewImage} />
+                    </Modal>
                   </Form.Item>
                 </Col>
                 <Col span={19} style={{ paddingRight: 20 }}><h3>调整信息</h3></Col>
                 <Col span={12}>
                   <Form.Item label="导高">
-                    {obj.guideHeight ? obj.guideHeight + 'm' : ''}
+                    {obj.guideHeight ? obj.guideHeight + 'mm' : ''}
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -379,11 +444,11 @@ const Basic = props => {
               </Row>
               :
               <Row gutter={24}>
-                    <Col span={12}>
-                    <Form.Item label="定位点编码" name="code">
-                      <Input placeholder="请输入定位点编码" disabled/>
-                    </Form.Item>
-                  </Col>
+                <Col span={12}>
+                  <Form.Item label="定位点编码" name="code">
+                    <Input placeholder="请输入定位点编码" disabled />
+                  </Form.Item>
+                </Col>
                 <Col span={12}>
                   <Form.Item label="定位点描述" name="descr">
                     <Input placeholder="请输入定位点描述" />
@@ -425,7 +490,7 @@ const Basic = props => {
                     <Select placeholder="请选择区间信息" onChange={changeInterval}>
                       {
                         intervals && intervals.map(item => (
-                          <Select.Option key={item.id} value={item.id}>
+                          <Select.Option key={item.code} id={item.id} value={item.code}>
                             {item.descr}
                           </Select.Option>
                         ))
@@ -474,7 +539,9 @@ const Basic = props => {
                 </Col>
                 <Col span={12}>
                   <Form.Item label="触网类型" name="catenaryType">
-                    <Select placeholder="请选择触网类型" disabled>
+                    <Select placeholder="请选择触网类型" onChange={() => {
+                      form.setFieldsValue({ chainSuspension: null })
+                    }} disabled>
                       {
                         catenaryTypeOption && catenaryTypeOption.length > 0 && catenaryTypeOption.map(item => (
                           <Select.Option key={item.code} value={item.code}>
@@ -512,7 +579,10 @@ const Basic = props => {
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item label="定位点号" name="anchorPoint" rules={[{ required: true, message: '请输入定位点号' }]}>
+                  <Form.Item label="定位点号" name="anchorPoint"
+                    rules={[{ required: true, message: '请输入定位点号' },
+                    { whitespace: true, message: '内容不能为空' }
+                    ]}>
                     <Input placeholder="请输入定位点号" />
                   </Form.Item>
                 </Col>
@@ -542,8 +612,8 @@ const Basic = props => {
                     {tags.map((item, index) =>
                       <Tag key={item} closable={true} onClose={() => closeTage(item)}>{item}</Tag>
                     )}
-                    </Form.Item>
-                    </Col>
+                  </Form.Item>
+                </Col>
                 <Col span={12}>
                   <Form.Item label="悬挂形式" name="hangingForm">
                     <Input placeholder="请输入悬挂形式" />
@@ -551,11 +621,16 @@ const Basic = props => {
                 </Col>
                 <Col span={12}>
                   <Form.Item label="链式悬挂" name="chainSuspension">
-                    <Select placeholder="请选择链式悬挂">
+                    {form.getFieldValue("catenaryType") === "0101" ? <Select placeholder="请选择链式悬挂">
                       <Select.Option value="正">正</Select.Option>
                       <Select.Option value="反">反</Select.Option>
                       <Select.Option value="无">无</Select.Option>
-                    </Select>
+                    </Select> : <Select placeholder="请选择链式悬挂" disabled>
+                        <Select.Option value="正">正</Select.Option>
+                        <Select.Option value="反">反</Select.Option>
+                        <Select.Option value="无">无</Select.Option>
+                      </Select>}
+
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -572,8 +647,30 @@ const Basic = props => {
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item label="公里表" name="kmTable">
-                    <Input placeholder="请输入公里表" />
+                  <Form.Item label="公里标" name="kmTable">
+                    <InputNumber placeholder="请输入公里标" />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label="顺序" name="sn">
+                    <InputNumber placeholder="请输入顺序" />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label="曲面半径(m)" name="surfaceRadius">
+                    <InputNumber placeholder="请输入曲面半径(m)" />
+                  </Form.Item>
+                </Col>
+                <Col span={24}>
+                  <Form.Item label="定位点图片" {...{ labelCol: { span: 4 } }}>
+                    <EditUpload
+                      accept="image/*"
+                      listType="picture-card"
+                      model='d9OverheadLine-img'
+                      fileList={fileList}
+                      setFileList={setFileList}
+                      type={2}
+                    />
                   </Form.Item>
                 </Col>
                 <Col span={19} style={{ paddingRight: 20 }}><h3>调整信息</h3></Col>

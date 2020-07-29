@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { Button, Row, Col, Dropdown, Menu, Modal, message, Tag, Divider } from 'antd'
 import { MenuOutlined, FileSearchOutlined } from '@ant-design/icons'
 import SiteModal from './modal'
-import { setTable, MainTable } from '../../../../common/table'
+import { setTable, MainTable, getColumnSearchProps } from '../../../../common/table'
 import { configLocation } from '../../../../../api/config/lineInfo'
 
 const Location = props => {
-  const { lineCode, MyContext, setSiteList } = props
+  const { lineCode, MyContext } = props
+  const { entity } = useContext(MyContext)
   const [data, setData] = useState([])  //列表数据
   const [loading, setLoading] = useState(false)
   const [dirty, setDirty] = useState(0)
@@ -19,6 +20,12 @@ const Location = props => {
   })
   const [visible, setVisible] = useState({})
   const [modalProperty, setModalProperty] = useState({})
+
+  const [searchProps, setSearchProps] = useState({
+    column: "",
+    text: ""
+  })
+  const [filter, setFilter] = useState([])
 
   const columns = [
     {
@@ -35,8 +42,13 @@ const Location = props => {
       }
     },
     {
+      title: '序号',
+      dataIndex: 'sn'
+    },
+    {
       title: '站点',
-      dataIndex: 'desc'
+      dataIndex: 'desc',
+      ...getColumnSearchProps('desc', "站点", searchProps, setSearchProps)
     },
     {
       title: '站点代码',
@@ -45,16 +57,25 @@ const Location = props => {
     {
       title: '车站类型',
       dataIndex: 'siteFunction',
+      filterMultiple: false,
+      filters: entity.siteFunctionOption.map(o=>{return{value:o.code, text:o.name}}),
+      onFilter: (value, record) => record.siteFunction ? record.siteFunction.indexOf(value) === 0 : null,
       render: (text, record) => record._displayName.siteFunction
     },
     {
       title: '变电所类型',
       dataIndex: 'style',
+      filterMultiple: false,
+      filters: entity.styleOption.map(o=>{return{value:o.code, text:o.name}}),
+      onFilter: (value, record) => record.style ? record.style.indexOf(value) === 0 : null,
       render: (text, record) => record._displayName.style
     },
     {
       title: '车站位置类型',
       dataIndex: 'locationType',
+      filterMultiple: false,
+      filters: entity.locationTypeOption.map(o=>{return{value:o.code, text:o.name}}),
+      onFilter: (value, record) => record.locationType ? record.locationType.indexOf(value) === 0 : null,
       render: (text, record) => record._displayName.locationType
     },
     {
@@ -81,8 +102,6 @@ const Location = props => {
                 <Menu>
                   <Menu.Item key="edit" onClick={(e) => { checkSite("edit", record.id) }}>编辑</Menu.Item>
                   <Menu.Item key="deleteSite" onClick={(e) => { deleteItem(record.id) }}>删除</Menu.Item>
-                  <Menu.Item key="upload" onClick={(e) => { upload("upload", record.id) }}>上传平面图</Menu.Item>
-                  <Menu.Item key="graph" onClick={(e) => { upload("graph", record.id) }}>上传HT图形</Menu.Item>
                 </Menu>
               }
             >
@@ -94,12 +113,10 @@ const Location = props => {
     }
   ]
 
-  setSiteList(data)  //当前线路所有站点，传给区间站点选择所用
-
   useEffect(() => {
-    setTable(configLocation.configLocationList, setData, setLoading, pager, setPager, [], { level: 4, line: lineCode })
+    setTable(configLocation.configLocationList, setData, setLoading, pager, setPager, filter, { level: 4, line: lineCode })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dirty])
+  }, [filter, dirty])
 
   //关闭弹窗
   const handleCancel = () => setVisible({})
@@ -140,10 +157,6 @@ const Location = props => {
     })
   }
 
-  const upload = () => {
-
-  }
-
   return (
     <React.Fragment>
       <Row type="flex" justify="space-between">
@@ -153,12 +166,12 @@ const Location = props => {
 
       <MainTable
         {...{
-          columns, data, loading, pager, setPager, setDirty,
+          columns, data, loading, pager, setPager, setDirty, setFilter,
           rowkey: "id",
         }}
       />
 
-      <SiteModal {...{ visible: visible.showSite, modalProperty, handleCancel, setDirty, MyContext, data }} />
+      <SiteModal {...{ visible: visible.showSite, modalProperty, handleCancel, setDirty, MyContext }} />
     </React.Fragment>
   )
 }

@@ -7,6 +7,7 @@ import UploadModal from './uploadModal'
 import NewModal from './newModal'
 import { configLocation } from '../../../api/config/lineInfo'
 import { people, CATENARY_TYPE, userLine } from '../../../api'
+import { requestApi } from '../../../api/request'
 import { connect } from 'react-redux'
 import { setTable, MainTable } from '../../common/table'
 import { Link } from 'react-router-dom'
@@ -17,7 +18,7 @@ const LineInfo = props => {
   const [form] = Form.useForm()
   const [data, setData] = useState([])  //列表数据
   const [loading, setLoading] = useState(false)
-  const [uploadTitle, setupLoadTitle] = useState("上传附件")
+  const [uploadProperty, setUploadProperty] = useState({})
   const [visible, setVisible] = useState({})
   const [dirty, setDirty] = useState(0)
   const [pager, setPager] = useState({
@@ -91,15 +92,14 @@ const LineInfo = props => {
       okType: 'danger',
       cancelText: '取消',
       onOk: () => {
-        configLocation.configLocationDelete(id)
-          .then((res) => {
-            if (res.success === true) {
-              message.success("删除成功")
-              setDirty((dirty) => dirty + 1)
-            } else {
-              message.error("该线路下存在站点，禁止删除!")
-            }
-          })
+        requestApi(
+          configLocation.configLocationDelete(id),
+          () => {
+            message.success("删除成功")
+            setDirty((dirty) => dirty + 1)
+          },
+          (res) => message.error(res.actionErrors[0])
+        )
       },
       onCancel() {
       },
@@ -108,11 +108,10 @@ const LineInfo = props => {
 
   //上传附件、图形
   const upload = (type, id) => {
-    if (type === "graph") {
-      setupLoadTitle("上传图形")
-    } else {
-      setupLoadTitle("上传附件")
-    }
+    setUploadProperty({
+      title: type === "graph" ? "上传图形" : "上传附件",
+      record: id
+    })
     setVisible({ ...visible, showUpload: true })
   }
 
@@ -195,9 +194,9 @@ const LineInfo = props => {
     <div>
       <Form form={form} name="lineSearchForm">
         <Row className={commonStyles.searchForm}>
-          <Col span={5}>
+          <Col span={5} id="codeArea">
             <Form.Item name="code" style={{ lineHeight: "unset" }}>
-              <Select placeholder="请选择线路" allowClear>
+              <Select placeholder="请选择线路" allowClear getPopupContainer={() => document.getElementById('codeArea')}>
                 {
                   props.userLine.toJS().map(item =>
                     <Select.Option key={item.code} value={item.code}>{item.desc}</Select.Option>
@@ -235,7 +234,7 @@ const LineInfo = props => {
               </Menu>
             }
           >
-            <Button>更多功能<DownOutlined /></Button>
+            <Button hidden>更多功能<DownOutlined /></Button>
           </Dropdown>
         </Col>
       </Row>
@@ -249,7 +248,7 @@ const LineInfo = props => {
 
       <AuditModal {...{ handleCancel, visible: visible.showAudit }} />
       <ImportModal {...{ handleCancel, visible: visible.showImport }} />
-      <UploadModal {...{ handleCancel, visible: visible.showUpload, title: uploadTitle }} />
+      <UploadModal {...{ handleCancel, visible: visible.showUpload, uploadProperty }} />
       <NewModal {...{ handleCancel, visible: visible.showNew, setDirty, user: props.user.toJS(), catenaryTypeOption, lineLeaderOption }} />
 
     </div>

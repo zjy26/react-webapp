@@ -14,13 +14,15 @@ const formItemLayout = {
 }
 
 const IntervalModal = props => {
-  const { modalProperty, visible, setDirty, handleCancel, MyContext } = props
-  const { entity, lineCode, siteList } = useContext(MyContext)
+  const { modalProperty, visible, setDirty, handleCancel, MyContext, siteOption } = props
+  const { entity, lineCode } = useContext(MyContext)
   const [form] = Form.useForm()
   const [initValues, setInitValues] = useState({})
+  const [okLoading, setOkLoading] = useState(false)
 
   useEffect(() => {
     if (visible) {
+      setOkLoading(false)
       modalProperty.type === "add" ?
         configLocation.configIntervalNew()
           .then((res) => {
@@ -38,12 +40,17 @@ const IntervalModal = props => {
           .then(res => {
             if (res) {
               const catenaryTypeValue = entity.catenaryTypeOption.find(obj => obj.code === res.catenaryType)
+              const siteField1 = siteOption.find(obj => obj.code === res.site1)
+              const siteField2 = siteOption.find(obj => obj.code === res.site2)
+
               modalProperty.type === "check" ?
                 setInitValues({
                   ...res,
                   isLarge: res.isLarge ? "是" : "否",
                   hasIntervalPlace: res.hasIntervalPlace ? "有" : "无",
-                  catenaryType: catenaryTypeValue ? catenaryTypeValue.name : null
+                  catenaryType: catenaryTypeValue ? catenaryTypeValue.name : null,
+                  site1Desc: siteField1 ? siteField1.desc : null,
+                  site2Desc: siteField2 ? siteField2.desc : null
                 })
                 :
                 setInitValues({
@@ -63,25 +70,32 @@ const IntervalModal = props => {
   const handleSubmit = () => {
     form.validateFields()
       .then(values => {
+        setOkLoading(true)
         switch (modalProperty.type) {
           case "add":
             configLocation.configIntervalAdd({ ...values, line: lineCode })
               .then((res) => {
-                if (res.success) {
+                if (res && res.success) {
                   handleCancel()
                   setDirty((dirty) => dirty + 1)
                   message.success("新建成功")
                 } else {
                   message.error(res.actionErrors[0])
+                  setOkLoading(false)
                 }
               })
             break;
           case "edit":
             configLocation.configIntervalUpdate(modalProperty.id, { ...values, _method: 'PUT' })
-              .then(() => {
-                message.success("编辑成功")
-                setDirty(dirty => dirty + 1)
-                handleCancel()
+              .then((res) => {
+                if (res && res.success) {
+                  message.success("编辑成功")
+                  setDirty(dirty => dirty + 1)
+                  handleCancel()
+                } else {
+                  message.error('编辑失败')
+                  setOkLoading(false)
+                }
               })
             break;
           default:
@@ -104,7 +118,7 @@ const IntervalModal = props => {
         modalProperty.type === "check" ? null :
           [
             <Button key="cancel" onClick={handleCancel}>取消</Button>,
-            <Button key="submit" type="primary" onClick={handleSubmit}>确定</Button>
+            <Button key="submit" type="primary" loading={okLoading} onClick={handleSubmit}>确定</Button>
           ]
       }
     >
@@ -113,18 +127,23 @@ const IntervalModal = props => {
           modalProperty.type === "check" ?
             <Row gutter={24}>
               <Col span={12}>
+                <Form.Item label="编码">
+                  {initValues.code}
+                </Form.Item>
+              </Col>
+              <Col span={12}>
                 <Form.Item label="区间名称">
                   {initValues.descr}
                 </Form.Item>
               </Col>
               <Col span={12}>
                 <Form.Item label="站点1名称">
-                  {initValues.site1}
+                  {initValues.site1Desc}
                 </Form.Item>
               </Col>
               <Col span={12}>
                 <Form.Item label="站点2名称">
-                  {initValues.site2}
+                  {initValues.site2Desc}
                 </Form.Item>
               </Col>
               <Col span={12}>
@@ -167,7 +186,7 @@ const IntervalModal = props => {
                 <Form.Item label="站点1名称" name="site1" rules={[{ required: true, message: '请选择站点1名称' }]}>
                   <Select placeholder="请选择站点1名称">
                     {
-                      siteList.map(item => (
+                      siteOption.map(item => (
                         <Select.Option key={item.code} value={item.code}>{item.desc}</Select.Option>
                       ))
                     }
@@ -178,22 +197,13 @@ const IntervalModal = props => {
                 <Form.Item
                   label="站点2名称"
                   name="site2"
-                  dependencies={['site1']}
                   rules={[
-                    { required: true, message: '请选择站点2名称' },
-                    ({ getFieldValue }) => ({
-                      validator(rule, value) {
-                        if (!value || getFieldValue('site1') !== value) {
-                          return Promise.resolve()
-                        }
-                        return Promise.reject('站点1和站点2不能重复')
-                      },
-                    })
+                    { required: true, message: '请选择站点2名称' }
                   ]}
                 >
                   <Select placeholder="请选择站点2名称">
                     {
-                      siteList.map(item => (
+                      siteOption.map(item => (
                         <Select.Option key={item.code} value={item.code}>{item.desc}</Select.Option>
                       ))
                     }

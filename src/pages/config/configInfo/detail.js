@@ -3,7 +3,7 @@ import { Form, Input, Button, Select, Row, Col, Divider, Radio, Modal, message }
 import { ExclamationCircleOutlined, FormOutlined, DeleteOutlined, FileSearchOutlined } from '@ant-design/icons'
 import { Link } from 'react-router-dom'
 import DetailModal from './detailModal'
-import { setTable, MainTable } from '../../common/table'
+import { setTable, MainTable, getColumnSearchProps } from '../../common/table'
 import { configEntity } from '../../../api/config/configInfo'
 import commonStyles from '../../Common.module.scss'
 
@@ -36,6 +36,11 @@ const Detail = props => {
     limit: 20
   })
   const [data, setData] = useState([]) //业务数据详情列表
+  const [searchProps, setSearchProps] = useState({
+    column: "",
+    text: ""
+  })
+  const [filter, setFilter] = useState([])
 
   const handleCancel = () => {
     setVisible(false)
@@ -49,7 +54,8 @@ const Detail = props => {
     {
       title: '名称',
       dataIndex: 'name',
-      ellipsis: true
+      ellipsis: true,
+      ...getColumnSearchProps('name', "名称", searchProps, setSearchProps)
     },
     {
       title: '描述',
@@ -85,9 +91,13 @@ const Detail = props => {
           <>
             <FileSearchOutlined onClick={() => { checkList("check", record.id) }} hidden />
             <Divider type="vertical" />
-            <FormOutlined onClick={() => { checkList("edit", record.id) }} />
+            <FormOutlined
+              onClick={
+                () => edit ? message.info('基础信息处于编辑状态，请先保存或取消') : checkList("edit", record.id)
+              }
+            />
             <Divider type="vertical" />
-            <DeleteOutlined onClick={() => { deleteList(record.id) }} />
+            <DeleteOutlined onClick={() => { deleteList(record.id) }} hidden />
           </>
         )
       }
@@ -109,10 +119,10 @@ const Detail = props => {
   }, [form, id])
 
   useEffect(() => {
-    setTable(configEntity.configEntityCodeList, setData, setLoading, pager, setPager, null, null, id)
+    setTable(configEntity.configEntityCodeList, setData, setLoading, pager, setPager, filter, null, id)
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dirty])
+  }, [filter, dirty])
 
   //基本信息编辑保存
   const save = () => {
@@ -167,22 +177,23 @@ const Detail = props => {
 
   //业务列表数据删除
   const deleteList = (id) => {
-    Modal.confirm({
-      title: '是否确认删除',
-      icon: <ExclamationCircleOutlined />,
-      okText: '确认',
-      okType: 'danger',
-      cancelText: '取消',
-      onOk: () => {
-        configEntity.configEntityCodeDelete(id)
-          .then(() => {
-            message.success("删除成功")
-            setDirty((dirty) => dirty + 1)
-          })
-      },
-      onCancel() {
-      },
-    })
+    edit ? message.info('基础信息处于编辑状态，请先保存或取消') :
+      Modal.confirm({
+        title: '是否确认删除',
+        icon: <ExclamationCircleOutlined />,
+        okText: '确认',
+        okType: 'danger',
+        cancelText: '取消',
+        onOk: () => {
+          configEntity.configEntityCodeDelete(id)
+            .then(() => {
+              message.success("删除成功")
+              setDirty((dirty) => dirty + 1)
+            })
+        },
+        onCancel() {
+        },
+      })
   }
 
   return (
@@ -303,12 +314,20 @@ const Detail = props => {
       </div>
       <Row type="flex" justify="space-between" className={commonStyles.topHeader}>
         <Col><h3>业务数据详情</h3></Col>
-        <Col><Button type="primary" onClick={() => checkList("add", null)}>添加</Button></Col>
+        <Col>
+          <Button
+            type="primary"
+            onClick={
+              () => edit ? message.info('基础信息处于编辑状态，请先保存或取消') : checkList("add", null)
+            }>
+            添加
+          </Button>
+        </Col>
       </Row>
 
       <MainTable
         {...{
-          columns, data, loading, pager, setPager, setDirty,
+          columns, data, loading, pager, setPager, setDirty, setFilter,
           rowkey: "code",
         }}
       />

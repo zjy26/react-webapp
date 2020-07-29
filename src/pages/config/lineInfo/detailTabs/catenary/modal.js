@@ -18,9 +18,11 @@ const CatenaryModal = props => {
   const { entity, lineCode } = useContext(MyContext)
   const [form] = Form.useForm()
   const [initValues, setInitValues] = useState({})
+  const [okLoading, setOkLoading] = useState(false)
 
   useEffect(() => {
     if (visible) {
+      setOkLoading(false)
       modalProperty.type === "add" ?
         configLocation.configCatenaryNew()
           .then((res) => {
@@ -50,25 +52,32 @@ const CatenaryModal = props => {
   const handleSubmit = () => {
     form.validateFields()
       .then(values => {
+        setOkLoading(true)
         switch (modalProperty.type) {
           case "add":
             configLocation.configCatenaryAdd({ ...values, line: lineCode })
               .then((res) => {
-                if (res.success) {
+                if (res && res.success) {
                   handleCancel()
                   setDirty((dirty) => dirty + 1)
                   message.success("新建成功")
                 } else {
                   message.error(res.actionErrors[0])
+                  setOkLoading(false)
                 }
               })
             break;
           case "edit":
             configLocation.configCatenaryUpdate(modalProperty.id, { ...values, _method: 'PUT' })
-              .then(() => {
-                message.success("编辑成功")
-                setDirty(dirty => dirty + 1)
-                handleCancel()
+              .then((res) => {
+                if(res && res.success) {
+                  message.success("编辑成功")
+                  setDirty(dirty => dirty + 1)
+                  handleCancel()
+                } else {
+                  message.error("编辑失败")
+                  setOkLoading(false)
+                }
               })
             break;
           default:
@@ -86,6 +95,7 @@ const CatenaryModal = props => {
       onOk={handleSubmit}
       visible={visible}
       onCancel={handleCancel}
+      okButtonProps={{ loading: okLoading }}
     >
       <Form name="lineCatenaryForm" {...formItemLayout} form={form} initialValues={initValues}>
         <Form.Item label="设备分类" name="cls" rules={[{ required: true, message: '请输入设备分类' }]}>

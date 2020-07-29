@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import { PlusOutlined } from '@ant-design/icons'
 import { Button, Row, Col, Form, Input, Select, DatePicker, TimePicker, Upload, message, Modal } from 'antd'
 import moment from "moment"
 import { configLocation } from '../../../../../api/config/lineInfo'
+import { upload } from '../../../../../api/index'
+import { EditUpload, showFile } from '../../../../common/upload'
 
 const formItemLayout = {
   labelCol: {
@@ -22,6 +23,10 @@ const Basic = props => {
   const [form] = Form.useForm()
   const [initValues, setInitValues] = useState({})
   const dateFormat = 'YYYY-MM-DD', timeFormat = "HH:mm"
+  const [fileList, setFileList] = useState({
+    lineInfo: [],
+    lineInfoHt: []
+  })
 
   useEffect(() => {
     configLocation.configLocationDetail(id)
@@ -39,13 +44,17 @@ const Basic = props => {
           setInitValues({
             ...res,
             lineLeader: res.lineLeader ? res.lineLeader.name : null,
-            runTime: [res.runStartTime ? moment(res.runStartTime, timeFormat) : null, res.runEndTime ? moment(res.runEndTime, timeFormat) : null],
+            runTime: [res.runStartTime ? moment(res.runStartTime, timeFormat) : "", res.runEndTime ? moment(res.runEndTime, timeFormat) : ""],
             commissionDate: res.commissionDate ? moment(res.commissionDate) : null,
             catenaryType: res.catenaryType ? res.catenaryType.split(",") : [],
             catenaryTypeDesc: descrArr ? descrArr.join("，") : null
           })
           form.resetFields()
         }
+      })
+      .then(() => {
+        showFile(id, "lineInfo-ht", setFileList, "lineInfoHt")
+        showFile(id, "lineInfo", setFileList, "lineInfo")
       })
       .catch(() => {
         console.log("基础信息详情获取失败")
@@ -86,6 +95,29 @@ const Basic = props => {
             }
           })
           : setEdit(false)
+      })
+      .then(() => {
+        //附件上传
+        const ids = []
+        for (var i in fileList) {
+          fileList[i].forEach(item => {
+            if(item.status === "done") {
+              ids.push(item.uid)
+            }
+          })
+        }
+        upload({
+          ids: ids.toString(),
+          record: id
+        })
+        .then(res => {
+          if(res && res.success) {
+            setFileList({
+              lineInfo: fileList.lineInfo.filter((item) => item.status === "done"),
+              lineInfoHt: fileList.lineInfoHt.filter((item) => item.status === "done")
+            })
+          }
+        })
       })
   }
 
@@ -162,17 +194,26 @@ const Basic = props => {
               </Col>
               <Col span={12}>
                 <Form.Item label="图形">
-                  <Upload listType="picture-card">
-                    <PlusOutlined />
-                  </Upload>
-                  <div>不超过20M,格式为jpg，png</div>
+                  <EditUpload
+                    model = 'lineInfo-ht'
+                    id = {id}
+                    type = {1}
+                    fileList = {fileList.lineInfoHt}
+                    setFileList = {setFileList}
+                    option = "lineInfoHt"
+                  />
                 </Form.Item>
               </Col>
               <Col span={12}>
                 <Form.Item label="附件">
-                  <Upload>
-                    <Button>上传附件</Button>
-                  </Upload>
+                  <EditUpload
+                    model = 'lineInfo'
+                    id = {id}
+                    type = {1}
+                    fileList = {fileList.lineInfo}
+                    setFileList = {setFileList}
+                    option = "lineInfo"
+                  />
                 </Form.Item>
               </Col>
             </Row> :
@@ -214,14 +255,12 @@ const Basic = props => {
               </Col>
               <Col span={12}>
                 <Form.Item label="图形">
-                  <Upload listType="picture-card">
-                  </Upload>
+                  <Upload fileList={fileList.lineInfoHt} disabled />
                 </Form.Item>
               </Col>
               <Col span={12}>
                 <Form.Item label="附件">
-                  <Upload>
-                  </Upload>
+                  <Upload fileList={fileList.lineInfo} disabled />
                 </Form.Item>
               </Col>
             </Row>

@@ -19,9 +19,11 @@ const Modal3 = props => {
 
   const [form] = Form.useForm()
   const [initValues, setInitValues] = useState({})
+  const [okLoading, setOkLoading] = useState(false)
 
   useEffect(() => {
     if (visible) {
+      setOkLoading(false)
       if (modalProperty.type === "edit") {
         configObjectTemplate.propEntityTemplateDetail(modalProperty.id)
           .then(res => {
@@ -41,6 +43,7 @@ const Modal3 = props => {
   const handleOk = () => {
     form.validateFields()
       .then(values => {
+        setOkLoading(true)
         if (modalProperty.type === "add") {
           configObjectTemplate.propEntityTemplateAdd(
             {
@@ -59,6 +62,7 @@ const Modal3 = props => {
                 renderChildData(true, modalProperty.property)
               } else {
                 message.success("新建失败")
+                setOkLoading(false)
               }
             })
         } else {
@@ -79,6 +83,7 @@ const Modal3 = props => {
                 renderChildData(true, modalProperty.property)
               } else {
                 message.success("编辑失败")
+                setOkLoading(false)
               }
             })
         }
@@ -95,6 +100,7 @@ const Modal3 = props => {
       visible={visible}
       onCancel={handleCancel}
       onOk={handleOk}
+      okButtonProps={{ loading: okLoading }}
     >
       <Form name="templateMonitorForm3" form={form} {...formItemLayout} initialValues={initValues}>
         <Form.Item label="值" name="value" rules={[{ required: true, message: '请输入值' }]}>

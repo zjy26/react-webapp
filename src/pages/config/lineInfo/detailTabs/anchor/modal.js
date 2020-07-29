@@ -14,13 +14,15 @@ const formItemLayout = {
 }
 
 const AnchorModal = props => {
-  const { modalProperty, visible, setDirty, handleCancel, MyContext } = props
-  const { lineCode, intervalList } = useContext(MyContext)
+  const { modalProperty, visible, setDirty, handleCancel, MyContext, intervalOption } = props
+  const { lineCode } = useContext(MyContext)
   const [form] = Form.useForm()
   const [initValues, setInitValues] = useState({})
+  const [okLoading, setOkLoading] = useState(false)
 
   useEffect(() => {
     if (visible) {
+      setOkLoading(false)
       modalProperty.type === "add" ?
         configLocation.configAnchorNew()
           .then((res) => {
@@ -34,7 +36,7 @@ const AnchorModal = props => {
               const intervalArr = res.interval.split(",")
               const intArr = intervalArr.map(item => +item)
               const descrArr = intArr.map(item => {
-                const data = intervalList.find(obj => obj.id === item)
+                const data = intervalOption.find(obj => obj.id === item)
                 return "".concat(data.descr)
               })
 
@@ -70,25 +72,33 @@ const AnchorModal = props => {
           interval: values.interval.toString()
         }
 
+        setOkLoading(true)
+
         switch (modalProperty.type) {
           case "add":
             configLocation.configAnchorAdd({ ...params, line: lineCode })
               .then((res) => {
-                if (res.success) {
+                if (res && res.success) {
                   handleCancel()
                   setDirty((dirty) => dirty + 1)
                   message.success("新建成功")
                 } else {
                   message.error(res.actionErrors[0])
+                  setOkLoading(false)
                 }
               })
             break;
           case "edit":
             configLocation.configAnchorUpdate(modalProperty.id, { ...params, _method: 'PUT' })
-              .then(() => {
-                message.success("编辑成功")
-                setDirty(dirty => dirty + 1)
-                handleCancel()
+              .then((res) => {
+                if(res && res.success) {
+                  message.success("编辑成功")
+                  setDirty(dirty => dirty + 1)
+                  handleCancel()
+                } else {
+                  message.error('编辑失败')
+                  setOkLoading(false)
+                }
               })
             break;
           default:
@@ -110,7 +120,7 @@ const AnchorModal = props => {
         modalProperty.type === "check" ? null :
           [
             <Button key="cancel" onClick={handleCancel}>取消</Button>,
-            <Button key="submit" type="primary" onClick={handleSubmit}>确定</Button>
+            <Button key="submit" type="primary" loading={okLoading} onClick={handleSubmit}>确定</Button>
           ]
       }
     >
@@ -118,6 +128,9 @@ const AnchorModal = props => {
         {
           modalProperty.type === "check" ?
             <>
+              <Form.Item label="编码">
+                {initValues.scode}
+              </Form.Item>
               <Form.Item label="序号">
                 {initValues.sn}
               </Form.Item>
@@ -163,7 +176,7 @@ const AnchorModal = props => {
               <Form.Item label="关联区间" name="interval" rules={[{ required: true, message: '请选择关联区间' }]}>
                 <Select placeholder="请选择关联区间" mode="multiple">
                   {
-                    intervalList.map(item => (
+                    intervalOption.map(item => (
                       <Select.Option key={item.id} value={item.id}>{item.descr}</Select.Option>
                     ))
                   }

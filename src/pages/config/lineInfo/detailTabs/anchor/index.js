@@ -2,12 +2,12 @@ import React, { useState, useEffect, useContext } from 'react'
 import { Button, Row, Col, Dropdown, Menu, Modal, message, Divider } from 'antd'
 import { MenuOutlined, FileSearchOutlined } from '@ant-design/icons'
 import AnchorModal from './modal'
-import { setTable, MainTable } from '../../../../common/table'
+import { setTable, MainTable, getColumnSearchProps } from '../../../../common/table'
 import { configLocation } from '../../../../../api/config/lineInfo'
 
 const Anchor = props => {
   const { MyContext } = props
-  const { lineCode, intervalList } = useContext(MyContext)
+  const { lineCode, activeKey } = useContext(MyContext)
   const [data, setData] = useState([])  //列表数据
   const [loading, setLoading] = useState(false)
   const [dirty, setDirty] = useState(0)
@@ -21,18 +21,43 @@ const Anchor = props => {
   const [visible, setVisible] = useState(false)
   const [modalProperty, setModalProperty] = useState({})
 
+  const [searchProps, setSearchProps] = useState({
+    column: "",
+    text: ""
+  })
+  const [filter, setFilter] = useState([])
+
+  const [intervalOption, setIntervalOption] = useState([])
+  //当前线路所有区间
+  useEffect(() => {
+    if(activeKey === "anchorInfo") {
+      configLocation.configIntervalList({ level: 4, line: lineCode })
+        .then(res => {
+          if (res && res.models) {
+            setIntervalOption(res.models)
+          }
+        })
+    }
+  }, [activeKey, lineCode])
+
   const columns = [
+    {
+      title: '编码',
+      dataIndex: 'scode'
+    },
     {
       title: '序号',
       dataIndex: 'sn'
     },
     {
       title: '锚段描述',
-      dataIndex: 'descr'
+      dataIndex: 'descr',
+      ...getColumnSearchProps('descr', "锚段描述", searchProps, setSearchProps)
     },
     {
       title: '锚段号',
-      dataIndex: 'code'
+      dataIndex: 'code',
+      ...getColumnSearchProps('code', "锚段号", searchProps, setSearchProps)
     },
     {
       title: '锚段长度',
@@ -45,7 +70,7 @@ const Anchor = props => {
         const intervalArr = text.split(",")
         const intArr = intervalArr.map(item => +item)
         const descrArr = intArr.map(item => {
-          const data = intervalList.find(obj => obj.id === item)
+          const data = intervalOption.find(obj => obj.id === item)
           return "".concat(data ? data.descr : "")
         })
         return descrArr.join("，")
@@ -76,9 +101,9 @@ const Anchor = props => {
   ]
 
   useEffect(() => {
-    setTable(configLocation.configAnchorlList, setData, setLoading, pager, setPager, [], { line: lineCode })
+    setTable(configLocation.configAnchorlList, setData, setLoading, pager, setPager, filter, { line: lineCode })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dirty])
+  }, [filter, dirty])
 
   //关闭弹窗
   const handleCancel = () => setVisible(false)
@@ -128,12 +153,12 @@ const Anchor = props => {
 
       <MainTable
         {...{
-          columns, data, loading, pager, setPager, setDirty,
+          columns, data, loading, pager, setPager, setDirty, setFilter,
           rowkey: "id",
         }}
       />
 
-      <AnchorModal {...{ visible: visible, modalProperty, handleCancel, setDirty, MyContext }} />
+      <AnchorModal {...{ visible: visible, modalProperty, handleCancel, setDirty, MyContext, intervalOption }} />
     </React.Fragment>
   )
 }

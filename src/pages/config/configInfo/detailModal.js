@@ -160,7 +160,12 @@ const DetailModal = props => {
                   { required: true, message: '请输入代码' }
                 ]}
               >
-                <Input placeholder="请输入代码" />
+                {
+                  modalProperty.type === "edit" ?
+                  <Input disabled />
+                  :
+                  <Input placeholder="请输入代码" />
+                }
               </Form.Item>
               <Form.Item label="描述" name="descr">
                 <Input placeholder="请输入描述" />

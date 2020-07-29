@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { Modal, Form, Row, Col } from 'antd'
+import { Modal, Form, Row, Col, Upload } from 'antd'
 import { configObjectTemplate } from '../../../../../../api/config/objectTemplate'
+import { echoBrand } from '../../../../../../api'
+import { showFile } from '../../../../../common/upload'
 
 const formItemLayout = {
   labelCol: {
@@ -14,7 +16,17 @@ const formItemLayout = {
 }
 
 const CheckModal = props => {
-  const { modalProperty, visible, handleCancel, activeKey, unitClassOption } = props
+  const { modalProperty, visible, handleCancel, unitClassOption } = props
+
+  const [fileList, setFileList] = useState({
+    objImage: [],
+    objBim: []
+  })
+  const [preview, setPreview] = useState({
+    previewVisible: false,
+    previewImage: '',
+    previewTitle: ''
+  })
 
   //部件分类
   const clsArr = []
@@ -27,44 +39,68 @@ const CheckModal = props => {
 
   useEffect(() => {
     if (visible) {
-      if (activeKey === "static") {
-        configObjectTemplate.unitTemplateDetail(modalProperty.id)
-          .then(res => {
-            const detail = res.detail
-            if(detail) {  //有关联模板时详情数据
-              const item = clsArr.find(obj => obj.code === detail.cls)
-              setInitValues({
-                ...detail,
-                cls: detail.cls ? item.desc : null,
-                brand: detail.brand && detail.brand.name ? detail.brand.name : null,
-                manufact: detail.manufact && detail.manufact.name ? detail.manufact.name : null,
-                enable: detail.enable === true ? "启用" : "未启用",
-                criticality: detail.criticality === true ? "是" : "否",
-              })
-            } else {    //TODO无关联模板时详情数据
-              setInitValues({
-                ...res
-              })
-            }
-          })
-      } else {
-        configObjectTemplate.unitDynamicTemplateDetail(modalProperty.id)
-          .then(res => {
-            const item = clsArr.find(obj => obj.code === res.cls)
+      configObjectTemplate.unitTemplateDetail(modalProperty.id)
+        .then(res => {
+          const detail = res.detail
+          if(detail) {  //有关联模板时详情数据
+            const item = clsArr.find(obj => obj.code === detail.cls)
             setInitValues({
-              ...res.detail,
-              cls: res.cls ? item.desc : null,
-              brand: res.brand && res.brand.descr ? res.brand.descr : null,
-              manufact: res.manufact && res.manufact.name ? res.manufact.name : null,
-              enable: res.enable === true ? "启用" : "未启用",
+              ...res,
+              brand: detail.brand && detail.brand.name,
+              designLife:detail.designLife,
+              repairLife:detail.repairLife,
+              replaceLife:detail.replaceLife,
+              cls: item ? item.desc : undefined,
+              manufact: detail.manufact && detail.manufact.name ? detail.manufact.name : null,
               criticality: res.criticality === true ? "是" : "否",
             })
-          })
-      }
+
+            showFile(detail.id, "d9ObjectTemplate-image", setFileList, "objImage")
+            showFile(detail.id, "d9ObjectTemplate-bim", setFileList, "objBim")
+          } else {    //无关联模板时详情数据
+            echoBrand({value: res.brand})
+            .then(brand => {
+              const clsItem = clsArr.find(obj => obj.code === res.cls)
+              setInitValues({
+                ...res,
+                brand: brand.name,
+                cls: clsItem ? clsItem.desc : null,
+                criticality: res.criticality === true ? "是" : "否",
+              })
+              setFileList({
+                objImage: [],
+                objBim: []
+              })
+            })
+          }
+          return detail
+        })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible, activeKey])
+  }, [visible])
 
+  //图片预览
+  function getBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = () => resolve(reader.result)
+      reader.onerror = error => reject(error)
+    })
+  }
+  const handlePreview = async file => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj)
+    }
+
+    setPreview({
+      ...preview,
+      previewImage: file.url || file.preview,
+      previewVisible: true,
+      previewTitle: file.name || file.url.substring(file.url.lastIndexOf('/') + 1),
+    })
+  }
+  const previewCancel = () => setPreview({ ...preview, previewVisible: false })
 
   return (
     <Modal
@@ -79,7 +115,7 @@ const CheckModal = props => {
         <Row gutter={24}>
           <Col span={24}><h3 style={{ marginLeft: '3%' }}>基础信息</h3></Col>
           <Col span={12}>
-            <Form.Item label="部件分类">{initValues.cls}</Form.Item>
+            <Form.Item label="部件名称">{initValues.name}</Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item label="品牌">{initValues.brand}</Form.Item>
@@ -91,13 +127,10 @@ const CheckModal = props => {
             <Form.Item label="规格">{initValues.spec}</Form.Item>
           </Col>
           <Col span={12}>
+            <Form.Item label="关键部件">{initValues.criticality}</Form.Item>
+          </Col>
+          <Col span={12}>
             <Form.Item label="	元器件编号">{initValues.componentNumber}</Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item label="描述">{initValues.descr}</Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item label="状态">{initValues.enable}</Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item label="备注">{initValues.remarks}</Form.Item>
@@ -114,28 +147,29 @@ const CheckModal = props => {
             <Form.Item label="更换年限">{initValues.replaceLife}</Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item label="关键部件">{initValues.criticality}</Form.Item>
-          </Col>
-          <Col span={12}>
             <Form.Item label="制造商">{initValues.manufact}</Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item label="一次变比参数">{initValues.transRatio1}</Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item label="二次变比参数">{initValues.transRatio2}</Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item label="制E码/订货编号">{initValues.ecode}</Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item label="设备图片">
-
+            <Form.Item label="部件图片">
+              <Upload
+                fileList={fileList.objImage}
+                listType="picture-card"
+                onPreview={handlePreview}
+                disabled
+              />
+              <Modal
+                visible={preview.previewVisible}
+                title={preview.previewTitle}
+                footer={null}
+                onCancel={previewCancel}
+              >
+                <img alt="部件图片" style={{ width: '100%' }} src={preview.previewImage} />
+              </Modal>
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item label="BIM结构图">
-
+              <Upload fileList={fileList.objBim} disabled />
             </Form.Item>
           </Col>
         </Row>

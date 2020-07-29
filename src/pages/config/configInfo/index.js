@@ -99,7 +99,7 @@ const ConfigInfo = props => {
           <>
             <Link to={"/config/config-info-detail/" + record.code}><FileSearchOutlined /></Link>
             <Divider type="vertical" />
-            <DeleteOutlined onClick={() => { deleteItem(record.code) }} />
+            <DeleteOutlined onClick={() => { deleteItem(record.code) }} hidden />
           </>
         )
       }
@@ -123,12 +123,12 @@ const ConfigInfo = props => {
       <Row type="flex" justify="space-between" className={commonStyles.topHeader}>
         <Col><h3>业务数据列表</h3></Col>
         <Col>
-          <Button type="primary"
+          <Button type="primary" hidden
             onClick={
               () => setVisible({ ...visible, showNew: true })
             }
           >新建</Button>
-          <Button
+          <Button hidden
             onClick={
               () => setVisible({ ...visible, showAudit: true })
             }>

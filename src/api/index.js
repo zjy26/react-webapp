@@ -135,3 +135,7 @@ objectEvaluation["objectEvaluationsite"] = () => {
 objectEvaluation["objectEvaluationDetail"] = () => {
   return axiosInstance.get( "/objectEvaluationDetail")
 }
+
+export const dataStatistics = {}
+
+export const patrolSheet = {}

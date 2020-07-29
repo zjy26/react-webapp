@@ -1,79 +1,80 @@
-import React, {useState, useEffect} from 'react'
-import { Modal, Table, Checkbox,Button, Pagination, Row, message, Col } from 'antd'
+import React, { useState, useEffect } from 'react'
+import { Modal, Table, Checkbox, Button, Pagination, Row, message, Col } from 'antd'
 import { connect } from 'react-redux'
-import {overheadLine} from '../../../../../api/index'
+import { overheadLine } from '../../../../../api/index'
+import { configObjectTemplate } from '../../../../../api/config/objectTemplate'
 import AddModal from './addModal'
 
 
 const NewUnit = props => {
-  const { MyContext} = props
-  const {objId,template} = props
+  const { MyContext } = props
+  const { objId, template } = props
   const [data, setData] = useState([])
   const [dirty, setDirty] = useState([])
   const [isChecked, setChecked] = useState(false)//是否全选
   const [selectedCodes, setSelectedCodes] = useState([]);//已选择的codes
   const [allCodes, setAllCodes] = useState([])//本页的所有table
   const [visible, setVisible] = useState(false)
+  const [okLoading, setOkLoading] = useState(false)
   const [paging, setPaging] = useState({
-    currentPage:1,
+    currentPage: 1,
     pageSize: 10,
-    total:0
+    total: 0
   })
 
   const pageNumberOnChange = (page) => {
     setPaging({
       ...paging,
-      currentPage:page
+      currentPage: page
     })
-    setDirty(dirty+1)
+    setDirty(dirty + 1)
   }
-  const pageSizeChange = (current,pageSize) => {
-      setPaging({
-          ...paging,
-          pageSize:pageSize
-      })
-      setDirty(dirty+1)
+  const pageSizeChange = (current, pageSize) => {
+    setPaging({
+      ...paging,
+      pageSize: pageSize
+    })
+    setDirty(dirty + 1)
   }
 
-  useEffect(()=>{
-    if(objId){
-      overheadLine.dynamicUnitTemplateList({template:template})
-      .then(res =>{
-        if(res && res.models){
-          setPaging(paging => {
-            const aa={
-              ...paging,
-              total:res.total
-            }
-            return aa
-          })
-          setData(res.models)
-          setSelectedCodes([])
-          setChecked(false)
-          setAllCodes(res.models.map(item => {return(item.code)}))
-        }
-      })
+  useEffect(() => {
+    if (objId) {
+      setOkLoading(false)
+      configObjectTemplate.unitTemplateList({ template: template, isStatic: false })
+        .then(res => {
+          if (res && res.models) {
+            setPaging(paging => {
+              const aa = {
+                ...paging,
+                total: res.total
+              }
+              return aa
+            })
+            setData(res.models)
+            setSelectedCodes([])
+            setChecked(false)
+            setAllCodes(res.models.map(item => { return (item.code) }))
+          }
+        })
     }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [objId,dirty,props.visible])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [objId, dirty, props.visible])
 
-  const handleSubmit =  () => {
-      if(selectedCodes){
-        overheadLine.objectUnit({templateCodes:selectedCodes.toString(),d9OverheadLineObjectId:objId})
-      .then(res => {
-        if(res){
-          message.success("新建成功")
-          props.handleCancel()
-          props.setDirty((dirty)=>dirty+1)
-          props.renderChildData(true, objId,template)
-        }
-      })
-      .catch(() => {
-        console.log("列表数据加载失败")
-      })
-      }
+  const handleSubmit = () => {
+    if (selectedCodes) {
+      setOkLoading(true)
+      overheadLine.objectUnit({ templateCodes: selectedCodes.toString(), d9OverheadLineObjectId: objId })
+        .then(res => {
+          if (res) {
+            message.success("新建成功")
+            props.handleCancel()
+            props.setDirty((dirty) => dirty + 1)
+            props.renderChildData(true, objId, template)
+          }
+        })
     }
+  }
 
   const unitColumns = [
     // {
@@ -81,25 +82,25 @@ const NewUnit = props => {
     //   dataIndex: 'code',
     //   hidden:true
     // },
+    // {
+    //   title: '分类',
+    //   dataIndex: 'utcls'
+    // },
     {
-      title: '分类',
-      dataIndex: 'clsName'
-    },
-    {
-      title: '描述',
-      dataIndex: 'descr'
+      title: '名称',
+      dataIndex: 'name'
     },
     {
       title: '品牌',
-      dataIndex: 'brandName'
+      dataIndex: 'utbrand'
     },
     {
       title: '型号',
-      dataIndex: 'modelNumber'
+      dataIndex: 'utmodelNumber'
     },
     {
       title: '规格',
-      dataIndex: 'spec'
+      dataIndex: 'utspec'
     },
     // {
     //   title: '元器件编号',
@@ -118,18 +119,24 @@ const NewUnit = props => {
       title: '关键部件',
       dataIndex: 'criticality',
       render: text => {
-        const descr = text === 1 ? "是" : "否"
+        const descr = text === true ? "是" : "否"
         return descr
       }
     },
-    {
-      title: '变比一次参数',
-      dataIndex: 'transRatio1'
-    },
-    {
-      title: '变比两次参数',
-      dataIndex: 'transRatio2'
-    },
+    // {
+    //   title:'变比',
+    //   render:(text,record)=>{
+    //     return (record.transRatio1?record.transRatio1:"") + '/' + (record.transRatio2?record.transRatio2:"")
+    //   }
+    // },
+    // {
+    //   title: '变比一次参数',
+    //   dataIndex: 'transRatio1'
+    // },
+    // {
+    //   title: '变比两次参数',
+    //   dataIndex: 'transRatio2'
+    // },
     {
       title: '制造商',
       dataIndex: 'manufactName'
@@ -146,28 +153,28 @@ const NewUnit = props => {
     setVisible(true)
   }
 
-  const handleCancel = ()=>{
+  const handleCancel = () => {
     setVisible(false)
   }
 
-    //列表逐条数据选择
+  //列表逐条数据选择
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
       setSelectedCodes(selectedRowKeys);
-      if(selectedRowKeys.length === allCodes.length){//全选了
+      if (selectedRowKeys.length === allCodes.length) {//全选了
         setChecked(true);
-      }else{
+      } else {
         setChecked(false)
       }
     },
-    selectedRowKeys:selectedCodes
+    selectedRowKeys: selectedCodes
   }
 
-  const onCheckBox = (event ) => {
-    if(event.target.checked){
+  const onCheckBox = (event) => {
+    if (event.target.checked) {
       setSelectedCodes(allCodes)
       setChecked(true)
-    }else{
+    } else {
       setSelectedCodes([])
       setChecked(false)
     }
@@ -184,21 +191,22 @@ const NewUnit = props => {
       visible={props.visible}
       onCancel={props.handleCancel}
       onOk={handleSubmit}
+      okButtonProps={{ loading: okLoading }}
     >
-    <Col span={23} style={{textAlign:"right"}}>
+      <Col span={23} style={{ textAlign: "right" }}>
         <Button type="danger" onClick={addUnit} hidden>新建</Button>
-    </Col>
-    <Table columns={unitColumns}
-      rowSelection={rowSelection}
-          dataSource = {data}
-          rowKey="code" defaultExpandedRowKeys={[1]} pagination={false}/>
-    <Row type="flex" justify="space-between" style={{margin:30}}>
+      </Col>
+      <Table columns={unitColumns}
+        rowSelection={rowSelection}
+        dataSource={data}
+        rowKey="code" defaultExpandedRowKeys={[1]} pagination={false} />
+      <Row type="flex" justify="space-between" style={{ margin: 30 }}>
         <Col>
-        <Checkbox checked={isChecked} onChange={onCheckBox}>全选</Checkbox>
+          <Checkbox checked={isChecked} onChange={onCheckBox}>全选</Checkbox>
         </Col>
         <Col><Pagination onShowSizeChange={pageSizeChange} pageSize={paging.pageSize} onChange={pageNumberOnChange} total={paging.total} current={paging.currentPage} showSizeChanger showQuickJumper /></Col>
       </Row>
-      <AddModal {...{visible: visible, handleCancel, MyContext, template, setDirty}} />
+      <AddModal {...{ visible: visible, handleCancel, MyContext, template, setDirty }} />
     </Modal>
 
   )

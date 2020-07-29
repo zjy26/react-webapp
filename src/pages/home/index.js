@@ -11,9 +11,6 @@ import { connect } from 'react-redux'
 const { Header, Content, Sider } = Layout
 const Index = (props) => {
 
-  const locationJS = props.location.toJS()
-  console.log(locationJS)
-
   const { getLocationDispatch, showPsd, closePsd, psdVisible } = props
   const [collapsed, setCollapsed] = useState(false)
 
@@ -64,11 +61,11 @@ const Index = (props) => {
                 </span>
               }
             >
-              <Menu.Item key="patrol-object"><NavLink to="/patrol-object">设备管理</NavLink></Menu.Item>
-              <Menu.Item key="patrol-config"><NavLink to="/patrol-config">巡检配置</NavLink></Menu.Item>
-              <Menu.Item key="patrol-plan"><NavLink to="/patrol-plan">巡检计划</NavLink></Menu.Item>
-              <Menu.Item key="patrol-sheet"><NavLink to="/patrol-sheet">巡检单</NavLink></Menu.Item>
-              <Menu.Item key="patrol-statistics"><NavLink to="/patrol-statistics">数据统计</NavLink></Menu.Item>
+              <Menu.Item key="patrol-object"><NavLink to="/patrol/patrol-object">设备管理</NavLink></Menu.Item>
+              <Menu.Item key="patrol-config"><NavLink to="/patrol/patrol-config">巡检配置</NavLink></Menu.Item>
+              <Menu.Item key="patrol-plan"><NavLink to="/patrol/patrol-plan">巡检计划</NavLink></Menu.Item>
+              <Menu.Item key="patrol-sheet"><NavLink to="/patrol/patrol-sheet">巡检单</NavLink></Menu.Item>
+              <Menu.Item key="patrol-statistics"><NavLink to="/patrol/patrol-statistics">数据统计</NavLink></Menu.Item>
             </Menu.SubMenu>
             <Menu.SubMenu
               key="config"

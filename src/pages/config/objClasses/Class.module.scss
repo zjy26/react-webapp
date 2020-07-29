@@ -1,0 +1,69 @@
+.container {
+    margin:0px 20px 0px;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content: flex-start;
+    :global {
+        .ant-card {
+            background-color:#ffffff;
+            width: 326px;
+            margin:15px 20px;
+            display:flex;
+            align-items:center;
+            justify-content:flex-start;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .ant-card .ant-card-body{
+            width: 100%;
+            padding: 0;
+        }
+        .ant-card-body > div{
+            text-align: center;
+        }
+        .ant-card img {
+            margin-top: 50px;
+            width: 66px;
+            height: 66px;
+        }
+        .ant-card input {
+          height: 36px;
+          width: 264px;
+          margin: 16px 28px 18px 28px;
+          font-size: 16px;
+          padding: 0px;
+          padding-left: 15px;
+          text-align: left;
+          font-weight: bold;
+        }
+        .ant-card-body .descr {
+          margin-top: 26px;
+        }
+        .ant-card .ant-col-12 {
+          visibility: hidden;
+          background:rgba(249,249,249,1);
+          border-radius:0px 0px 2px 2px;
+        }
+        .ant-card .ant-col-12 > div {
+          height:55px;
+          line-height:55px;
+        }
+        .ant-card-body:hover .descr {
+          margin-top: 21px;
+        }
+        .ant-card-body:hover img{
+          margin-top: 30px;
+        }
+        .ant-card-body:hover .ant-col-12 {
+          visibility: visible;
+          background:rgba(249,249,249,1);
+          border-radius:0px 0px 2px 2px;
+        }
+        .ant-form-item {
+          margin-bottom: 0;
+        }
+        .ant-card-body:hover .ant-col-12 > div:hover{
+          background:rgba(245,245,245,1);
+        }
+    }
+}

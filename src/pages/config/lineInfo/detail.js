@@ -5,7 +5,7 @@ import Basic from './detailTabs/basic/index'
 import Location from './detailTabs/location/index'
 import Interval from './detailTabs/interval/index'
 import Anchor from './detailTabs/anchor/index'
-import Catenary from './detailTabs/catenary/index'
+// import Catenary from './detailTabs/catenary/index'
 import { configLocation } from '../../../api/config/lineInfo'
 import { classification, CATENARY_TYPE, SITE_FUNCTION, LOCATION_SUBSTATION_TYPE, STATION_LOCATION_TYPE, VEHICLE_ROUTE, brands } from '../../../api'
 import { connect } from 'react-redux'
@@ -14,8 +14,6 @@ const MyContext = createContext({});
 
 const Detail = props => {
   const [lineCode, setLineCode] = useState()
-  const [siteList, setSiteList] = useState([])
-  const [intervalList, setIntervalList] = useState([])
   const [activeKey, setActiveKey] = useState("bascInfo")  //默认显示基础信息tab
   const [entity, setEntity] = useState({
     catenaryTypeOption: [],  //触网类型
@@ -72,26 +70,12 @@ const Detail = props => {
 
     configLocation.configLocationDetail(props.match.params.id)
       .then(res => {
-        if (res) {
+        if (res && res.success) {
           setLineCode(res.code)  //线路code
-
-          configLocation.configIntervalList({ level: 4, line: res.code })  //区间信息(新建锚段时需要选择关联区间)
-            .then(res => {
-              if (res && res.models) {
-                setIntervalList(res.models)
-              }
-            })
         }
       })
       .catch(() => {
         console.log("业务基础数据详情获取失败")
-      })
-
-    configLocation.configLocationList({ level: 4, line: props.match.params.code })  //站点信息(新建区间时需要选择站点)
-      .then(res => {
-        if (res && res.models) {
-          setSiteList(res.models)
-        }
       })
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -109,8 +93,7 @@ const Detail = props => {
           entity: entity,
           lineCode: lineCode,
           org: props.user.toJS().org,
-          siteList: siteList,
-          intervalList: intervalList
+          activeKey: activeKey
         }}
       >
         <Tabs
@@ -130,17 +113,17 @@ const Detail = props => {
             <Basic {...{ id: props.match.params.id, catenaryTypeOption: entity.catenaryTypeOption, setLineCode, setEditStatus }} />
           </Tabs.TabPane>
           <Tabs.TabPane tab="站点信息" key="siteInfo">
-            <Location {...{ lineCode, entity, setSiteList, MyContext }} />
+            <Location {...{ lineCode, entity, MyContext }} />
           </Tabs.TabPane>
           <Tabs.TabPane tab="区间信息" key="netInfo">
-            <Interval {...{ lineCode, entity, siteList, setIntervalList, MyContext }} />
+            <Interval {...{ lineCode, entity, MyContext }} />
           </Tabs.TabPane>
           <Tabs.TabPane tab="锚段信息" key="anchorInfo">
             <Anchor {...{ lineCode, entity, MyContext }} />
           </Tabs.TabPane>
-          <Tabs.TabPane tab="设备信息" key="objectInfo">
+          {/* <Tabs.TabPane tab="设备信息" key="objectInfo">
             <Catenary  {...{ lineCode, entity, MyContext }} />
-          </Tabs.TabPane>
+          </Tabs.TabPane> */}
         </Tabs>
       </MyContext.Provider>
 

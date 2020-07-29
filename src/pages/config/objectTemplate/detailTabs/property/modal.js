@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react'
-import { Modal, Form, Input, Row, Col, Select, Checkbox, message } from 'antd'
+import { Modal, Form, Input, Row, Col, Select, message, Radio, InputNumber, Tooltip, Space } from 'antd'
+import { QuestionCircleOutlined } from '@ant-design/icons'
 import { properties } from '../../../../../api'
 import { configObjectTemplate } from '../../../../../api/config/objectTemplate'
 import debounce from 'lodash/debounce'
@@ -21,18 +22,23 @@ const CheckPropertyModal = props => {
   const { templateCode, propertiesOption, uomsOption } = useContext(MyContext)
 
   const [form] = Form.useForm()
+  const [type, setType] = useState(false)
   const [initValues, setInitValues] = useState({})
   const [propertyData, setPropertyData] = useState(propertiesOption)
+  const [okLoading, setOkLoading] = useState(false)
 
   useEffect(() => {
     if (visible) {
+      setOkLoading(false)
       if (modalProperty.type === "edit") {
         configObjectTemplate.proValueDetail(modalProperty.id)
           .then(res => {
+            //属性回显
+            setPropertyData([...propertyData, {code: res.code, desc:res.descr}])
+            setType(res.calculateFunction)
             setInitValues({
               ...res,
               uom: res.uom ? res.uom : undefined,
-              test: res.test ? ["test"] : []
             })
             form.resetFields()
           })
@@ -43,21 +49,20 @@ const CheckPropertyModal = props => {
               ...res,
               code: res.code ? res.code : undefined,
               uom: res.uom ? res.uom : undefined,
-              test: res.test ? ["test"] : []
             })
             form.resetFields()
           })
       }
     }
-  }, [visible, form, modalProperty.id, modalProperty.type])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible, modalProperty.id, modalProperty.type])
 
   const handleOk = () => {
     form.validateFields()
       .then(values => {
-        console.log(values)
+        setOkLoading(true)
         var params = {
           ...values,
-          test: values.test.length > 0 ? true : false,
           template: templateCode,
           _method: 'PUT'
         }
@@ -71,6 +76,7 @@ const CheckPropertyModal = props => {
                 setDirty(dirty => dirty + 1)
               } else {
                 message.error("新建失败")
+                setOkLoading(false)
               }
             })
         } else {
@@ -82,6 +88,7 @@ const CheckPropertyModal = props => {
                 setDirty(dirty => dirty + 1)
               } else {
                 message.error("编辑失败")
+                setOkLoading(false)
               }
             })
         }
@@ -111,58 +118,96 @@ const CheckPropertyModal = props => {
       visible={visible}
       onCancel={handleCancel}
       onOk={handleOk}
+      okButtonProps={{ loading: okLoading }}
     >
       <Form name="templatePropertyForm" form={form} {...formItemLayout} initialValues={initValues}>
         <Row gutter={24}>
           <Col span={12}>
             {
               modalProperty.type === "add" ?
-                <Form.Item label="属性代码" name="code" rules={[{ required: true, message: '请输入属性代码' }]}>
+                <Form.Item label="属性名称" name="code" rules={[{ required: true, message: '请输入属性名称' }]}>
                   <Select
                     showSearch
-                    placeholder="请输入属性代码"
+                    placeholder="请输入属性名称"
                     filterOption={false}
                     onSearch={handleSearch}
                     onChange={
-                      (val, opt) => form.setFieldsValue({
-                        "test": opt.test === "true" ? ["test"] : [],
-                        descr: opt.name
-                      })
+                      (val, opt) => {
+                        form.setFieldsValue({
+                          descr: opt.name,
+                          uom: opt.uom
+                        })
+                      }
                     }
                   >
                     {
                       propertyData.map(item => (
-                        <Select.Option key={item.code} value={item.code} test={item.test.toString()} name={item.desc}>{item.code}-{item.desc}</Select.Option>
+                        <Select.Option key={item.code} value={item.code} name={item.desc} uom={item.uom}>{item.code}-{item.desc}</Select.Option>
                       ))
                     }
                   </Select>
                 </Form.Item>
                 :
-                <Form.Item label="属性代码" name="code">
-                  <Input disabled />
+                <Form.Item label="属性名称" name="code">
+                  <Select disabled>
+                    {
+                      propertyData.map(item => (
+                        <Select.Option key={item.code} value={item.code}>{item.code}-{item.desc}</Select.Option>
+                      ))
+                    }
+                  </Select>
                 </Form.Item>
             }
           </Col>
           <Col span={12}>
-            <Form.Item label="属性名称" name="descr">
-              <Input placeholder="请输入属性名称" disabled />
+            <Form.Item
+              name="calculateFunction"
+              label={
+                <Space>
+                  计算信息
+                  <Tooltip placement="top" title={"需要进行计算的数值可选择是，其他均默认为否"}>
+                    <QuestionCircleOutlined />
+                  </Tooltip>
+                </Space>
+              }
+            >
+              <Radio.Group
+                  onChange ={
+                    (e)=>{
+                      setType(e.target.value)
+                      form.setFieldsValue({value: null})
+                    }
+                  }
+                >
+                <Radio value={false}>否</Radio>
+                <Radio value={true}>是</Radio>
+              </Radio.Group>
             </Form.Item>
           </Col>
-          <Col span={12}>
-            <Form.Item label="试验属性" name="test">
-              <Checkbox.Group>
-                <Checkbox value="test" />
-              </Checkbox.Group>
+          <Col span={12} hidden >
+            <Form.Item label="属性名称" name="descr" >
+              <Input placeholder="请输入属性名称"  />
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item label="属性值" name="value">
-              <Input placeholder="请输入属性值" />
+              {
+                type
+                ? <InputNumber placeholder="请输入属性值" />
+                : <Input placeholder="请输入属性值" />
+              }
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item label="计量单位" name="uom">
-              <Select placeholder="请选择计量单位" allowClear>
+              <Select
+                placeholder="请选择计量单位"
+                allowClear
+                showSearch
+                filterOption={(input, option) =>
+                  option.children&&option.children[0].indexOf(input) >= 0
+                }
+              >
                 {
                   uomsOption.map(item => (
                     <Select.OptGroup key={item.id} label={item.text}>
@@ -178,11 +223,6 @@ const CheckPropertyModal = props => {
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item label="属性说明" name="alias">
-              <Input.TextArea placeholder="请输入属性说明" />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
             <Form.Item label="属性标准值1" name="stdValue1">
               <Input placeholder="请输入属性值1" />
             </Form.Item>
@@ -190,6 +230,11 @@ const CheckPropertyModal = props => {
           <Col span={12}>
             <Form.Item label="属性标准值2" name="stdValue2">
               <Input placeholder="请输入属性值2" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item label="属性说明" name="alias">
+              <Input.TextArea placeholder="请输入属性说明" />
             </Form.Item>
           </Col>
           <Col span={12}>

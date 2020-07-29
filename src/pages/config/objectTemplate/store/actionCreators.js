@@ -1,5 +1,6 @@
-import { CHANGE_CLASS, CHANGE_UNITCLASS, CHANGE_IMPORTANCE, CHANGE_CLASSIFICATION, CHANGE_MAINCLS, CHANGE_OBJECTCLS, CHANGE_VOLTAGELEVEL, CHANGE_PROPERTY, CHANGE_MONITORPOINTTYPE, CHANGE_UOMS } from './actionTypes'
-import { classification, properties, uoms, OBJECT_CRITICALITY_LEVEL, OBJECT_CLASSIFICATION, OBJECT_MAIN_CLS, VOLTAGE_LEVEL, MONITOR_POINT_INFO_TYPE } from '../../../../api/index'
+import { CHANGE_CLASS, CHANGE_OBJECTFUNCTIONALTYPE, CHANGE_UNITCLASS, CHANGE_IMPORTANCE, CHANGE_CLASSIFICATION, CHANGE_MAINCLS, CHANGE_OBJECTCLS, CHANGE_VOLTAGELEVEL, CHANGE_PROPERTY, CHANGE_MONITORPOINTTYPE, CHANGE_UOMS, CHANGE_PARAMS_NAME, CHANGE_EXPERIMENT_STANDARD_TYPE, CHANGE_EXPERIMENT_STANDARD_VALUE } from './actionTypes'
+import { classification, OBJECT_FUNCTIONAL_TYPE, properties, uoms, OBJECT_CRITICALITY_LEVEL, OBJECT_CLASSIFICATION, OBJECT_MAIN_CLS, VOLTAGE_LEVEL, MONITOR_POINT_INFO_TYPE, DYNAMIC_BASE_TEMPLATE_NAME, EXPERIMENT_STANDARD_TYPE } from '../../../../api/index'
+import { EXPERIMENT_STANDARD_VALUE } from '../../../../api/experimental/testTemplate'
 import { fromJS } from 'immutable'
 
 //设备分类
@@ -22,16 +23,16 @@ export const getClass = (params) => {
     classification(params)
       .then(res => {
         if (res && res.children) {
-          if (params.clsFun === "asset.classification") {
-            dispatch(changeClass(res.children))
-          } else if (params.clsFun === "asset.unitClass") {
+          if (params.clsFun === "asset.unitClass") {
             dispatch(changeUnitClass(res.children))
-          } else {
+          } else if(params.clsFun === "asset.class") {
             dispatch(changeObjectCls(res.children))
+          } else {
+            dispatch(changeClass(res.children))
           }
         }
       }).catch(() => {
-        console.log("设备分类加载失败")
+        console.log("分类加载失败")
       })
   }
 }
@@ -66,6 +67,23 @@ export const getImpartance = () => {
         }
       }).catch(() => {
         console.log("重要程度加载失败")
+      })
+  }
+}
+
+const changeObjectFunctionalType = (data) => ({
+  type: CHANGE_OBJECTFUNCTIONALTYPE,
+  data: fromJS(data)
+})
+export const getObjectFunctionalType = () => {
+  return dispatch => {
+    OBJECT_FUNCTIONAL_TYPE()
+      .then(res => {
+        if (res && res.models) {
+          dispatch(changeObjectFunctionalType(res.models))
+        }
+      }).catch(() => {
+        console.log("功能类型")
       })
   }
 }
@@ -151,6 +169,58 @@ export const getUoms = () => {
         }
       }).catch(() => {
         console.log("计量单位加载失败")
+      })
+  }
+}
+
+
+//参数名称
+const changeParamsName = (data) => ({
+  type: CHANGE_PARAMS_NAME,
+  data: fromJS(data)
+})
+export const getParamsName = () => {
+  return dispatch => {
+    DYNAMIC_BASE_TEMPLATE_NAME()
+      .then(res => {
+        if (res && res.models) {
+          dispatch(changeParamsName(res.models))
+        }
+      }).catch(() => {
+        console.log("参数名称加载失败")
+      })
+  }
+}
+
+//标准值类型
+const changeExperimentStandardType = (data) => ({
+  type: CHANGE_EXPERIMENT_STANDARD_TYPE,
+  data: fromJS(data)
+})
+export const getExperimentStandardType = () => {
+  return dispatch => {
+    EXPERIMENT_STANDARD_TYPE()
+      .then(res => {
+        if (res && res.models) {
+          dispatch(changeExperimentStandardType(res.models))
+        }
+      }).catch(() => {
+        console.log("标准值类型加载失败")
+      })
+  }
+}
+
+//标准值
+const changeExperimentStandardValue = (data) => ({
+  type: CHANGE_EXPERIMENT_STANDARD_VALUE,
+  data: fromJS(data)
+})
+export const getExperimentStandardValue = () => {
+  return dispatch => {
+    EXPERIMENT_STANDARD_VALUE()
+      .then(data => {
+        const list = data && data.models
+        dispatch(changeExperimentStandardValue(list))
       })
   }
 }

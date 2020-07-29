@@ -15,6 +15,22 @@ const MainClass = props => {
   const [activeId, setActiveId] = useState(null)
   const [changedName, setChangedName] = useState("")
   const inputRef = useRef(null)
+  const addClass = () => {
+    if(activeId){
+      message.error("请先保存当前修改")
+      return
+    }else{
+      setVisible({...visible,showAdd:true})
+    }
+  }
+  // const auditModalShow = () => {
+  //   if(activeId){
+  //     message.error("请先保存当前修改")
+  //     return
+  //   }else{
+  //     setVisible({...visible, showAudit:true})
+  //   }
+  // }
   const [visible, setVisible] = useState({
     showAdd:false,
     showAudit:false
@@ -35,11 +51,19 @@ const MainClass = props => {
   }
   const handleEditCancel = (e, item, status)=> {
     e.preventDefault()
+    if(activeId && status){
+      message.error("请先保存当前修改")
+      return
+    }
     setActiveId(status ? item.id : null)
     setChangedName(status ? item.descr : '')
   }
   const handleDelete = (e,id) => {
     e.preventDefault()
+    if(activeId){
+      message.error("请先保存当前修改")
+      return
+    }
     Modal.confirm({
       title: '确认删除',
       content: '是否删除该分类？',
@@ -111,8 +135,8 @@ const MainClass = props => {
   return(
     <div>
       <Row type="flex" justify="end" style={{margin:"5px 40px 5px 0"}}>
-        <Button type="primary" style={{width:"88px"}} onClick={() => {setVisible({...visible,showAdd:true})}}>添加分类</Button>
-        <Button block type="default" className="topButton" style={{width:"88px",backgroundColor:"#D9D9D9",marginLeft:"10px"}} onClick={ ()=>{setVisible({...visible, showAudit:true})}}>审计</Button>
+        <Button type="primary" style={{width:"88px"}} onClick={() => {addClass()}}>添加分类</Button>
+        {/* <Button block type="default" className="topButton" style={{width:"88px",backgroundColor:"#D9D9D9",marginLeft:"10px"}} onClick={()=>{auditModalShow()}}>审计</Button> */}
       </Row>
       <div className={styles.container}>
         {

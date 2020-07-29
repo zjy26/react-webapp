@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { Modal, Button, Form, Input, Select, message, Divider } from 'antd'
 import { ExclamationCircleOutlined, FormOutlined, DeleteOutlined } from '@ant-design/icons'
-import { properties } from '../../../../../../api'
+import { properties, echoProperty } from '../../../../../../api'
 import { configObjectTemplate } from '../../../../../../api/config/objectTemplate'
 import { setTable, MainTable } from '../../../../../common/table'
 import debounce from 'lodash/debounce'
@@ -9,17 +9,17 @@ import debounce from 'lodash/debounce'
 const formItemLayout = {
   labelCol: {
     xs: { span: 24 },
-    sm: { span: 7 },
+    sm: { span: 6 },
   },
   wrapperCol: {
     xs: { span: 24 },
-    sm: { span: 17 },
+    sm: { span: 16 },
   }
 }
 
 //参数标准弹窗
 const ParametersStandardModal = props => {
-  const { modalProperty, activeKey, MyContext } = props
+  const { modalProperty, MyContext } = props
   const [childVisible, setChildVisible] = useState(false)
   const [childModalProperty, setChildModalProperty] = useState({})
   const childHandleCancel = () => {
@@ -36,14 +36,9 @@ const ParametersStandardModal = props => {
     limit: 20
   })
 
-
   useEffect(() => {
     if (props.visible === true) {
-      if (activeKey === "static") {
-        setTable(configObjectTemplate.unitPropStdList, setData, setLoading, pager, setPager, [], { unitTemplate: modalProperty.unitTemplate })
-      } else {
-        setTable(configObjectTemplate.unitDynaPropStdList, setData, setLoading, pager, setPager, [], { unitTemplate: modalProperty.unitTemplate })
-      }
+      setTable(configObjectTemplate.unitPropStdList, setData, setLoading, pager, setPager, [], { unitTemplate: modalProperty.unitTemplate })
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -65,19 +60,11 @@ const ParametersStandardModal = props => {
       okType: 'danger',
       cancelText: '取消',
       onOk: () => {
-        if (activeKey === "static") {
-          configObjectTemplate.unitPropStdDelete(id)
-            .then(() => {
-              message.success("删除成功")
-              setDirty((dirty) => dirty + 1)
-            })
-        } else {
-          configObjectTemplate.unitDynamicTemplateDelete(id)
-            .then(() => {
-              message.success("删除成功")
-              setDirty((dirty) => dirty + 1)
-            })
-        }
+        configObjectTemplate.unitPropStdDelete(id)
+          .then(() => {
+            message.success("删除成功")
+            setDirty((dirty) => dirty + 1)
+          })
       },
       onCancel() {
       },
@@ -120,9 +107,9 @@ const ParametersStandardModal = props => {
       <Modal
         maskClosable={false}
         title="参数标准"
+        width={800}
         visible={props.visible}
         onCancel={props.handleCancel}
-        handleCancel={props.handleCancel}
         zIndex={500}
         footer={[
           <Button key="cancel" onClick={() => props.handleCancel()}>取消</Button>,
@@ -136,61 +123,45 @@ const ParametersStandardModal = props => {
           }}
         />
       </Modal>
-      <CheckParametersStandardModal {...{ modalProperty, childVisible, childModalProperty, childHandleCancel, setDirty, activeKey, MyContext }} />
+      <CheckParametersStandardModal {...{ modalProperty, childVisible, childModalProperty, childHandleCancel, setDirty, MyContext }} />
     </React.Fragment>
   )
 }
 
 //参数标准新增编辑弹窗
 const CheckParametersStandardModal = props => {
-  const { modalProperty, childModalProperty, childVisible, childHandleCancel, setDirty, MyContext, activeKey } = props
+  const { modalProperty, childModalProperty, childVisible, childHandleCancel, setDirty, MyContext } = props
   const { propertiesOption } = useContext(MyContext)
   const [form] = Form.useForm()
   const [initValues, setInitValues] = useState({})
   const [propertyData, setPropertyData] = useState(propertiesOption)
+  const [okLoading, setOkLoading] = useState(false)
 
   useEffect(() => {
     if (childVisible) {
+      setOkLoading(false)
       if (childModalProperty.type === "edit") {
-        if (activeKey === "static") {
-          configObjectTemplate.unitPropStdDetail(childModalProperty.id)
-            .then(res => {
-              setInitValues({
-                ...res,
-                property: res.property ? res.property : undefined
+        configObjectTemplate.unitPropStdDetail(childModalProperty.id)
+          .then(res => {
+            //属性回显
+            if(res && res.property) {
+              echoProperty({value: res.property})
+              .then(res => {
+                setPropertyData([...propertyData, res.model])
               })
-              form.resetFields()
-            })
-        } else {
-          configObjectTemplate.unitDynaPropStdDetail(childModalProperty.id)
-            .then(res => {
-              setInitValues({
-                ...res,
-                property: res.property ? res.property : undefined
-              })
-              form.resetFields()
-            })
-        }
+            }
+            setInitValues(res)
+            form.resetFields()
+          })
       } else {
-        if (activeKey === "static") {
-          configObjectTemplate.unitPropStdNew()
-            .then(res => {
-              setInitValues({
-                ...res,
-                property: res.property ? res.property : undefined
-              })
-              form.resetFields()
+        configObjectTemplate.unitPropStdNew()
+          .then(res => {
+            setInitValues({
+              ...res,
+              property: res.property ? res.property : undefined
             })
-        } else {
-          configObjectTemplate.unitDynaPropStdNew()
-            .then(res => {
-              setInitValues({
-                ...res,
-                property: res.property ? res.property : undefined
-              })
-              form.resetFields()
+            form.resetFields()
             })
-        }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -199,54 +170,39 @@ const CheckParametersStandardModal = props => {
   const handleOk = () => {
     form.validateFields()
       .then(values => {
+        setOkLoading(true)
         if (childModalProperty.type === "add") {
-          if (activeKey === "static") {
-            configObjectTemplate.unitPropStdAdd({
-              ...values,
-              unitTemplate: modalProperty.unitTemplate,
-              _method: 'PUT'
-            })
-              .then(() => {
+          configObjectTemplate.unitPropStdAdd({
+            ...values,
+            unitTemplate: modalProperty.unitTemplate,
+            _method: 'PUT'
+          })
+            .then((res) => {
+              if(res && res.success) {
                 message.success("新建成功")
                 childHandleCancel()
                 setDirty(dirty => dirty + 1)
-              })
-          } else {
-            configObjectTemplate.unitDynaPropStdAdd({
-              ...values,
-              unitTemplate: modalProperty.unitTemplate,
-              _method: 'PUT'
+              } else {
+                message.success("新建失败")
+                setOkLoading(false)
+              }
             })
-              .then(() => {
-                message.success("新建成功")
-                childHandleCancel()
-                setDirty(dirty => dirty + 1)
-              })
-          }
         } else {
-          if (activeKey === "static") {
-            configObjectTemplate.unitPropStdUpdate(childModalProperty.id, {
-              ...values,
-              unitTemplate: modalProperty.unitTemplate,
-              _method: 'PUT'
-            })
-              .then(() => {
+          configObjectTemplate.unitPropStdUpdate(childModalProperty.id, {
+            ...values,
+            unitTemplate: modalProperty.unitTemplate,
+            _method: 'PUT'
+          })
+            .then((res) => {
+              if(res && res.success) {
                 message.success("编辑成功")
                 childHandleCancel()
                 setDirty(dirty => dirty + 1)
-              })
-          } else {
-            configObjectTemplate.unitDynaPropStdUpdate(childModalProperty.id, {
-              ...values,
-              unitTemplate: modalProperty.unitTemplate,
-              _method: 'PUT'
+              } else {
+                message.success("编辑失败")
+                setOkLoading(false)
+              }
             })
-              .then(() => {
-                message.success("编辑成功")
-                childHandleCancel()
-                setDirty(dirty => dirty + 1)
-              })
-          }
         }
       })
   }
@@ -273,6 +229,7 @@ const CheckParametersStandardModal = props => {
       visible={childVisible}
       onCancel={childHandleCancel}
       onOk={handleOk}
+      okButtonProps={{ loading: okLoading }}
     >
       <Form name="templatePropStdForm" form={form} {...formItemLayout} initialValues={initValues}>
         <Form.Item label="属性" name="property" rules={[{ required: true, message: '请选择属性' }]}>

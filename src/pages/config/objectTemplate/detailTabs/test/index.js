@@ -48,7 +48,13 @@ const Test = props => {
     },
     {
       title: '标准值',
-      dataIndex: 'stdValue'
+      dataIndex: 'stdValue',
+      render: (text, record) => {
+        const desc = record.standardValueType === "T"
+          ? text ? text === '1' ? "合格" : "不合格" : null
+          : record.min && record.max ? `${record.min}-${record.max}` : record.min || record.max
+        return desc
+      }
     },
     {
       title: '计量单位',

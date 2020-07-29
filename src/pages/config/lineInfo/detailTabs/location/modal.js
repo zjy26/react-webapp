@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useContext } from 'react'
-import { PlusOutlined } from '@ant-design/icons'
-import { Form, Modal, Input, Row, Col, Select, Radio, Upload, message, Button } from 'antd'
+import { Form, Modal, Input, Row, Col, Select, Radio, Upload, message, Button, InputNumber } from 'antd'
 import { configLocation } from '../../../../../api/config/lineInfo'
+import { upload } from '../../../../../api/index'
+import { EditUpload, showFile } from '../../../../common/upload'
 
 const formItemLayout = {
   labelCol: {
@@ -15,14 +16,23 @@ const formItemLayout = {
 }
 
 const SiteModal = props => {
-  const { modalProperty, visible, setDirty, handleCancel, MyContext, data } = props
+  const { modalProperty, visible, setDirty, handleCancel, MyContext } = props
   const { entity, lineCode, org } = useContext(MyContext)
   const [form] = Form.useForm()
   const [initValues, setInitValues] = useState({})
   const [prefix, setPrefix] = useState()
+  const [siteOption, setSiteOption] = useState([])
+  const [siteDirty, setSiteDirty] = useState(0)
+  const [okLoading, setOkLoading] = useState(false)
+
+  const [fileList, setFileList] = useState({
+    stationHt: [],
+    stationImage: []
+  })
 
   useEffect(() => {
     if (visible) {
+      setOkLoading(false)
       modalProperty.type === "add" ?
         configLocation.configLocationNew({ level: 4, line: lineCode })
           .then((res) => {
@@ -37,6 +47,10 @@ const SiteModal = props => {
               locationType: res.locationType ? res.locationType : undefined,
             })
             form.resetFields()
+            setFileList({
+              stationHt: [],
+              stationImage: []
+            })
           })
         :
         configLocation.configLocationDetail(modalProperty.siteId)
@@ -45,13 +59,16 @@ const SiteModal = props => {
               const siteFunctionValue = entity.siteFunctionOption.find(obj => obj.code === res.siteFunction)
               const styleValue = entity.styleOption.find(obj => obj.code === res.style)
               const locationTypeValue = entity.locationTypeOption.find(obj => obj.code === res.locationType)
+              const siteField = siteOption.find(obj => obj.code === res.mapField)
+
               modalProperty.type === "check" ?
                 setInitValues({
                   ...res,
                   isDutyPoint: res.isDutyPoint ? "是" : "否",
                   siteFunction: siteFunctionValue ? siteFunctionValue.name : null,
                   style: styleValue ? styleValue.name : null,
-                  locationType: locationTypeValue ? locationTypeValue.name : null
+                  locationType: locationTypeValue ? locationTypeValue.name : null,
+                  mapField: siteField ? `${res.mapField}-${siteField.desc}` : null
                 })
                 :
                 setInitValues({
@@ -65,13 +82,31 @@ const SiteModal = props => {
               form.resetFields()
             }
           })
+          .then(() => {
+            showFile(modalProperty.siteId, "station-ht", setFileList, "stationHt")
+            showFile(modalProperty.siteId, "station-image", setFileList, "stationImage")
+          })
     }
 
-  }, [entity.locationTypeOption, entity.siteFunctionOption, entity.styleOption, form, lineCode, modalProperty.siteId, modalProperty.type, visible])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entity.locationTypeOption, entity.siteFunctionOption, entity.styleOption, lineCode, modalProperty.siteId, modalProperty.type, visible, siteOption])
+
+  //当前线路所有站点
+  useEffect(() => {
+    if (visible) {
+      configLocation.configLocationList({ level: 4, line: lineCode })
+        .then(res => {
+          if (res && res.models) {
+            setSiteOption(res.models)
+          }
+        })
+    }
+  }, [lineCode, siteDirty, visible])
 
   const handleSubmit = () => {
     form.validateFields()
       .then(values => {
+        setOkLoading(true)
         switch (modalProperty.type) {
           case "add":
             const { code, ...data } = values
@@ -83,21 +118,60 @@ const SiteModal = props => {
             }
             configLocation.configLocationAdd(params)
               .then((res) => {
-                if (res.success) {
+                if (res && res.success) {
                   handleCancel()
                   setDirty((dirty) => dirty + 1)
                   message.success("新建成功")
+                  setSiteDirty(siteDirty => siteDirty + 1)
+                  return res
                 } else {
                   message.error(res.actionErrors[0])
+                  setOkLoading(false)
+                }
+              })
+              .then(data => {
+                if (data && data.id) {
+                  const ids = []
+                  for (var i in fileList) {
+                    fileList[i].forEach(item => {
+                      if (item.status === "done") {
+                        ids.push(item.uid)
+                      }
+                    })
+                  }
+                  upload({
+                    ids: ids.toString(),
+                    record: data.id
+                  })
                 }
               })
             break;
           case "edit":
             configLocation.configLocationUpdate(modalProperty.siteId, { ...values, _method: 'PUT' })
+              .then((res) => {
+                if (res && res.success) {
+                  message.success("编辑成功")
+                  setDirty(dirty => dirty + 1)
+                  handleCancel()
+                  setSiteDirty(siteDirty => siteDirty + 1)
+                } else {
+                  message.error('编辑失败')
+                  setOkLoading(false)
+                }
+              })
               .then(() => {
-                message.success("编辑成功")
-                setDirty(dirty => dirty + 1)
-                handleCancel()
+                const ids = []
+                for (var i in fileList) {
+                  fileList[i].forEach(item => {
+                    if (item.status === "done") {
+                      ids.push(item.uid)
+                    }
+                  })
+                }
+                upload({
+                  ids: ids.toString(),
+                  record: modalProperty.siteId
+                })
               })
             break;
           default:
@@ -120,7 +194,7 @@ const SiteModal = props => {
         modalProperty.type === "check" ? null :
           [
             <Button key="cancel" onClick={handleCancel}>取消</Button>,
-            <Button key="submit" type="primary" onClick={handleSubmit}>确定</Button>
+            <Button key="submit" type="primary" loading={okLoading} onClick={handleSubmit}>确定</Button>
           ]
       }
     >
@@ -128,6 +202,11 @@ const SiteModal = props => {
         {
           modalProperty.type === "check" ?
             <Row gutter={24}>
+              <Col span={12}>
+                <Form.Item label="序号">
+                  {initValues.sn}
+                </Form.Item>
+              </Col>
               <Col span={12}>
                 <Form.Item label="站点代码">
                   {initValues.code}
@@ -139,7 +218,7 @@ const SiteModal = props => {
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item label="编码">
+                <Form.Item label="设备归属站点">
                   {initValues.mapField}
                 </Form.Item>
               </Col>
@@ -180,23 +259,26 @@ const SiteModal = props => {
               </Col>
               <Col span={12}>
                 <Form.Item label="HT图形">
-                  <Upload
-                    listType="picture-card"
-                  >
-                  </Upload>
+                  <Upload fileList={fileList.stationHt} disabled />
                 </Form.Item>
               </Col>
               <Col span={12}>
                 <Form.Item label="平面图">
-                  <Upload
-                    listType="picture-card"
-                  >
-                  </Upload>
+                  <Upload fileList={fileList.stationImage} disabled />
                 </Form.Item>
               </Col>
             </Row>
             :
             <Row gutter={24}>
+              <Col span={12}>
+                <Form.Item
+                  label="序号"
+                  name="sn"
+                  rules={[{ required: true, message: '请输入序号' }]}
+                >
+                  <InputNumber placeholder="请输入序号" min={1} precision={0} />
+                </Form.Item>
+              </Col>
               <Col span={12}>
                 {
                   modalProperty.type === "add" ?
@@ -230,15 +312,15 @@ const SiteModal = props => {
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item label="编码" name="mapField">
+                <Form.Item label="设备归属站点" name="mapField">
                   <Select
-                    placeholder="请选择编码"
+                    placeholder="请选择设备归属站点"
                     allowClear
                     showSearch
                   >
                     {
-                      data.map(item => (
-                        <Select.Option key={item.code} value={item.code}>{item.code}</Select.Option>
+                      siteOption.map(item => (
+                        <Select.Option key={item.code} value={item.code}>{item.code}-{item.desc}</Select.Option>
                       ))
                     }
                   </Select>
@@ -310,22 +392,22 @@ const SiteModal = props => {
               </Col>
               <Col span={12}>
                 <Form.Item label="HT图形">
-                  <Upload
-                    listType="picture-card"
-                  >
-                    <PlusOutlined />
-                  </Upload>
-                  <div>不超过20M,格式为jpg，png</div>
+                  <EditUpload
+                    model='station-ht'
+                    fileList={fileList.stationHt}
+                    setFileList={setFileList}
+                    option="stationHt"
+                  />
                 </Form.Item>
               </Col>
               <Col span={12}>
                 <Form.Item label="平面图">
-                  <Upload
-                    listType="picture-card"
-                  >
-                    <PlusOutlined />
-                  </Upload>
-                  <div>不超过20M,格式为jpg，png</div>
+                  <EditUpload
+                    model='station-image'
+                    fileList={fileList.stationImage}
+                    setFileList={setFileList}
+                    option="stationImage"
+                  />
                 </Form.Item>
               </Col>
             </Row>

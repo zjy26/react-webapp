@@ -305,7 +305,7 @@ const ObjectModule = props => {
               {getFieldDecorator('lineSite', {
                 rules: [],
               })(
-                <Cascader options={props.locationTree.lineSite} placeholder="请选择线路/站点" />,
+                <Cascader options={props.locationTree&&props.locationTree.lineSite} placeholder="请选择线路/站点" />,
               )}
             </Form.Item>
           </Col>

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { PlusOutlined } from '@ant-design/icons'
-import { Form, Modal, Input, Upload, DatePicker, TimePicker, Select, Row, Col, Button, message } from 'antd'
+import { Form, Modal, Input, DatePicker, TimePicker, Select, Row, Col, message } from 'antd'
 import moment from 'moment'
 import { configLocation } from '../../../api/config/lineInfo'
+import { requestApi } from '../../../api/request'
+import { upload } from '../../../api/index'
+import { EditUpload } from '../../common/upload'
 
 const formItemLayout = {
   labelCol: {
@@ -20,11 +22,24 @@ const NewModal = props => {
   const [form] = Form.useForm()
   const [initValues, setInitValues] = useState({})
   const [prefix, setPrefix] = useState()
+  const [fileList, setFileList] = useState({
+    lineInfoHt: [],
+    lineInfo: []
+  })
+  const [okLoading, setOkLoading] = useState(false)
 
   useEffect(() => {
     if (props.visible === true) {
-      configLocation.configLocationNew({ level: 2 })
-        .then((res) => {
+      setOkLoading(false)
+
+      setFileList({
+        lineInfoHt: [],
+        lineInfo: []
+      })
+
+      requestApi(
+        configLocation.configLocationNew({ level: 2 }),
+        (res) => {
           setPrefix(res.code)
           const { code, ...data } = res
           setInitValues({
@@ -34,7 +49,8 @@ const NewModal = props => {
             runTime: [res.runStartTime, res.runEndTime]
           })
           form.resetFields()
-        })
+        }
+      )
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -43,27 +59,49 @@ const NewModal = props => {
   //确定
   const handleSubmit = () => {
     form.validateFields()
-      .then(values => {
-        const { runTime, ...data } = values
-        const runTimeArr = values.runTime.map(item => item ? moment(item).format('HH:mm') : "")
+    .then(values => {
+      const { runTime, ...data } = values
+      const runTimeArr = values.runTime.map(item => item ? moment(item).format('HH:mm') : "")
 
-        const params = {
-          ...data,
-          level: 2,
-          org: props.user.org,
-          code: `${prefix}${values.code}`,
-          commissionDate: values.commissionDate ? moment(values.commissionDate, 'YYYY-MM-DD HH:mm:ss').valueOf() : null,
-          runStartTime: runTimeArr[0],
-          runEndTime: runTimeArr[1],
-          catenaryType: values.catenaryType ? values.catenaryType.toString() : null
-        }
+      const params = {
+        ...data,
+        level: 2,
+        org: props.user.org,
+        code: `${prefix}${values.code}`,
+        commissionDate: values.commissionDate ? moment(values.commissionDate, 'YYYY-MM-DD HH:mm:ss').valueOf() : null,
+        runStartTime: runTimeArr[0],
+        runEndTime: runTimeArr[1],
+        catenaryType: values.catenaryType ? values.catenaryType.toString() : null
+      }
+
+        setOkLoading(true)
         configLocation.configLocationAdd(params)
-          .then((res) => {
-            if (res.success) {
+          .then(res => {
+            if (res && res.success) {
+              message.success("新建成功")
               props.handleCancel()
               props.setDirty((dirty) => dirty + 1)
+              return res
             } else {
+              setOkLoading(false)
               message.error("新建失败，站点代码可能重复")
+            }
+          })
+          .then(data => {
+            if (data && data.id) {
+              const ids = []
+              for (var i in fileList) {
+                fileList[i].forEach(item => {
+                  if(item.status === "done") {
+                    ids.push(item.uid)
+                  }
+                })
+              }
+              upload({
+                ids: ids.toString(),
+                record: data.id
+              })
+
             }
           })
       })
@@ -79,6 +117,7 @@ const NewModal = props => {
       onOk={handleSubmit}
       visible={props.visible}
       onCancel={props.handleCancel}
+      okButtonProps={{ loading: okLoading }}
     >
       <Form name="newLineForm" {...formItemLayout} form={form} initialValues={initValues}>
         <Row gutter={24}>
@@ -127,7 +166,7 @@ const NewModal = props => {
               </Select>
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col span={12} hidden>
             <Form.Item label="线长" name="lineLeader">
               <Select
                 placeholder="请选择线长"
@@ -152,17 +191,22 @@ const NewModal = props => {
           </Col>
           <Col span={12}>
             <Form.Item label="图形">
-              <Upload listType="picture-card">
-                <PlusOutlined />
-              </Upload>
-              <div>不超过20M,格式为jpg，png</div>
+              <EditUpload
+                model = 'lineInfo-ht'
+                fileList = {fileList.lineInfoHt}
+                setFileList = {setFileList}
+                option = "lineInfoHt"
+              />
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item label="附件">
-              <Upload>
-                <Button>上传附件</Button>
-              </Upload>
+              <EditUpload
+                model = 'lineInfo'
+                fileList = {fileList.lineInfo}
+                setFileList = {setFileList}
+                option = "lineInfo"
+              />
             </Form.Item>
           </Col>
         </Row>

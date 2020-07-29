@@ -21,6 +21,17 @@ const Setting = props => {
   })
   const [visible, setVisible] = useState(false)
   const [modalProperty, setModalProperty] = useState({})
+  const [unitOption, setUnitOption] = useState([])
+
+  useEffect(() => {
+    //静态部件模板
+    configObjectTemplate.unitTemplateList({ template: templateCode, isStatic: true })
+      .then(res => {
+        if (res && res.models) {
+          setUnitOption(res.models)
+        }
+      })
+  }, [templateCode])
 
   useEffect(() => {
     setTable(configObjectTemplate.settingValList, setData, setLoading, pager, setPager, [], { template: templateCode })
@@ -30,29 +41,46 @@ const Setting = props => {
 
   const columns = [
     {
+      title: '关联部件',
+      dataIndex: 'unit',
+      render: (text) => {
+        const item = unitOption.find(obj => obj.code === text)
+        if (item) {
+          return `${item.sn}-${item.name}`
+        }
+      }
+    },
+    {
       title: '组别',
       dataIndex: 'group'
     },
     {
-      title: '名称',
-      dataIndex: 'descr'
+      title: '保护类型',
+      dataIndex: 'protectType'
     },
     {
-      title: '属性代码',
-      dataIndex: 'property'
+      title: '运行方式',
+      dataIndex: 'runType'
     },
     {
-      title: '属性说明',
-      dataIndex: 'alias',
-      ellipsis: true
+      title: '保护参数',
+      dataIndex: 'protectParam'
     },
     {
-      title: '默认值',
+      title: '设定参数',
+      dataIndex: 'setPrarm'
+    },
+    {
+      title: '整定值',
       dataIndex: 'defaultValue'
     },
     {
       title: '计量单位',
       dataIndex: 'uomDesc'
+    },
+    {
+      title: '时限参数',
+      dataIndex: 'timeLimitParam'
     },
     {
       title: '动作时限',
@@ -63,9 +91,16 @@ const Setting = props => {
       dataIndex: 'actUom'
     },
     {
-      title: '备注',
-      dataIndex: 'remarks',
-      ellipsis: true
+      title: '作用',
+      dataIndex: 'effect',
+    },
+    {
+      title: '关联属性报警',
+      dataIndex: 'alarmPropertyDesc',
+    },
+    {
+      title: '关联属性投用',
+      dataIndex: 'applyPropertyDesc',
     },
     {
       title: '操作',
@@ -119,11 +154,12 @@ const Setting = props => {
       <MainTable
         {...{
           columns, data, loading, pager, setPager, setDirty,
-          rowkey: "group"
+          rowkey: "group",
+          scroll: {x: 1600}
         }}
       />
 
-      <CheckSettingModal {...{ visible, handleCancel, modalProperty, setDirty, MyContext }} />
+      <CheckSettingModal {...{ visible, handleCancel, modalProperty, setDirty, MyContext, unitOption }} />
     </React.Fragment>
   )
 }

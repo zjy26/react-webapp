@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/alt-text */
 import React, { useState, useEffect } from 'react'
-import { Modal, Row, Dropdown, Menu, Col, Button, Table, message, Divider } from 'antd'
+import { Modal, Row,/* Dropdown, Menu,*/ Col, Button, Table, message, Divider } from 'antd'
 import ClassModal from './classModal'
 import AuditModal from '../../common/auditModal'
 import ImportModal from '../../common/importModal'
@@ -9,6 +9,15 @@ import { assetClass } from '../../../api'
 import { connect } from 'react-redux'
 import commonStyles from '../../Common.module.scss'
 
+const addLevel = (data, level) => {
+  data.forEach(item => {
+    item['level'] = level
+    if(item.children.length){
+      let nextLevel = level + 1
+      addLevel(item.children, nextLevel)
+    }
+  })
+}
 
 const ObjectClass = props => {
   const user = props.user.toJS();
@@ -20,15 +29,14 @@ const ObjectClass = props => {
   const [dirty, setDirty] = useState(0)
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState([])
+  const [level, setLevel] = useState()
   const [modalTitle, setModalTitle] = useState("添加")
   const [currentId, setCurrentId] = useState(0)
   const [parItem, setParItem] = useState({})
-  let level = 1;
   const find = (arr, id) => {
     arr.forEach((item) => {
-      level +=1;
       if(item["children"].find(value => value["id"]===id)){
-        setParItem({item:item,level:level})
+        setParItem(item)
         return item
       }
       else if(item.children.length > 0){
@@ -50,7 +58,7 @@ const ObjectClass = props => {
     setModalTitle(option ? '编辑' : '添加')
     record["edit"]=option
     setCurrentId(record)
-    level = 1
+    setLevel(record.level)
     find(data, record.id)
     setVisible({
       ...visible,
@@ -89,7 +97,7 @@ const ObjectClass = props => {
       dataIndex: 'text'
     },
     {
-      title: '编码',
+      title: '分类代码',
       ellipsis: true,
       dataIndex: 'code',
       render: (text, record) => {
@@ -135,7 +143,9 @@ const ObjectClass = props => {
     assetClass.objectClassList({org:user.org})
     .then(res => {
       if(res){
-        setData([res])
+        let result = [res]
+        addLevel(result, 1)
+        setData(result)
         setLoading(false)
       }
     })
@@ -154,7 +164,7 @@ const ObjectClass = props => {
         <Col></Col>
         <Col>
           <Button type="primary">下载</Button>
-          <Dropdown
+          {/* <Dropdown
             overlay={
               <Menu>
                 <Menu.Item key="switch" onClick={()=>{setVisible({...visible, showImport:true})}}>信息导入</Menu.Item>
@@ -163,7 +173,7 @@ const ObjectClass = props => {
             }
           >
           <Button>更多功能<DownOutlined /></Button>
-        </Dropdown>
+        </Dropdown> */}
         </Col>
       </Row>
       <Table
@@ -171,23 +181,24 @@ const ObjectClass = props => {
         columns={columns}
         dataSource={data}
         loading={loading}
+        key={loading}
         rowKey="id"
         expandable={{
+          defaultExpandAllRows: true,
           indentSize:50,
           expandIcon: ({ expanded, onExpand, record }) =>{
             return (
+              record.children && record.children.length ?
               expanded ? (
                 <DownOutlined onClick={e => onExpand(record, e)} />
               ) : (
                 <RightOutlined onClick={e => onExpand(record, e)} />
-              )
+              ) : null
             )
           }
-
         }}
       />
-
-      <ClassModal {...{handleCancel, setData, currentId, setDirty, visible: visible.showClass, title: modalTitle, org: user.org, parItem: parItem}}/>
+      <ClassModal {...{handleCancel, currentId, setDirty, level, parItem, visible: visible.showClass, title: modalTitle, org: user.org }}/>
       <AuditModal {...{handleCancel, visible: visible.showAudit}} />
       <ImportModal {...{handleCancel, visible: visible.showImport}} />
     </React.Fragment>

@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { Button, Row, Col, Dropdown, Menu, Modal, message, Divider } from 'antd'
 import { MenuOutlined, FileSearchOutlined } from '@ant-design/icons'
 import IntervalModal from './modal'
-import { setTable, MainTable } from '../../../../common/table'
+import { setTable, MainTable, getColumnSearchProps } from '../../../../common/table'
 import { configLocation } from '../../../../../api/config/lineInfo'
 
 const Interval = props => {
   const { lineCode, MyContext, setIntervalList } = props
+  const { entity, activeKey } = useContext(MyContext)
   const [data, setData] = useState([])  //列表数据
   const [loading, setLoading] = useState(false)
   const [dirty, setDirty] = useState(0)
@@ -20,32 +21,60 @@ const Interval = props => {
   const [visible, setVisible] = useState(false)
   const [modalProperty, setModalProperty] = useState({})
 
+  const [searchProps, setSearchProps] = useState({
+    column: "",
+    text: ""
+  })
+  const [filter, setFilter] = useState([])
+
+  const [siteOption, setSiteOption] = useState([])
+
   const columns = [
     {
+      title: '编码',
+      dataIndex: 'code'
+    },
+    {
       title: '区间名称',
-      dataIndex: 'descr'
+      dataIndex: 'descr',
+      ...getColumnSearchProps('descr', "区间名称", searchProps, setSearchProps)
     },
     {
       title: '触网类型',
       dataIndex: 'catenaryType',
+      filterMultiple: false,
+      filters: entity.catenaryTypeOption.map(o=>{return{value:o.code, text:o.name}}),
+      onFilter: (value, record) => record.catenaryType ? record.catenaryType.indexOf(value) === 0 : null,
       render: (text, record) => record._displayName.catenaryType
     },
     {
       title: '站点1',
-      dataIndex: 'site1Desc'
+      dataIndex: 'site1Desc',
+      filterMultiple: false,
+      filters: siteOption.map(o=>{return{value:o.desc, text:o.desc}}),
+      onFilter: (value, record) => record.site1Desc ? record.site1Desc.indexOf(value) === 0 : null,
     },
     {
       title: '站点2',
-      dataIndex: 'site2Desc'
+      dataIndex: 'site2Desc',
+      filterMultiple: false,
+      filters: siteOption.map(o=>{return{value:o.desc, text:o.desc}}),
+      onFilter: (value, record) => record.site2Desc ? record.site2Desc.indexOf(value) === 0 : null,
     },
     {
       title: '行车路线',
       dataIndex: 'vehicleRoute',
+      filterMultiple: false,
+      filters: entity.vehicleRouteOption.map(o=>{return{value:o.code, text:o.name}}),
+      onFilter: (value, record) => record.vehicleRoute ? record.vehicleRoute.indexOf(value) === 0 : null,
       render: (text, record) => record._displayName.vehicleRoute
     },
     {
       title: '是否长/大区间',
       dataIndex: 'isLarge',
+      filterMultiple: false,
+      filters: [{text: "是", value: "true"}, {text: "否", value: "false"}],
+      onFilter: (value, record) => record.isLarge&&record.isLarge.toString() ? record.isLarge.toString().indexOf(value) === 0 : null,
       render: (text) => {
         if (text) {
           return "是"
@@ -57,6 +86,9 @@ const Interval = props => {
     {
       title: '有无区间所',
       dataIndex: 'hasIntervalPlace',
+      filterMultiple: false,
+      filters: [{text: "有", value: "true"}, {text: "无", value: "false"}],
+      onFilter: (value, record) => record.hasIntervalPlace&&record.hasIntervalPlace.toString() ? record.hasIntervalPlace.toString().indexOf(value) === 0 : null,
       render: (text) => {
         if (text) {
           return "有"
@@ -89,11 +121,22 @@ const Interval = props => {
     }
   ]
 
-  setIntervalList(data)
   useEffect(() => {
-    setTable(configLocation.configIntervalList, setData, setLoading, pager, setPager, [], { level: 4, line: lineCode })
+    setTable(configLocation.configIntervalList, setData, setLoading, pager, setPager, filter, { level: 4, line: lineCode })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dirty])
+  }, [filter, dirty])
+
+  //当前线路所有站点
+  useEffect(() => {
+    if(activeKey === "netInfo") {
+      configLocation.configLocationList({ level: 4, line: lineCode })
+        .then(res => {
+          if (res && res.models) {
+            setSiteOption(res.models)
+          }
+        })
+    }
+  }, [activeKey, lineCode])
 
   //关闭弹窗
   const handleCancel = () => setVisible(false)
@@ -143,12 +186,12 @@ const Interval = props => {
 
       <MainTable
         {...{
-          columns, data, loading, pager, setPager, setDirty,
-          rowkey: "id",
+          columns, data, loading, pager, setPager, setDirty, setFilter,
+          rowkey: "id"
         }}
       />
 
-      <IntervalModal {...{ visible: visible, modalProperty, handleCancel, setDirty, MyContext }} />
+      <IntervalModal {...{ visible: visible, modalProperty, handleCancel, setDirty, MyContext, setIntervalList, siteOption }} />
     </React.Fragment>
   )
 }

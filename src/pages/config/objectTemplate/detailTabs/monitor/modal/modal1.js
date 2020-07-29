@@ -22,12 +22,16 @@ const Modal1 = props => {
   const [form] = Form.useForm()
   const [initValues, setInitValues] = useState({})
   const [propertyData, setPropertyData] = useState(propertiesOption)
+  const [okLoading, setOkLoading] = useState(false)
 
   useEffect(() => {
     if (visible) {
+      setOkLoading(false)
       if (modalProperty.type === "edit") {
         configObjectTemplate.propertyTemplateDetail(modalProperty.id)
           .then(res => {
+            //属性回显
+            setPropertyData([...propertyData, {code: res.code, desc:res.descr}])
             setInitValues({
               ...res,
               uom: res.uom ? res.uom : undefined,
@@ -46,11 +50,13 @@ const Modal1 = props => {
           })
       }
     }
-  }, [form, modalProperty.id, modalProperty.type, visible])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modalProperty.id, modalProperty.type, propertiesOption, visible])
 
   const handleOk = () => {
     form.validateFields()
       .then(values => {
+        setOkLoading(true)
         if (modalProperty.type === "add") {
           configObjectTemplate.propertyTemplateAdd({
             ...values,
@@ -59,12 +65,13 @@ const Modal1 = props => {
             _method: 'PUT'
           })
             .then((res) => {
-              if (res.success) {
+              if (res && res.success) {
                 handleCancel()
                 setDirty(dirty => dirty + 1)
                 message.success("新建成功")
               } else {
                 message.error(res.message)
+                setOkLoading(false)
               }
             })
         } else {
@@ -108,40 +115,48 @@ const Modal1 = props => {
       visible={visible}
       onCancel={handleCancel}
       onOk={handleOk}
+      okButtonProps={{ loading: okLoading }}
     >
       <Form name="templateMonitorForm1" form={form} {...formItemLayout} initialValues={initValues}>
         <Row gutter={24}>
           <Col span={12}>
             {
               modalProperty.type === "add" ?
-                <Form.Item label="属性代码" name="code" rules={[{ required: true, message: '请选择属性代码' }]}>
+                <Form.Item label="属性名称" name="code" rules={[{ required: true, message: '请输入属性名称' }]}>
                   <Select
                     showSearch
                     filterOption={false}
                     onSearch={handleSearch}
-                    placeholder="请输入属性代码"
+                    placeholder="请输入属性名称"
                     onChange={
                       (val, opt) => form.setFieldsValue({
-                        descr: opt.name
+                        descr: opt.name,
+                        uom: opt.uom
                       })
                     }
                   >
                     {
                       propertyData.map(item => (
-                        <Select.Option key={item.code} value={item.code} name={item.desc}>{item.code}-{item.desc}</Select.Option>
+                        <Select.Option key={item.code} value={item.code} name={item.desc} uom={item.uom}>{item.code}-{item.desc}</Select.Option>
                       ))
                     }
                   </Select>
                 </Form.Item>
                 :
-                <Form.Item label="属性代码" name="code">
-                  <Input disabled />
+                <Form.Item label="属性名称" name="code">
+                  <Select disabled>
+                    {
+                      propertyData.map(item => (
+                        <Select.Option key={item.code} value={item.code}>{item.code}-{item.desc}</Select.Option>
+                      ))
+                    }
+                  </Select>
                 </Form.Item>
             }
           </Col>
-          <Col span={12}>
+          <Col span={12} hidden>
             <Form.Item label="属性名称" name="descr">
-              <Input placeholder="请输入属性名称" disabled />
+              <Input placeholder="请输入属性名称" />
             </Form.Item>
           </Col>
           <Col span={12}>
@@ -181,7 +196,14 @@ const Modal1 = props => {
           </Col>
           <Col span={12}>
             <Form.Item label="计量单位" name="uom">
-              <Select placeholder="请选择计量单位" allowClear>
+              <Select
+                placeholder="请选择计量单位"
+                allowClear
+                showSearch
+                filterOption={(input, option) =>
+                  option.children&&option.children[0].indexOf(input) >= 0
+                }
+              >
                 {
                   uomsOption.map(item => (
                     <Select.OptGroup key={item.id} label={item.text}>
