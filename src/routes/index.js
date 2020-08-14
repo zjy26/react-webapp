@@ -9,7 +9,10 @@ import PatrolSheet from '../pages/patrol/patrolSheet/index'
 import PatrolConfig from '../pages/patrol/patrolConfig/index'
 import DataStatistics from '../pages/patrol/dataStatistics/index'
 import ObjectModuleDetail from '../pages/object/detail'
-import ObjectEnvaluation from '../pages/objectEvaluation';
+import ObjectEnvaluation from '../pages/objectEvaluation'
+
+import Form from '../pages/form/index'
+import FormEdit from '../pages/form/edit'
 
 const menuRoutes = [
   {path: "/home", exact: true, component: View},
@@ -25,7 +28,10 @@ const menuRoutes = [
   {path:"/patrol/patrol-config", exact: true, component: PatrolConfig},
   {path:"/patrol/patrol-statistics", exact: true, component: DataStatistics},
   
-  {path:"/object-evaluation", exact: true, component: ObjectEnvaluation}
+  {path:"/object-evaluation", exact: true, component: ObjectEnvaluation},
+
+  {path:"/form", exact: true, component: Form},
+  {path:"/form-edit", exact: true, component: FormEdit}
 ]
 
 export default menuRoutes;
