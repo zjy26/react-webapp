@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import {
+  Form,
   Radio,
   Checkbox,
   Input,
@@ -89,18 +90,30 @@ const columns = [
   },
 ]
 
+const codeArr = [{
+  xtype: 'input',
+  name: 'name',
+  label: '姓名'
+}, {
+  xtype: 'select',
+  name: 'sex',
+  label: '性别',
+  option: [{value:'male', label:'男性'}, {value:'female', label:'女性'}],
+
+}]
+
 const Index = (props) => {
+  const [form] = Form.useForm()
   const [visible, setVisible] = useState(false)
   const handleCancel = () => setVisible(false)
+  const data = props.location.query
+  console.log(data)
 
-  useEffect(() => {
-    // console.log(props.location.query.value)
-    document.getElementById("componment").innerHTML = props.location.query ? props.location.query.value : "暂无数据"
-  })
+  const codeVals = data&&data.codes ? data.codes : []
 
-  const queryVals = props.location.query ? props.location.query.value : []
+  const compVals = data&&data.components ? data.components : []
   let comp = null
-  queryVals.map(item => {
+  compVals.map(item => {
     switch(item) {
       case "Button":
         comp = <>{comp}<Button>Button</Button></>
@@ -166,9 +179,39 @@ const Index = (props) => {
     return item
   })
 
+  const onFinish = () => {
+    form.validateFields()
+    .then(values => {
+      console.log(values)
+    })
+  }
+
   return (
     <React.Fragment>
-      <div id="componment"></div>
+      <Form form={form} onFinish={onFinish}>
+        {
+          codeArr.map(item => {
+            return (
+              <Form.Item label={item.label} name={item.name} key={item.name}>
+                {
+                  item.xtype === "input"
+                  ? <Input />
+                  : <Select>
+                    {
+                      item.option.map(opt => <Select.Option value={opt.value} key={opt.value}>{opt.label}</Select.Option>)
+                    }
+                    </Select>
+                }
+              </Form.Item>
+            )
+          })
+        }
+        <Form.Item>
+          <Button type="primary" htmlType="submit">
+            提交
+          </Button>
+        </Form.Item>
+      </Form>
 
       {comp}
 

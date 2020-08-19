@@ -6,8 +6,9 @@ const Edit = (props) => {
   const onFinish = () => {
     form.validateFields()
     .then(values => {
-      console.log(values)
-      props.history.push({ pathname: `/form`, query:{value: values.code ? values.code : values.components} })
+
+      console.log(values.codes)
+     // props.history.push({ pathname: `/form`, query:{codes: values.codes, components: values.components} })
     })
   }
 
@@ -33,7 +34,7 @@ const Edit = (props) => {
     >
       <Form.Item
         label="源代码"
-        name="code"
+        name="codes"
       >
         <Input.TextArea />
       </Form.Item>
