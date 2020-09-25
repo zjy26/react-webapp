@@ -11,8 +11,7 @@ import DataStatistics from '../pages/patrol/dataStatistics/index'
 import ObjectModuleDetail from '../pages/object/detail'
 import ObjectEnvaluation from '../pages/objectEvaluation'
 
-import Form from '../pages/form/index'
-import FormEdit from '../pages/form/edit'
+import State from '../pages/state/index'
 
 const menuRoutes = [
   {path: "/home", exact: true, component: View},
@@ -30,8 +29,7 @@ const menuRoutes = [
   
   {path:"/object-evaluation", exact: true, component: ObjectEnvaluation},
 
-  {path:"/form", exact: true, component: Form},
-  {path:"/form-edit", exact: true, component: FormEdit}
+  {path:"/state", exact: true, component: State},
 ]
 
 export default menuRoutes;

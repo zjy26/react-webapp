@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { MessageOutlined, UserOutlined, VideoCameraOutlined, UploadOutlined, MenuUnfoldOutlined, MenuFoldOutlined, NotificationOutlined } from '@ant-design/icons'
+import { MessageOutlined, UserOutlined, VideoCameraOutlined, UploadOutlined, MenuUnfoldOutlined, MenuFoldOutlined, NotificationOutlined, SendOutlined } from '@ant-design/icons'
 import { Layout, Menu } from 'antd'
 import { Route, NavLink, Switch, Redirect } from 'react-router-dom'
 import MeunRoute from '../../routes'
@@ -52,6 +52,10 @@ const Index = (props) => {
               <UploadOutlined />
               <NavLink to="/object-evaluation">设备评价</NavLink>
             </Menu.Item>
+            <Menu.Item key="state">
+              <SendOutlined />
+              <NavLink to="/state">状态控制</NavLink>
+            </Menu.Item>
             <Menu.SubMenu
               key="patrol"
               title={
@@ -60,6 +64,7 @@ const Index = (props) => {
                   智能巡检
                 </span>
               }
+              hidden
             >
               <Menu.Item key="patrol-object"><NavLink to="/patrol/patrol-object">设备管理</NavLink></Menu.Item>
               <Menu.Item key="patrol-config"><NavLink to="/patrol/patrol-config">巡检配置</NavLink></Menu.Item>
@@ -75,6 +80,7 @@ const Index = (props) => {
                   基础配置
                 </span>
               }
+              hidden
             >
               <Menu.Item key="config-info"><NavLink to="/config-info">业务基础数据</NavLink></Menu.Item>
               <Menu.Item key="config-class"><NavLink to="/config-class">分类设置</NavLink></Menu.Item>
