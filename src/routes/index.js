@@ -10,6 +10,7 @@ import PatrolConfig from '../pages/patrol/patrolConfig/index'
 import DataStatistics from '../pages/patrol/dataStatistics/index'
 import ObjectModuleDetail from '../pages/object/detail'
 import ObjectEnvaluation from '../pages/objectEvaluation'
+import Roles from '../pages/roles/index1.js'
 
 import State from '../pages/state/index'
 
@@ -28,6 +29,7 @@ const menuRoutes = [
   {path:"/patrol/patrol-statistics", exact: true, component: DataStatistics},
   
   {path:"/object-evaluation", exact: true, component: ObjectEnvaluation},
+  {path:"/roles", exact: true, component: Roles },
 
   {path:"/state", exact: true, component: State},
 ]
