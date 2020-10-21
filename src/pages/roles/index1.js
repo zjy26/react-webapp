@@ -208,20 +208,20 @@ const Index = props => {
   }
 
   function recursiveFn(data, val, arr = []) {
-    // let arr = []
     data.map(item => {
+      const obj = {...item};
       if (item.children) {
         let children = item.children
-        item.children = recursiveFn(children, val)
-        if (hasProp(item.name, val) || (item.children && item.children.length > 0)) {
-          arr.push(item)
+        obj.children = recursiveFn(children, val)
+        if (hasProp(obj.name, val) || (obj.children && obj.children.length > 0)) {
+          arr.push(obj)
         }
       } else {
-        if (hasProp(item.name, val)) {
-          arr.push(item)
+        if (hasProp(obj.name, val)) {
+          arr.push(obj)
         }
       }
-      return item
+      return obj
     })
     return arr
   }
