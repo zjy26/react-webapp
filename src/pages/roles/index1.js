@@ -1,117 +1,100 @@
-import React, { useState, useEffect } from 'react'
-import { Divider, message, Tooltip, Popconfirm, Table, Drawer, Checkbox, Button, Input, Row, Col } from 'antd'
+import React, { useState, useEffect, useRef } from 'react'
+import {
+  Divider,
+  message,
+  Tooltip,
+  Popconfirm,
+  Table,
+  Drawer,
+  Checkbox,
+  Button,
+  Input,
+  Row,
+  Col
+} from 'antd'
 import { FormOutlined, DeleteOutlined, LockOutlined } from '@ant-design/icons'
-import styles from './Roles.module.scss'
 
-const initPermissionData = [
-  {
-    key: 1,
-    name: 'A',
-    option: [{name:'新增', value: 'add'}, {name:'修改', value: 'edit'}, {name:'删除', value: 'delete'}],
-    children: [
-      {
-        key: 11,
-        name: 'A1',
-        option: [{name:'新增', value: 'add'}, {name:'修改', value: 'edit'}],
-      },
-      {
-        key: 12,
-        name: 'A2',
-        option: [{name:'修改', value: 'edit'}, {name:'删除', value: 'delete'}],
-        children: [
-          {
-            key: 121,
-            name: 'A2-1',
-            option: [{name:'修改', value: 'edit'}],
-          },
-        ],
-      },
-      {
-        key: 13,
-        name: 'A3',
-        option: [],
-        children: [
-          {
-            key: 131,
-            name: 'A3-1',
-            option: [],
-            children: [
-              {
-                key: 1311,
-                name: 'A3-1-1',
-                option: [],
-              },
-              {
-                key: 1312,
-                name: 'A3-1-2',
-                option: [],
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    key: 2,
-    name: 'B',
-    option: [],
-  },
-  {
-    key: 3,
-    name: 'C',
-    option: [{name:'新增', value: 'add'}, {name:'修改', value: 'edit'}, {name:'删除', value: 'delete'}],
-    children: [
-      {
-        key: 31,
-        name: 'C1',
-        option: [{name:'新增', value: 'add'}, {name:'修改', value: 'edit'}],
-      },
-      {
-        key: 32,
-        name: 'C2',
-        option: [{name:'修改', value: 'edit'}, {name:'删除', value: 'delete'}],
-        children: [
-          {
-            key: 321,
-            name: 'C2-1',
-            option: [{name:'修改', value: 'edit'}],
-          },
-        ],
-      },
-      {
-        key: 33,
-        name: 'C3',
-        option: [],
-        children: [
-          {
-            key: 331,
-            name: 'C3-1',
-            option: [],
-            children: [
-              {
-                key: 3311,
-                name: 'C3-1-1',
-                option: [],
-              },
-              {
-                key: 3312,
-                name: 'C3-1-2',
-                option: [],
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-]
+const permissionsJson = {
+  "id": "root",
+  "i18n": "text.key",
+  "name": "root",
+  "resources": ["eap.user", "user.role"],
+  "functions": [{
+    "code": "create",
+    "i18n": "label.function.create",
+    "name": "新建",
+    "value": true
+  }, {
+    "code": "delete",
+    "name": "删除",
+    "value": true
+  }, {
+    "code": "update",
+    "name": "更新",
+    "value": true
+  }, {
+    "code": "read",
+    "name": "只读",
+    "value": true
+  }],
+  "children": [{
+    "id": "menu1",
+    "i18n": "label.menu1",
+    "name": "test",
+    "resources": ["eap.site"],
+    "functions": [{
+      "code": "delete",
+      "name": "删除",
+      "value": false
+    }, {
+      "code": "update",
+      "name": "更新",
+      "value": true
+    }, {
+      "code": "read",
+      "name": "只读",
+      "value": true
+    }]
+  }, {
+    "id": "menu2",
+    "i18n": "label.menu2",
+    "name": "test2",
+    "resources": ["eap.unit"],
+    "functions": [{
+      "code": "delete",
+      "name": "删除",
+      "value": false
+    }, {
+      "code": "read",
+      "name": "只读",
+      "value": true
+    }],
+    "children" : [{
+      "id": "menu2-1",
+      "i18n": "label.Menu2-1",
+      "name": "test2-1",
+      "resources": ["eap.org"],
+      "functions": [{
+        "code": "delete",
+        "name": "删除",
+        "value": false
+      }, {
+        "code": "read",
+        "name": "只读",
+        "value": false
+      }]
+    }]
+  }]
+}
+
+const initPermissionData = [permissionsJson];
 
 const Index = props => {
-  const [selectKey, setSelectKey] = useState([])
+  const searchRef = useRef()
   const [expandedRowKeys, setExpandedRowKeys] = useState([])
   const [visible, setVisible] = useState(false)
   const [permissionData, setPermissionData] = useState()
+  const functionData = {}
 
   useEffect(() => {
     setPermissionData(initPermissionData)
@@ -133,19 +116,23 @@ const Index = props => {
       title: '角色',
       dataIndex: 'roles',
       key: 'roles'
-    },
-    {
+    }, {
       title: '操作',
       render: (_, record) => {
         return (
-          <>
-            <Tooltip title="授权" placement="bottom"><LockOutlined onClick={() =>{ showDrawer(record.id) }} /></Tooltip>
+          <> < Tooltip title="授权" placement="bottom" > <LockOutlined
+            onClick={() => {
+              showDrawer(record.id)
+              setExpandedRowKeys([permissionsJson.id])
+            }} /></Tooltip>
             <Divider type="vertical" />
             <Tooltip title="编辑" placement="bottom"><FormOutlined /></Tooltip>
             <Divider type="vertical" />
-            <Popconfirm title="是否删除此配置，删除后数据不能恢复？"
-              onConfirm={() => { deleteItem(record.id) }}
-            >
+            <Popconfirm
+              title="是否删除此配置，删除后数据不能恢复？"
+              onConfirm={() => {
+                deleteItem(record.id)
+              }}>
               <Tooltip title="删除" placement="bottom"><DeleteOutlined /></Tooltip>
             </Popconfirm>
           </>
@@ -157,11 +144,10 @@ const Index = props => {
   const data = [
     {
       id: 1,
-      roles: "管理员",
-    },
-    {
+      roles: "管理员"
+    }, {
       id: 2,
-      roles: "测试",
+      roles: "测试"
     }
   ]
 
@@ -170,21 +156,37 @@ const Index = props => {
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
-    },
-    {
-      title: 'Option',
-      dataIndex: 'option',
+      render: text => {
+        const searchValue = searchRef && searchRef.current && searchRef.current.input && searchRef.current.input.state.value
+        const str = text.indexOf(searchValue) !== -1
+          ? <span style={{color: '#1890ff'}}>{text}</span>
+          : text
+        return str
+      }
+    }, {
+      title: 'Functions',
+      dataIndex: 'functions',
       width: '50%',
-      key: 'option',
+      key: 'functions',
       render: (text, record) => {
+        const defaultValue = []
         return (
-          <Checkbox.Group style={{ width: '100%' }} onChange={(checkedValues) => selectPermission(record.key, checkedValues)}>
+          <Checkbox.Group
+            style={{
+              width: '100%'
+            }}
+            defaultValue={defaultValue}
+            onChange={(checkedValues) => selectPermission(record.id, checkedValues)}
+          >
             <Row>
               {
-                text.map(item => {
+                text.map((item, index) => {
+                  if(item.value){
+                    defaultValue.push(item.code)
+                  }
                   return (
-                    <Col span={8} key={item.value}>
-                      <Checkbox value={item.value}>{item.name}</Checkbox>
+                    <Col span={8} key={index}>
+                      <Checkbox value={item.code}>{item.name}</Checkbox>
                     </Col>
                   )
                 })
@@ -193,60 +195,94 @@ const Index = props => {
           </Checkbox.Group>
         )
       }
-    },
-  ];
+    }
+  ]
 
-
-
-  //权限勾选操作
-  const selectPermission = (record, values) => {
-    console.log(record, values)
-  }
-
-  function hasProp(string, prop) {
+  const hasProp = (string, prop) => {
     return string.indexOf(prop) > -1
   }
 
-  function recursiveFn(data, val, arr = []) {
-    data.map(item => {
-      const obj = {...item};
-      if (item.children) {
-        let children = item.children
-        obj.children = recursiveFn(children, val)
-        if (hasProp(obj.name, val) || (obj.children && obj.children.length > 0)) {
+  //模糊查询获取目标数据且保留树形结构
+  const recursiveFn = (data, val, arr = []) => {
+    data.forEach(item => {
+      const obj = { ...item }
+      if (item.children && item.children.length > 0) {
+        obj.children = recursiveFn(item.children, val)
+        if (hasProp(item.name, val) || (obj.children && obj.children.length > 0)) {
           arr.push(obj)
         }
       } else {
-        if (hasProp(obj.name, val)) {
+        if (hasProp(item.name, val)) {
           arr.push(obj)
         }
       }
-      return obj
     })
     return arr
   }
 
+  //获取目标数据所有key值
+  const findKeys = (data, keysArr = []) => {
+    data.forEach(item => {
+      if(item.children && item.children.length > 0) {
+        const childData  = findKeys(item.children)
+        keysArr.push(...childData)
+      }
+      keysArr.push(item.id)
+    })
+    return keysArr
+  }
 
   //搜索
   const search = (value) => {
-    if(value) {
-      console.log(recursiveFn(initPermissionData, value))
-      setPermissionData(() => recursiveFn(initPermissionData, value))
-
-      // setExpandedRowKeys(parentKeysArr)    //展开目标节点（目标节点为子节点时数组中必须包含父节点才能展开）
-      // setSelectKey(targetKeys)    //目标节点赋予样式
+    if (value) {
+      let filterData = recursiveFn(initPermissionData, value)
+      setPermissionData(filterData)
+      setExpandedRowKeys(findKeys(filterData)) //展开目标节点（目标节点为子节点时数组中必须包含父节点才能展开）
     } else {
       setPermissionData(initPermissionData)
     }
   }
 
   const onExpand = (expanded, record) => {
-    if(expanded) {
-      setExpandedRowKeys([...expandedRowKeys, record.key])
+    if (expanded) {
+      setExpandedRowKeys([
+        ...expandedRowKeys,
+        record.id
+      ])
     } else {
-      expandedRowKeys.splice(expandedRowKeys.findIndex(item => item === record.key), 1)
+      expandedRowKeys.splice(
+        expandedRowKeys.findIndex(item => item === record.id),
+        1
+      )
       setExpandedRowKeys(expandedRowKeys)
     }
+  }
+
+  //获取所有操作数据
+  const getFunctionData = (data) => {
+    data.forEach(item => {
+      if(item.children && item.children.length > 0) {
+        getFunctionData(item.children)
+      }
+      let funArr = []
+      for(let i = 0; i<item.functions.length; i++) {
+        if(item.functions[i].value) {
+          funArr.push(item.functions[i].code)
+        }
+      }
+      functionData[item.id] = funArr
+    })
+  }
+  getFunctionData(initPermissionData)
+
+  //权限勾选操作
+  const selectPermission = (recordId, values) => {
+    functionData[recordId] = values
+  }
+
+  //确定
+  const onSubmit = () => {
+    console.log(functionData)
   }
 
   return (
@@ -260,39 +296,39 @@ const Index = props => {
         onClose={onClose}
         visible={visible}
         width={720}
-        footer={
-          <div
+        footer={<div
+          style={{
+            textAlign: 'right',
+          }} > <Button
+            onClick={onClose}
             style={{
-              textAlign: 'right',
-            }}
-          >
-            <Button onClick={onClose} style={{ marginRight: 8 }}>
-              取消
-            </Button>
-            <Button onClick={onClose} type="primary">
-              确定
-            </Button>
-          </div>
-        }
-      >
+              marginRight: 8
+            }}>
+            取消
+                </Button>
+          <Button onClick={onSubmit} type="primary">
+            确定
+          </Button>
+        </div>}>
 
-      <Input.Search style={{ marginBottom: 8 }} enterButton="搜索" onSearch={value => search(value)} />
+        <Input.Search
+          style={{
+            marginBottom: 8
+          }}
+          enterButton="搜索"
+          onSearch={value => search(value)}
+          ref={searchRef} />
 
-      <Table
-        columns={permissionColumns}
-        dataSource={permissionData}
-        expandedRowKeys={expandedRowKeys}
-        onExpand={onExpand}
-        rowClassName={(record) => {
-          for(var i in selectKey) {
-            if(record.key === selectKey[i]) {
-              return styles.rowStyle
-            }
-          }
-        }}
-        pagination={false}
-        scroll={{y: document.body.clientHeight - 260}}
-      />
+        <Table
+          rowKey="id"
+          columns={permissionColumns}
+          dataSource={permissionData}
+          expandedRowKeys={expandedRowKeys}
+          onExpand={onExpand}
+          pagination={false}
+          scroll={{
+            y: document.body.clientHeight - 260
+          }} />
       </Drawer>
     </React.Fragment>
   )
