@@ -11,6 +11,7 @@ import DataStatistics from '../pages/patrol/dataStatistics/index'
 import ObjectModuleDetail from '../pages/object/detail'
 import ObjectEnvaluation from '../pages/objectEvaluation'
 import Roles from '../pages/roles/index1.js'
+import Components from '../pages/components'
 
 import State from '../pages/state/index'
 
@@ -32,6 +33,8 @@ const menuRoutes = [
   {path:"/roles", exact: true, component: Roles },
 
   {path:"/state", exact: true, component: State},
+
+  {path:"/components", exact: true, component: Components},
 ]
 
 export default menuRoutes;

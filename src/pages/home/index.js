@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { MessageOutlined, UserOutlined, VideoCameraOutlined, UploadOutlined, MenuUnfoldOutlined, MenuFoldOutlined, NotificationOutlined, SendOutlined, LockOutlined } from '@ant-design/icons'
+import { MessageOutlined, UserOutlined, VideoCameraOutlined, UploadOutlined, MenuUnfoldOutlined, MenuFoldOutlined, NotificationOutlined, SendOutlined, LockOutlined, TableOutlined } from '@ant-design/icons'
 import { Layout, Menu } from 'antd'
 import { Route, NavLink, Switch, Redirect } from 'react-router-dom'
 import MeunRoute from '../../routes'
@@ -60,6 +60,11 @@ const Index = (props) => {
               <LockOutlined />
               <NavLink to="/roles">人员权限</NavLink>
             </Menu.Item>
+            <Menu.Item key="components">
+              <TableOutlined />
+              <NavLink to="/components">通用列表</NavLink>
+            </Menu.Item>
+            
             <Menu.SubMenu
               key="patrol"
               title={
