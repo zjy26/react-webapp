@@ -12,6 +12,7 @@ import ObjectModuleDetail from '../pages/object/detail'
 import ObjectEnvaluation from '../pages/objectEvaluation'
 import Roles from '../pages/roles/index1.js'
 import Components from '../pages/components'
+import ComponentsDetail from '../pages/components/detail'
 
 import State from '../pages/state/index'
 
@@ -35,6 +36,7 @@ const menuRoutes = [
   {path:"/state", exact: true, component: State},
 
   {path:"/components", exact: true, component: Components},
+  {path:"/components/detail/:id", exact: true, component: ComponentsDetail},
 ]
 
 export default menuRoutes;

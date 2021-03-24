@@ -1,52 +1,132 @@
 import React, { useEffect, useState } from 'react'
 import { Table, Row, Col, Space, Button, Tooltip, Divider, Popconfirm, message, Modal, Form } from 'antd'
-import { FormOutlined, DeleteOutlined, UpOutlined, DownOutlined } from '@ant-design/icons'
+import { FormOutlined, DeleteOutlined, UpOutlined, DownOutlined, FileSearchOutlined } from '@ant-design/icons'
+import { Link } from 'react-router-dom'
 
+//搜索
+export const SearchModule = (props) => {
+  const { total, getFields, setFilter } = props
+  const [searchForm] = Form.useForm()
+  const [expand, setExpand] = useState(false)
+
+  const onFinish = () => {
+    searchForm.validateFields()
+    .then(values => {
+      const filterArr = []
+      const objArr= Object.keys(values)
+      objArr.forEach(key => {
+        if(values[key]) {
+          let filterObj = {}
+          filterObj["property"] = key
+          filterObj["value"] = values[key].toString()
+          filterArr.push(filterObj)
+        }
+      })
+      setFilter(filterArr)
+    })
+  }
+  return (
+    <div style={{ backgroundColor: '#fff' }}>
+      <Form
+        form={searchForm}
+        onFinish={onFinish}
+        style={{margin: 20, padding: 25}}
+      >
+        <Row gutter={24}>{getFields(expand)}</Row>
+        <Row>
+          <Col
+            span={24}
+            style={{
+              textAlign: 'right',
+            }}
+          >
+            <Button type="primary" htmlType="submit">
+              查询
+            </Button>
+            <Button
+              style={{
+                margin: '0 8px',
+              }}
+              onClick={() => {
+                searchForm.resetFields();
+              }}
+            >
+              重置
+            </Button>
+            {
+              total > 6 ?
+              <a
+                style={{
+                  fontSize: 12,
+                }}
+                onClick={() => {
+                  setExpand(!expand);
+                }}
+              >
+                {expand ? <>收起<UpOutlined /></> : <>展开<DownOutlined /></>}
+              </a>
+              : null
+            }
+
+          </Col>
+        </Row>
+      </Form>
+    </div>
+  )
+}
+
+//新建、编辑弹窗
 const ContentModal = (props) => {
-  const { visible, setVisible, modalTitle, modalType, modalContentId, content, form, editUrl, addUrl, detailUrl, setDirty } = props
+  const { visible, setVisible, modalProperty, content, form, url, setDirty, modalSubmit } = props
+  const [okLoading, setOkLoading] = useState(false)
   useEffect(() => {
     if(visible){
-      if(modalType === "edit") {
-        detailUrl(modalContentId)
+      setOkLoading(false)
+      if(modalProperty && modalProperty.type === "edit") {
+        form.setFieldsValue({id: 2})
+        url.detail(modalProperty.id)
         .then(res => {
           form.setFieldsValue({...res})
         })
       } else {
-        form.setFieldsValue({
-          id: null,
-          port: null,
-          ip: null
-        })
+        form.resetFields()
       }
     }
-  }, [visible, modalType])
+  }, [visible, modalProperty])
 
   const handleOk = () => {
     form.validateFields()
     .then(values => {
-      if(modalType === "edit") {
-        editUrl()
+      setOkLoading(true)
+      if(modalProperty.type === "edit") {
+        url.edit(modalProperty.id, {...values, _method:'PUT'})
         .then(res => {
           if(res && res.actionErrors) {
             message.error(res.actionErrors.toString())
+            setOkLoading(false)
           } else if(res && res.success) {
             message.success("编辑成功")
             setDirty(dirty => dirty +1)
+            setVisible(false)
           } else {
             message.error("编辑失败")
+            setOkLoading(false)
           }
         })
         .catch(err => console.error(`${err}: 编辑失败`))
       } else {
-        addUrl()
+        url.add({...values, _method: 'PUT'})
         .then(res => {
           if(res && res.actionErrors) {
             message.error(res.actionErrors.toString())
+            setOkLoading(false)
           } else if(res && res.success) {
             message.success("新建成功")
             setDirty(dirty => dirty +1)
+            setVisible(false)
           } else {
             message.error("新建失败")
+            setOkLoading(false)
           }
         })
         .catch(err => console.error(`${err}: 新建失败`))
@@ -57,22 +137,26 @@ const ContentModal = (props) => {
     <Modal
       getContainer={false}
       width={800}
-      title={modalTitle} 
-      visible={visible} 
-      onOk={handleOk} 
+      title={modalProperty.title}
+      visible={visible}
+      onOk={modalSubmit ? modalSubmit : handleOk}
       onCancel={() => setVisible(false)}
+      okButtonProps={{ loading: okLoading }}
     >
       {content}
     </Modal>
   )
 }
 
+//列表
 export const TableList = (props) => {
-  const { title, toolbar, loading, setLoading, options, columns, data, scroll, setData, dirty, setDirty, content, form, filter,  listUrl, deleteUrl, editUrl, addUrl, detailUrl } = props
+  const { title, toolbar, loading, setLoading, options, columns, data, scroll, setData, dirty, setDirty, content, form, filter, url, modalSubmit, detailLink } = props
   const [visible, setVisible] = useState(false)
-  const [modalTitle, setModalTitle] = useState("新建")
-  const [modalType, setModalType] = useState("edit")
-  const [modalContentId, setModalContentId] = useState("")
+  const [modalProperty, setModalProperty] = useState({
+    type: "type",
+    title: "新建",
+    id: null,
+  })
   const [pager, setPager] = useState({
     total: 0,
     current: 1,
@@ -83,25 +167,23 @@ export const TableList = (props) => {
 
   useEffect(() => {
     setLoading(true)
-    listUrl({filter: JSON.stringify(filter)})
+    url.list({filter: JSON.stringify(filter)})
     .then(res => {
-      setData(res)
-      setLoading(false)
-      setPager({
-        ...pager,
-        total: res.total
-      })
-      // if(res && res.modesl) {
-      //   setLoading(false)
-      //   setData(res.models)
-      // }
+      if(res) {
+        setLoading(false)
+        setData(res)
+        setPager({
+          ...pager,
+          total: res.total
+        })
+      }
     })
     .catch(err => console.error(`${err}: 请求失败`))
   }, [dirty, filter])
 
   //删除
   const deleteItem = (id) => {
-    deleteUrl(id)
+    url.delete(id)
     .then(res => {
       if(res && res.actionErrors) {
         message.error(res.actionErrors.toString())
@@ -118,9 +200,7 @@ export const TableList = (props) => {
   //新建、编辑
   const showModal = (type, id) => {
     setVisible(true)
-    setModalTitle(type==="edit" ? "编辑" : "新建")
-    setModalType(type)
-    setModalContentId(id)
+    setModalProperty({type, id, title: type==="edit" ? "编辑" : "新建"})
   }
 
   return (
@@ -135,7 +215,7 @@ export const TableList = (props) => {
                 {
                   toolbar
                   ? toolbar
-                  : <Button type="primary" onClick={()=>showModal("new", "")}>新建</Button>
+                  : detailLink ? <Link to={detailLink + null}><Button type="primary">新建</Button></Link> : <Button type="primary" onClick={()=>showModal("new", null)}>新建</Button>
                 }
               </Space>
             </Col>
@@ -155,9 +235,15 @@ export const TableList = (props) => {
             render: (_, record) => {
               return (
                 <>
-                  <Tooltip title="编辑" placement="bottom">
-                    <FormOutlined onClick={()=>showModal("edit", record.id)} />
-                  </Tooltip>
+                  {
+                    detailLink
+                    ? <Tooltip title="查看详情" placement="bottom">
+                        <Link to={detailLink + record.id}><FileSearchOutlined /></Link>
+                      </Tooltip>
+                    : <Tooltip title="编辑" placement="bottom">
+                        <FormOutlined onClick={()=>showModal("edit", record.id)} />
+                      </Tooltip>
+                  }
                   <Divider type="vertical" />
                   <Popconfirm title="是否删除此配置，删除后数据不能恢复？"
                     onConfirm={() => { deleteItem(record.id) }}
@@ -200,70 +286,7 @@ export const TableList = (props) => {
           })
         }}
       />
-      <ContentModal {...{visible, setVisible, modalTitle, modalType,  content, form, editUrl, addUrl, detailUrl, modalContentId, setDirty }} />
+      <ContentModal {...{visible, setVisible, modalProperty, content, form, url, setDirty, modalSubmit, detailLink}} />
     </React.Fragment>
-  )
-}
-
-export const SearchModule = (props) => {
-  const { getFields, setFilter } = props
-  const [searchForm] = Form.useForm()
-  const [expand, setExpand] = useState(false)
-
-  const onFinish = () => {
-    searchForm.validateFields()
-    .then(values => {
-      const filterArr = []
-      const objArr= Object.keys(values)
-      objArr.forEach(key => {
-        if(values[key]) {
-          let filterObj = {}
-          filterObj["property"] = key
-          filterObj["value"] = values[key].toString()
-          filterArr.push(filterObj)
-        }
-      })
-      setFilter(filterArr)
-    })
-  }
-  return (
-    <Form
-      form={searchForm}
-      onFinish={onFinish}
-    >
-      <Row gutter={24}>{getFields(expand)}</Row>
-      <Row>
-        <Col
-          span={24}
-          style={{
-            textAlign: 'right',
-          }}
-        >
-          <Button type="primary" htmlType="submit">
-            查询
-          </Button>
-          <Button
-            style={{
-              margin: '0 8px',
-            }}
-            onClick={() => {
-              searchForm.resetFields();
-            }}
-          >
-            重置
-          </Button>
-          <a
-            style={{
-              fontSize: 12,
-            }}
-            onClick={() => {
-              setExpand(!expand);
-            }}
-          >
-            {expand ? <>收起<UpOutlined /></> : <>展开<DownOutlined /></>}
-          </a>
-        </Col>
-      </Row>
-    </Form>
   )
 }
