@@ -196,7 +196,7 @@
     "@antv/util" "~2.0.5"
     tslib "^2.0.0"
 
-"@antv/g2@^4.0.15", "@antv/g2@~4.0.9":
+"@antv/g2@~4.0.9":
   version "4.0.15"
   resolved "https://registry.npm.taobao.org/@antv/g2/download/@antv/g2-4.0.15.tgz?cache=0&sync_timestamp=1597749470011&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40antv%2Fg2%2Fdownload%2F%40antv%2Fg2-4.0.15.tgz#68eeee5befd9f2e654f7655f8d3d2935cdd526b8"
   integrity sha1-aO7uW+/Z8uZU92VfjT0pNc3VJrg=

@@ -8,6 +8,8 @@ import {
   Legend,
   Annotation
 } from 'bizcharts'
+import ReactEcharts from 'echarts-for-react'
+import { pictorialBarOption, colBarOption } from './echarts'
 
 
 const data = [
@@ -116,6 +118,18 @@ const Grouped = () => {
         />
         <Line position="date*value" />
       </Chart>
+
+      <ReactEcharts
+        option={pictorialBarOption()}
+        theme="light"
+        style={{width: '100%',height:'400px'}}
+      />
+
+      <ReactEcharts
+        option={colBarOption()}
+        theme="light"
+        style={{width: '100%',height:'400px'}}
+      />
     </React.Fragment>
   )
 }
